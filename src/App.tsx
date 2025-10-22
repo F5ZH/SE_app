@@ -1,0 +1,153 @@
+import React, { useState, useEffect } from 'react';
+import { WordBook, StudyPlan } from './types';
+import { wordBookStorage, studyPlanStorage } from './utils/storage';
+import { presetWordBooks } from './data/presetWordBooks';
+import Header from './components/Header';
+import WordBookList from './components/WordBookList';
+import StudyPlanCreator from './components/StudyPlanCreator';
+import StudySession from './components/StudySession';
+import Dashboard from './components/Dashboard';
+import './App.css';
+
+/**
+ * 主应用组件
+ * 管理应用的整体状态和路由
+ */
+function App() {
+  // 应用状态
+  const [currentView, setCurrentView] = useState<'dashboard' | 'wordbooks' | 'study' | 'plan'>('dashboard');
+  const [wordBooks, setWordBooks] = useState<WordBook[]>([]);
+  const [currentPlan, setCurrentPlan] = useState<StudyPlan | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // 初始化应用数据
+  useEffect(() => {
+    initializeApp();
+  }, []);
+
+  /**
+   * 初始化应用数据
+   * 加载词书和学习计划
+   */
+  const initializeApp = async () => {
+    try {
+      setIsLoading(true);
+      
+      // 加载词书数据
+      let books = wordBookStorage.getAll();
+      
+      // 如果是首次使用，添加预设词书
+      if (books.length === 0) {
+        books = presetWordBooks;
+        wordBookStorage.saveAll(books);
+      }
+      
+      setWordBooks(books);
+      
+      // 加载当前学习计划
+      const plan = studyPlanStorage.getCurrent();
+      setCurrentPlan(plan);
+      
+    } catch (error) {
+      console.error('Failed to initialize app:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /**
+   * 添加新词书
+   */
+  const handleAddWordBook = (newBook: WordBook) => {
+    const updatedBooks = [...wordBooks, newBook];
+    setWordBooks(updatedBooks);
+    wordBookStorage.save(newBook);
+  };
+
+  /**
+   * 删除词书
+   */
+  const handleDeleteWordBook = (bookId: string) => {
+    const updatedBooks = wordBooks.filter(book => book.id !== bookId);
+    setWordBooks(updatedBooks);
+    wordBookStorage.delete(bookId);
+  };
+
+  /**
+   * 创建学习计划
+   */
+  const handleCreateStudyPlan = (plan: StudyPlan) => {
+    studyPlanStorage.save(plan);
+    studyPlanStorage.setCurrent(plan.id);
+    setCurrentPlan(plan);
+    setCurrentView('dashboard');
+  };
+
+  /**
+   * 开始学习
+   */
+  const handleStartStudy = () => {
+    if (currentPlan) {
+      setCurrentView('study');
+    }
+  };
+
+  // 加载状态
+  if (isLoading) {
+    return (
+      <div className="app">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>加载中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="app">
+      <Header 
+        currentView={currentView}
+        onViewChange={setCurrentView}
+        hasActivePlan={!!currentPlan}
+      />
+      
+      <main className="main-content">
+        {currentView === 'dashboard' && (
+          <Dashboard 
+            currentPlan={currentPlan}
+            wordBooks={wordBooks}
+            onStartStudy={handleStartStudy}
+            onCreatePlan={() => setCurrentView('plan')}
+          />
+        )}
+        
+        {currentView === 'wordbooks' && (
+          <WordBookList 
+            wordBooks={wordBooks}
+            onAddWordBook={handleAddWordBook}
+            onDeleteWordBook={handleDeleteWordBook}
+          />
+        )}
+        
+        {currentView === 'plan' && (
+          <StudyPlanCreator 
+            wordBooks={wordBooks}
+            onCreatePlan={handleCreateStudyPlan}
+            onCancel={() => setCurrentView('dashboard')}
+          />
+        )}
+        
+        {currentView === 'study' && currentPlan && (
+          <StudySession 
+            plan={currentPlan}
+            wordBooks={wordBooks}
+            onComplete={() => setCurrentView('dashboard')}
+          />
+        )}
+      </main>
+    </div>
+  );
+}
+
+export default App;

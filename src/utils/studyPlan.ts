@@ -1,0 +1,145 @@
+import { WordBook, StudyPlan, StudyRecord, TodayTask } from '../types';
+import { studyRecordStorage } from './storage';
+import { needsReview } from './ebbinghaus';
+
+/**
+ * 学习计划相关工具函数
+ */
+
+/**
+ * 计算学习计划预期完成日期
+ * @param totalWords 总单词数
+ * @param dailyNewWords 每日新词量
+ * @param startDate 开始日期
+ * @returns 预期完成日期时间戳
+ */
+export function calculateExpectedEndDate(
+  totalWords: number,
+  dailyNewWords: number,
+  startDate: number
+): number {
+  const daysNeeded = Math.ceil(totalWords / dailyNewWords);
+  return startDate + (daysNeeded * 24 * 60 * 60 * 1000);
+}
+
+/**
+ * 生成今日学习任务
+ * @param wordBook 词书
+ * @param studyPlan 学习计划
+ * @returns 今日学习任务
+ */
+export function generateTodayTask(wordBook: WordBook, studyPlan: StudyPlan): TodayTask {
+  const records = studyRecordStorage.getAll();
+  const now = Date.now();
+  const todayStart = new Date().setHours(0, 0, 0, 0);
+  
+  // 获取需要复习的单词
+  const dueForReview = records.filter(record => {
+    const word = wordBook.words.find(w => w.id === record.wordId);
+    return word && needsReview(record);
+  });
+  
+  // 获取今日已学习的新词数量
+  const todayLearned = records.filter(record => {
+    const word = wordBook.words.find(w => w.id === record.wordId);
+    return word && record.lastReviewed >= todayStart && record.reviewCount === 1;
+  }).length;
+  
+  // 计算今日剩余新词数量
+  const remainingNewWords = Math.max(0, studyPlan.dailyNewWords - todayLearned);
+  
+  // 获取未学习的新词
+  const unlearnedWords = wordBook.words.filter(word => {
+    const record = records.find(r => r.wordId === word.id);
+    return !record || record.reviewCount === 0;
+  });
+  
+  // 选择今日要学习的新词
+  const todayNewWords = unlearnedWords.slice(0, remainingNewWords);
+  
+  // 获取今日要复习的单词
+  const todayReviewWords = dueForReview.slice(0, 20); // 限制每日复习数量
+  
+  return {
+    newWords: todayNewWords,
+    reviewWords: todayReviewWords,
+    totalNew: todayNewWords.length,
+    totalReview: todayReviewWords.length,
+    completedNew: 0,
+    completedReview: 0
+  };
+}
+
+/**
+ * 计算学习进度
+ * @param wordBook 词书
+ * @param studyPlan 学习计划
+ * @returns 学习进度百分比
+ */
+export function calculateProgress(wordBook: WordBook, studyPlan: StudyPlan): number {
+  const records = studyRecordStorage.getAll();
+  const learnedWords = wordBook.words.filter(word => {
+    const record = records.find(r => r.wordId === word.id);
+    return record && record.reviewCount > 0;
+  }).length;
+  
+  return Math.round((learnedWords / wordBook.totalWords) * 100);
+}
+
+/**
+ * 计算剩余学习天数
+ * @param studyPlan 学习计划
+ * @returns 剩余天数
+ */
+export function calculateRemainingDays(studyPlan: StudyPlan): number {
+  const now = Date.now();
+  const remainingTime = studyPlan.expectedEndDate - now;
+  return Math.max(0, Math.ceil(remainingTime / (24 * 60 * 60 * 1000)));
+}
+
+/**
+ * 检查学习计划是否已完成
+ * @param wordBook 词书
+ * @param studyPlan 学习计划
+ * @returns 是否已完成
+ */
+export function isPlanCompleted(wordBook: WordBook, studyPlan: StudyPlan): boolean {
+  const records = studyRecordStorage.getAll();
+  const masteredWords = wordBook.words.filter(word => {
+    const record = records.find(r => r.wordId === word.id);
+    return record && record.interval >= 30; // 间隔30天以上认为已掌握
+  }).length;
+  
+  return masteredWords >= wordBook.totalWords;
+}
+
+/**
+ * 获取学习统计信息
+ * @param wordBook 词书
+ * @returns 学习统计
+ */
+export function getStudyStats(wordBook: WordBook) {
+  const records = studyRecordStorage.getAll();
+  const wordRecords = records.filter(record => 
+    wordBook.words.some(word => word.id === record.wordId)
+  );
+  
+  const totalWords = wordBook.totalWords;
+  const learnedWords = wordRecords.length;
+  const masteredWords = wordRecords.filter(record => record.interval >= 30).length;
+  const totalReviews = wordRecords.reduce((sum, record) => sum + record.reviewCount, 0);
+  const totalCorrect = wordRecords.reduce((sum, record) => sum + record.correctCount, 0);
+  const totalWrong = wordRecords.reduce((sum, record) => sum + record.wrongCount, 0);
+  const accuracy = totalCorrect + totalWrong > 0 ? 
+    Math.round((totalCorrect / (totalCorrect + totalWrong)) * 100) : 0;
+  
+  return {
+    totalWords,
+    learnedWords,
+    masteredWords,
+    totalReviews,
+    accuracy,
+    progress: Math.round((learnedWords / totalWords) * 100),
+    masteryRate: Math.round((masteredWords / totalWords) * 100)
+  };
+}

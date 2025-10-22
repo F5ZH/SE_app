@@ -1,0 +1,20 @@
+abandon	v. 放弃，抛弃	/əˈbændən/	He had to abandon his car in the snow.	3
+ability	n. 能力，才能	/əˈbɪləti/	She has the ability to solve complex problems.	2
+absolute	adj. 绝对的，完全的	/ˈæbsəluːt/	There is no absolute truth in this matter.	3
+accept	v. 接受，承认	/əkˈsept/	I accept your invitation to the party.	1
+access	n. 通道，接近；v. 访问	/ˈækses/	Students have access to the library 24/7.	2
+accident	n. 事故，意外	/ˈæksɪdənt/	The car accident was caused by speeding.	1
+accompany	v. 陪伴，伴随	/əˈkʌmpəni/	She will accompany me to the meeting.	3
+accomplish	v. 完成，实现	/əˈkʌmplɪʃ/	We accomplished our goal ahead of schedule.	3
+account	n. 账户，解释；v. 解释	/əˈkaʊnt/	Please check your bank account balance.	2
+accurate	adj. 准确的，精确的	/ˈækjərət/	The weather forecast was not accurate.	3
+achieve	v. 实现，达到	/əˈtʃiːv/	He achieved great success in his career.	2
+acknowledge	v. 承认，感谢	/əkˈnɒlɪdʒ/	I acknowledge your help with this project.	4
+acquire	v. 获得，学到	/əˈkwaɪə/	She acquired new skills through practice.	3
+activate	v. 激活，启动	/ˈæktɪveɪt/	Press the button to activate the system.	3
+adequate	adj. 足够的，适当的	/ˈædɪkwət/	The salary is adequate for my needs.	3
+adjacent	adj. 邻近的，毗邻的	/əˈdʒeɪsənt/	The hotel is adjacent to the train station.	4
+adjust	v. 调整，适应	/əˈdʒʌst/	You need to adjust your schedule.	2
+administer	v. 管理，执行	/ədˈmɪnɪstə/	The nurse will administer the medicine.	4
+admit	v. 承认，允许进入	/ədˈmɪt/	I must admit that I was wrong.	2
+adopt	v. 采用，收养	/əˈdɒpt/	The company decided to adopt new policies.	3
