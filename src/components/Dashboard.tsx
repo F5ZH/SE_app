@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StudyPlan, WordBook, TodayTask } from '../types';
 import { generateTodayTask, getStudyStats } from '../utils/studyPlan';
+import { studyRecordStorage } from '../utils/storage';
 import { Play, Calendar, BookOpen, TrendingUp, Clock, Target } from 'lucide-react';
 
 interface DashboardProps {
@@ -54,6 +55,23 @@ const Dashboard: React.FC<DashboardProps> = ({
     } finally {
       setIsLoading(false);
     }
+  };
+
+  /**
+   * 在 Dashboard 上直接重置当前计划对应词书的学习进度
+   */
+  const handleResetProgress = () => {
+    if (!currentPlan) return;
+    const book = wordBooks.find(b => b.id === currentPlan.wordBookId);
+    if (!book) return;
+    const ok = window.confirm(`确定要重置词书 "${book.name}" 的学习进度吗？此操作不可撤销。`);
+    if (!ok) return;
+
+    const ids = book.words.map(w => w.id);
+    studyRecordStorage.deleteByWordIds(ids);
+    // 重新加载数据
+    loadDashboardData();
+    alert('已重置该词书的学习进度。');
   };
 
   // 加载状态
@@ -155,6 +173,7 @@ const Dashboard: React.FC<DashboardProps> = ({
               <Play size={20} />
               {todayTask.totalNew + todayTask.totalReview > 0 ? '开始学习' : '今日已完成'}
             </button>
+            {/* 重置按钮已移至学习计划信息区域，以免与“开始学习”按钮冲突 */}
           </div>
         </div>
       )}
@@ -249,6 +268,14 @@ const Dashboard: React.FC<DashboardProps> = ({
           <div className="plan-actions">
             <button className="btn btn-secondary" onClick={onCreatePlan}>
               修改计划
+            </button>
+            <button
+              className="btn btn-danger"
+              onClick={handleResetProgress}
+              title="重置此计划对应词书的学习进度"
+              style={{ marginLeft: '8px' }}
+            >
+              重置进度
             </button>
           </div>
         </div>
