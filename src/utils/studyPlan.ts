@@ -32,35 +32,35 @@ export function generateTodayTask(wordBook: WordBook, studyPlan: StudyPlan): Tod
   const records = studyRecordStorage.getAll();
   const now = Date.now();
   const todayStart = new Date().setHours(0, 0, 0, 0);
-  
+
   // 获取需要复习的单词
   const dueForReview = records.filter(record => {
     const word = wordBook.words.find(w => w.id === record.wordId);
     return word && needsReview(record);
   });
-  
+
   // 获取今日已学习的新词数量
   const todayLearned = records.filter(record => {
     const word = wordBook.words.find(w => w.id === record.wordId);
     return word && record.lastReviewed >= todayStart && record.reviewCount === 1;
   }).length;
-  
+
   // 计算今日剩余新词数量
   const remainingNewWords = Math.max(0, studyPlan.dailyNewWords - todayLearned);
-  
+
   // 获取未学习的新词
   const unlearnedWords = wordBook.words.filter(word => {
     const record = records.find(r => r.wordId === word.id);
     return !record || record.reviewCount === 0;
   });
-  
+
   // 选择今日要学习的新词
   const todayNewWords = unlearnedWords.slice(0, remainingNewWords);
-  
+
   // 获取今日要复习的单词 - 需要将 StudyRecord 转换为 Word
   const reviewWordIds = dueForReview.slice(0, 20).map(record => record.wordId); // 限制每日复习数量
   const todayReviewWords = wordBook.words.filter(word => reviewWordIds.includes(word.id));
-  
+
   return {
     newWords: todayNewWords,
     reviewWords: todayReviewWords,
@@ -83,7 +83,7 @@ export function calculateProgress(wordBook: WordBook, studyPlan: StudyPlan): num
     const record = records.find(r => r.wordId === word.id);
     return record && record.reviewCount > 0;
   }).length;
-  
+
   return Math.round((learnedWords / wordBook.totalWords) * 100);
 }
 
@@ -110,7 +110,7 @@ export function isPlanCompleted(wordBook: WordBook, studyPlan: StudyPlan): boole
     const record = records.find(r => r.wordId === word.id);
     return record && record.interval >= 30; // 间隔30天以上认为已掌握
   }).length;
-  
+
   return masteredWords >= wordBook.totalWords;
 }
 
@@ -121,19 +121,19 @@ export function isPlanCompleted(wordBook: WordBook, studyPlan: StudyPlan): boole
  */
 export function getStudyStats(wordBook: WordBook) {
   const records = studyRecordStorage.getAll();
-  const wordRecords = records.filter(record => 
+  const wordRecords = records.filter(record =>
     wordBook.words.some(word => word.id === record.wordId)
   );
-  
+
   const totalWords = wordBook.totalWords;
   const learnedWords = wordRecords.length;
   const masteredWords = wordRecords.filter(record => record.interval >= 30).length;
   const totalReviews = wordRecords.reduce((sum, record) => sum + record.reviewCount, 0);
   const totalCorrect = wordRecords.reduce((sum, record) => sum + record.correctCount, 0);
   const totalWrong = wordRecords.reduce((sum, record) => sum + record.wrongCount, 0);
-  const accuracy = totalCorrect + totalWrong > 0 ? 
+  const accuracy = totalCorrect + totalWrong > 0 ?
     Math.round((totalCorrect / (totalCorrect + totalWrong)) * 100) : 0;
-  
+
   return {
     totalWords,
     learnedWords,
