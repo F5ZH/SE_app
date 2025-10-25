@@ -13,6 +13,7 @@ interface WordBookCardProps {
  */
 const WordBookCard: React.FC<WordBookCardProps> = ({ wordBook, onDelete }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   /**
    * 处理删除确认
@@ -107,7 +108,7 @@ const WordBookCard: React.FC<WordBookCardProps> = ({ wordBook, onDelete }) => {
 
       {/* 卡片操作 */}
       <div className="card-actions">
-        <button className="btn btn-secondary btn-sm">
+        <button className="btn btn-secondary btn-sm" onClick={() => setShowPreview(true)}>
           <Eye size={14} />
           预览
         </button>
@@ -122,6 +123,27 @@ const WordBookCard: React.FC<WordBookCardProps> = ({ wordBook, onDelete }) => {
           </button>
         )}
       </div>
+      {/* 预览弹窗 */}
+      {showPreview && (
+        <div className="preview-modal-overlay">
+          <div className="preview-modal">
+            <div className="preview-modal-header">
+              <h3>词书预览 — {wordBook.name}</h3>
+              <button className="btn btn-sm" onClick={() => setShowPreview(false)}>关闭</button>
+            </div>
+            <div className="preview-modal-content">
+              <div className="preview-list">
+                {wordBook.words.map(w => (
+                  <div key={w.id} className="preview-item">
+                    <span className="preview-word">{w.word}</span>
+                    <span className="preview-translation">{w.translation}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
