@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { WordBook, StudyPlan } from './types';
 import { wordBookStorage, studyPlanStorage } from './utils/storage';
 import { presetWordBooks } from './data/presetWordBooks';
@@ -32,22 +32,22 @@ function App() {
   const initializeApp = async () => {
     try {
       setIsLoading(true);
-      
+
       // 加载词书数据
       let books = wordBookStorage.getAll();
-      
+
       // 如果是首次使用，添加预设词书
       if (books.length === 0) {
         books = presetWordBooks;
         wordBookStorage.saveAll(books);
       }
-      
+
       setWordBooks(books);
-      
+
       // 加载当前学习计划
       const plan = studyPlanStorage.getCurrent();
       setCurrentPlan(plan);
-      
+
     } catch (error) {
       console.error('Failed to initialize app:', error);
     } finally {
@@ -106,40 +106,40 @@ function App() {
 
   return (
     <div className="app">
-      <Header 
+      <Header
         currentView={currentView}
         onViewChange={setCurrentView}
         hasActivePlan={!!currentPlan}
       />
-      
+
       <main className="main-content">
         {currentView === 'dashboard' && (
-          <Dashboard 
+          <Dashboard
             currentPlan={currentPlan}
             wordBooks={wordBooks}
             onStartStudy={handleStartStudy}
             onCreatePlan={() => setCurrentView('plan')}
           />
         )}
-        
+
         {currentView === 'wordbooks' && (
-          <WordBookList 
+          <WordBookList
             wordBooks={wordBooks}
             onAddWordBook={handleAddWordBook}
             onDeleteWordBook={handleDeleteWordBook}
           />
         )}
-        
+
         {currentView === 'plan' && (
-          <StudyPlanCreator 
+          <StudyPlanCreator
             wordBooks={wordBooks}
             onCreatePlan={handleCreateStudyPlan}
             onCancel={() => setCurrentView('dashboard')}
           />
         )}
-        
+
         {currentView === 'study' && currentPlan && (
-          <StudySession 
+          <StudySession
             plan={currentPlan}
             wordBooks={wordBooks}
             onComplete={() => setCurrentView('dashboard')}

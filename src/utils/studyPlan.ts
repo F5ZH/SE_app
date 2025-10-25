@@ -1,4 +1,4 @@
-import { WordBook, StudyPlan, StudyRecord, TodayTask } from '../types';
+import { WordBook, StudyPlan, TodayTask } from '../types';
 import { studyRecordStorage } from './storage';
 import { needsReview } from './ebbinghaus';
 
@@ -30,7 +30,6 @@ export function calculateExpectedEndDate(
  */
 export function generateTodayTask(wordBook: WordBook, studyPlan: StudyPlan): TodayTask {
   const records = studyRecordStorage.getAll();
-  const now = Date.now();
   const todayStart = new Date().setHours(0, 0, 0, 0);
 
   // 获取需要复习的单词
@@ -77,7 +76,7 @@ export function generateTodayTask(wordBook: WordBook, studyPlan: StudyPlan): Tod
  * @param studyPlan 学习计划
  * @returns 学习进度百分比
  */
-export function calculateProgress(wordBook: WordBook, studyPlan: StudyPlan): number {
+export function calculateProgress(wordBook: WordBook): number {
   const records = studyRecordStorage.getAll();
   const learnedWords = wordBook.words.filter(word => {
     const record = records.find(r => r.wordId === word.id);
@@ -104,7 +103,7 @@ export function calculateRemainingDays(studyPlan: StudyPlan): number {
  * @param studyPlan 学习计划
  * @returns 是否已完成
  */
-export function isPlanCompleted(wordBook: WordBook, studyPlan: StudyPlan): boolean {
+export function isPlanCompleted(wordBook: WordBook): boolean {
   const records = studyRecordStorage.getAll();
   const masteredWords = wordBook.words.filter(word => {
     const record = records.find(r => r.wordId === word.id);

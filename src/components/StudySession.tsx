@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StudyPlan, WordBook, Word, StudyRecord, StudyMode, StudySessionConfig } from '../types';
 import { studyRecordStorage } from '../utils/storage';
-import { updateStudyRecord, createStudyRecord, needsReview } from '../utils/ebbinghaus';
+import { updateStudyRecord, createStudyRecord } from '../utils/ebbinghaus';
 import { generateTodayTask } from '../utils/studyPlan';
 import { exportTodayWordsToPDF } from '../utils/pdfExport';
 import StudyModeSelector from './StudyModeSelector';
@@ -146,11 +146,38 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
     setStudyQueue(newQueue);
     setCompletedCount(prev => prev + 1);
 
-    // 加载下一个单词
+    // 决定如何切换到下一个单词：
+    // - 如果开启自动前进，延迟 500ms 后再切换（给用户短暂查看答案的时间）
+    // - 否则立即切换到下一个单词，避免需要额外交互导致重复显示当前单词
+    const switchToNext = () => {
+      if (newQueue.length === 0) {
+        onComplete();
+        return;
+      }
+
+      const next = newQueue[0];
+      setCurrentWord(next);
+      setShowAnswer(false);
+
+      // 生成选择题选项（若当前模式为选择题）
+      if (sessionConfig.mode === StudyMode.WORD_TO_CHOICE) {
+        generateChoiceOptions(next);
+      }
+
+      // 获取或创建学习记录并设置
+      const existing = studyRecordStorage.getByWordId(next.id);
+      if (existing) {
+        setCurrentRecord(existing);
+      } else {
+        const newRecord = createStudyRecord(next.id, next.word);
+        setCurrentRecord(newRecord);
+      }
+    };
+
     if (sessionConfig.autoAdvance) {
-      setTimeout(() => {
-        loadNextWord();
-      }, 500);
+      setTimeout(switchToNext, 500);
+    } else {
+      switchToNext();
     }
   };
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, BarChart3, Library, Calendar, Home } from 'lucide-react';
+import { BookOpen, Library, Calendar, Home } from 'lucide-react';
 
 interface HeaderProps {
   currentView: 'dashboard' | 'wordbooks' | 'study' | 'plan';
@@ -59,7 +59,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange, hasActivePla
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
-            
+
             return (
               <button
                 key={item.id}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { WordBook } from '../types';
-import { Trash2, BookOpen, Calendar, Users, Eye } from 'lucide-react';
+import { Trash2, BookOpen, Calendar, Eye } from 'lucide-react';
 
 interface WordBookCardProps {
   wordBook: WordBook;
@@ -54,7 +54,7 @@ const WordBookCard: React.FC<WordBookCardProps> = ({ wordBook, onDelete }) => {
             )}
           </div>
         </div>
-        
+
         <div className="book-badge">
           {wordBook.isPreset ? (
             <span className="badge badge-primary">预设</span>
@@ -75,7 +75,7 @@ const WordBookCard: React.FC<WordBookCardProps> = ({ wordBook, onDelete }) => {
             <span className="stat-label">单词数</span>
           </div>
         </div>
-        
+
         <div className="stat-item">
           <div className="stat-icon">
             <Calendar size={16} />
@@ -91,7 +91,7 @@ const WordBookCard: React.FC<WordBookCardProps> = ({ wordBook, onDelete }) => {
       <div className="card-preview">
         <h4 className="preview-title">词汇预览</h4>
         <div className="word-list">
-          {wordBook.words.slice(0, 3).map((word, index) => (
+          {wordBook.words.slice(0, 3).map((word) => (
             <div key={word.id} className="word-item">
               <span className="word-text">{word.word}</span>
               <span className="word-translation">{word.translation}</span>
@@ -111,7 +111,7 @@ const WordBookCard: React.FC<WordBookCardProps> = ({ wordBook, onDelete }) => {
           <Eye size={14} />
           预览
         </button>
-        
+
         {!wordBook.isPreset && (
           <button
             className={`btn btn-sm ${showDeleteConfirm ? 'btn-danger' : 'btn-secondary'}`}

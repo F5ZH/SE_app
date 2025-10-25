@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { StudyPlan, WordBook, TodayTask } from '../types';
-import { studyRecordStorage } from '../utils/storage';
 import { generateTodayTask, getStudyStats } from '../utils/studyPlan';
 import { Play, Calendar, BookOpen, TrendingUp, Clock, Target } from 'lucide-react';
 
@@ -39,7 +38,7 @@ const Dashboard: React.FC<DashboardProps> = ({
       if (currentPlan) {
         // 获取当前计划的词书
         const wordBook = wordBooks.find(book => book.id === currentPlan.wordBookId);
-        
+
         if (wordBook) {
           // 生成今日任务
           const task = generateTodayTask(wordBook, currentPlan);
@@ -148,8 +147,8 @@ const Dashboard: React.FC<DashboardProps> = ({
           </div>
 
           <div className="task-actions">
-            <button 
-              className="btn btn-primary btn-lg" 
+            <button
+              className="btn btn-primary btn-lg"
               onClick={onStartStudy}
               disabled={todayTask.totalNew + todayTask.totalReview === 0}
             >
@@ -176,8 +175,8 @@ const Dashboard: React.FC<DashboardProps> = ({
                 已学习 {studyStats.learnedWords} / {studyStats.totalWords} 个单词
               </div>
               <div className="progress-bar">
-                <div 
-                  className="progress-fill" 
+                <div
+                  className="progress-fill"
                   style={{ width: `${studyStats.progress}%` }}
                 ></div>
               </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { WordBook, StudyPlan } from '../types';
 import { calculateExpectedEndDate } from '../utils/studyPlan';
 import { Calendar, BookOpen, Target, Clock, ArrowLeft } from 'lucide-react';
@@ -13,18 +13,18 @@ interface StudyPlanCreatorProps {
  * 学习计划创建组件
  * 允许用户创建新的学习计划
  */
-const StudyPlanCreator: React.FC<StudyPlanCreatorProps> = ({
+const StudyPlanCreator = ({
   wordBooks,
   onCreatePlan,
   onCancel
-}) => {
+}: StudyPlanCreatorProps) => {
   const [selectedWordBook, setSelectedWordBook] = useState<WordBook | null>(null);
   const [dailyNewWords, setDailyNewWords] = useState(20);
   const [startDate, setStartDate] = useState(new Date().toISOString().split('T')[0]);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // 计算预期完成日期
-  const expectedEndDate = selectedWordBook ? 
+  const expectedEndDate = selectedWordBook ?
     calculateExpectedEndDate(
       selectedWordBook.totalWords,
       dailyNewWords,
@@ -32,7 +32,7 @@ const StudyPlanCreator: React.FC<StudyPlanCreatorProps> = ({
     ) : null;
 
   // 计算学习天数
-  const studyDays = selectedWordBook ? 
+  const studyDays = selectedWordBook ?
     Math.ceil(selectedWordBook.totalWords / dailyNewWords) : 0;
 
   /**
@@ -55,7 +55,7 @@ const StudyPlanCreator: React.FC<StudyPlanCreatorProps> = ({
       const selectedDate = new Date(startDate);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      
+
       if (selectedDate < today) {
         newErrors.startDate = '开始日期不能早于今天';
       }
@@ -85,12 +85,7 @@ const StudyPlanCreator: React.FC<StudyPlanCreatorProps> = ({
     onCreatePlan(plan);
   };
 
-  /**
-   * 生成唯一ID
-   */
-  const generateId = (): string => {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
-  };
+  // generateId 已不再使用
 
   return (
     <div className="study-plan-creator">
@@ -113,7 +108,7 @@ const StudyPlanCreator: React.FC<StudyPlanCreatorProps> = ({
             <BookOpen size={20} />
             选择词书
           </h2>
-          
+
           <div className="wordbook-selector">
             {wordBooks.map(book => (
               <div
@@ -137,7 +132,7 @@ const StudyPlanCreator: React.FC<StudyPlanCreatorProps> = ({
               </div>
             ))}
           </div>
-          
+
           {errors.wordBook && (
             <p className="error-message">{errors.wordBook}</p>
           )}
@@ -149,7 +144,7 @@ const StudyPlanCreator: React.FC<StudyPlanCreatorProps> = ({
             <Calendar size={20} />
             学习设置
           </h2>
-          
+
           <div className="settings-grid">
             <div className="setting-item">
               <label className="label">每日新词量</label>
@@ -195,7 +190,7 @@ const StudyPlanCreator: React.FC<StudyPlanCreatorProps> = ({
               <Clock size={20} />
               计划预览
             </h2>
-            
+
             <div className="plan-preview">
               <div className="preview-card">
                 <div className="preview-item">
@@ -227,7 +222,7 @@ const StudyPlanCreator: React.FC<StudyPlanCreatorProps> = ({
                   </span>
                 </div>
               </div>
-              
+
               <div className="preview-timeline">
                 <div className="timeline-item">
                   <div className="timeline-icon start">
@@ -238,9 +233,9 @@ const StudyPlanCreator: React.FC<StudyPlanCreatorProps> = ({
                     <p>{new Date(startDate).toLocaleDateString('zh-CN')}</p>
                   </div>
                 </div>
-                
+
                 <div className="timeline-line"></div>
-                
+
                 <div className="timeline-item">
                   <div className="timeline-icon end">
                     <Target size={16} />
@@ -260,8 +255,8 @@ const StudyPlanCreator: React.FC<StudyPlanCreatorProps> = ({
         <button className="btn btn-secondary" onClick={onCancel}>
           取消
         </button>
-        <button 
-          className="btn btn-primary btn-lg" 
+        <button
+          className="btn btn-primary btn-lg"
           onClick={handleCreatePlan}
           disabled={!selectedWordBook}
         >
