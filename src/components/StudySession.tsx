@@ -49,7 +49,7 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
   const initializeSession = async () => {
     try {
       setIsLoading(true);
-      
+
       if (!wordBook) return;
 
       // 保存所有单词用于生成选择题选项
@@ -57,11 +57,11 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
 
       // 生成今日任务
       const todayTask = generateTodayTask(wordBook, plan);
-      
+
       // 优先学习新词，然后复习
       const newWords = todayTask.newWords;
       const reviewWords = todayTask.reviewWords;
-      
+
       if (newWords.length > 0) {
         setStudyQueue(newWords);
         setSessionType('new');
@@ -119,7 +119,7 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
       .map(w => w.translation)
       .sort(() => Math.random() - 0.5)
       .slice(0, 3);
-    
+
     const options = [correctAnswer, ...otherWords].sort(() => Math.random() - 0.5);
     setChoiceOptions(options);
   };
@@ -174,7 +174,7 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
    */
   const handleLookupWord = () => {
     if (!currentWord) return;
-    
+
     // 打开词典网站
     const searchUrl = `https://www.merriam-webster.com/dictionary/${encodeURIComponent(currentWord.word)}`;
     window.open(searchUrl, '_blank');
@@ -183,11 +183,16 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
   /**
    * 导出今日单词表为PDF
    */
-  const handleExportPDF = () => {
+  const handleExportPDF = async () => {
     if (!wordBook) return;
-    
-    const todayTask = generateTodayTask(wordBook, plan);
-    exportTodayWordsToPDF(todayTask, wordBook.name);
+
+    try {
+      const todayTask = generateTodayTask(wordBook, plan);
+      await exportTodayWordsToPDF(todayTask, wordBook.name);
+    } catch (error) {
+      console.error('导出PDF失败:', error);
+      alert('导出PDF失败，请重试');
+    }
   };
 
   /**
@@ -219,7 +224,7 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
             <ArrowLeft size={20} />
             返回
           </button>
-          
+
           <div className="session-info">
             <h1 className="session-title">选择学习模式</h1>
             <p className="session-subtitle">
@@ -285,13 +290,13 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
           <ArrowLeft size={20} />
           返回
         </button>
-        
+
         <div className="session-info">
           <h1 className="session-title">
             {sessionType === 'new' ? '新词学习' : '复习巩固'} - {
               sessionConfig.mode === StudyMode.WORD_TO_TRANSLATION ? '看英语回忆汉语' :
-              sessionConfig.mode === StudyMode.TRANSLATION_TO_WORD ? '看汉语拼写英语' :
-              '看英语选择汉语'
+                sessionConfig.mode === StudyMode.TRANSLATION_TO_WORD ? '看汉语拼写英语' :
+                  '看英语选择汉语'
             }
           </h1>
           <div className="session-progress">
@@ -299,10 +304,10 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
               {completedCount} / {completedCount + studyQueue.length}
             </span>
             <div className="progress-bar">
-              <div 
-                className="progress-fill" 
-                style={{ 
-                  width: `${(completedCount / (completedCount + studyQueue.length)) * 100}%` 
+              <div
+                className="progress-fill"
+                style={{
+                  width: `${(completedCount / (completedCount + studyQueue.length)) * 100}%`
                 }}
               ></div>
             </div>
@@ -333,9 +338,9 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
                     <p className="word-pronunciation">{currentWord.pronunciation}</p>
                   )}
                 </div>
-                
+
                 <div className="word-actions">
-                  <button 
+                  <button
                     className="btn btn-secondary btn-sm"
                     onClick={handleLookupWord}
                     title="查词"
@@ -349,7 +354,7 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
                 <div className="card-content">
                   <div className="word-prompt">
                     <p className="prompt-text">请回忆这个单词的含义</p>
-                    <button 
+                    <button
                       className="btn btn-primary"
                       onClick={handleShowAnswer}
                     >
@@ -362,7 +367,7 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
                   <div className="word-answer">
                     <h3 className="answer-title">翻译：</h3>
                     <p className="answer-translation">{currentWord.translation}</p>
-                    
+
                     {sessionConfig.showExample && currentWord.example && (
                       <div className="word-example">
                         <h4 className="example-title">例句：</h4>
@@ -373,32 +378,32 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
                     <div className="quality-rating">
                       <h4 className="rating-title">请评价您的掌握程度：</h4>
                       <div className="rating-buttons">
-                        <button 
+                        <button
                           className="btn btn-danger"
                           onClick={() => handleQualityRating(1)}
                         >
                           <X size={16} />
                           完全不会
                         </button>
-                        <button 
+                        <button
                           className="btn btn-secondary"
                           onClick={() => handleQualityRating(2)}
                         >
                           有点印象
                         </button>
-                        <button 
+                        <button
                           className="btn btn-secondary"
                           onClick={() => handleQualityRating(3)}
                         >
                           基本掌握
                         </button>
-                        <button 
+                        <button
                           className="btn btn-success"
                           onClick={() => handleQualityRating(4)}
                         >
                           熟练掌握
                         </button>
-                        <button 
+                        <button
                           className="btn btn-success"
                           onClick={() => handleQualityRating(5)}
                         >
@@ -409,7 +414,7 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
                     </div>
 
                     <div className="card-actions">
-                      <button 
+                      <button
                         className="btn btn-secondary"
                         onClick={handleRestart}
                       >

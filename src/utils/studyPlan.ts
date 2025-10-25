@@ -57,8 +57,9 @@ export function generateTodayTask(wordBook: WordBook, studyPlan: StudyPlan): Tod
   // 选择今日要学习的新词
   const todayNewWords = unlearnedWords.slice(0, remainingNewWords);
   
-  // 获取今日要复习的单词
-  const todayReviewWords = dueForReview.slice(0, 20); // 限制每日复习数量
+  // 获取今日要复习的单词 - 需要将 StudyRecord 转换为 Word
+  const reviewWordIds = dueForReview.slice(0, 20).map(record => record.wordId); // 限制每日复习数量
+  const todayReviewWords = wordBook.words.filter(word => reviewWordIds.includes(word.id));
   
   return {
     newWords: todayNewWords,
