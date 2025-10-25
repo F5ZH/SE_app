@@ -38,10 +38,10 @@ export function generateTodayTask(wordBook: WordBook, studyPlan: StudyPlan): Tod
     return word && needsReview(record);
   });
 
-  // 获取今日已学习的新词数量
+  // 获取今日已学习的新词数量（任何在今天被复习过的新词都算作已学习）
   const todayLearned = records.filter(record => {
     const word = wordBook.words.find(w => w.id === record.wordId);
-    return word && record.lastReviewed >= todayStart && record.reviewCount === 1;
+    return word && record.lastReviewed >= todayStart && record.reviewCount > 0;
   }).length;
 
   // 计算今日剩余新词数量
@@ -60,13 +60,24 @@ export function generateTodayTask(wordBook: WordBook, studyPlan: StudyPlan): Tod
   const reviewWordIds = dueForReview.slice(0, 20).map(record => record.wordId); // 限制每日复习数量
   const todayReviewWords = wordBook.words.filter(word => reviewWordIds.includes(word.id));
 
+  // 计算今日已完成的新词和复习数量（基于 lastReviewed 时间）
+  const completedNew = todayNewWords.filter(word => {
+    const record = records.find(r => r.wordId === word.id);
+    return !!record && record.lastReviewed >= todayStart;
+  }).length;
+
+  const completedReview = todayReviewWords.filter(word => {
+    const record = records.find(r => r.wordId === word.id);
+    return !!record && record.lastReviewed >= todayStart;
+  }).length;
+
   return {
     newWords: todayNewWords,
     reviewWords: todayReviewWords,
     totalNew: todayNewWords.length,
     totalReview: todayReviewWords.length,
-    completedNew: 0,
-    completedReview: 0
+    completedNew,
+    completedReview
   };
 }
 
