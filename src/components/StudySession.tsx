@@ -223,6 +223,30 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
   };
 
   /**
+   * 重置词书学习进度（调试用）
+   */
+  const handleResetProgress = () => {
+    if (!wordBook) return;
+
+    const confirmed = window.confirm('确定要重置此词书的学习进度吗？此操作不可撤销。');
+    if (!confirmed) return;
+
+    // 删除该词书所有单词对应的学习记录
+    const wordIds = wordBook.words.map(w => w.id);
+    studyRecordStorage.deleteByWordIds(wordIds);
+
+    // 重置本地会话状态并重新初始化
+    setCompletedCount(0);
+    setCurrentWord(null);
+    setCurrentRecord(null);
+    setStudyQueue([]);
+    setShowModeSelector(true);
+    initializeSession();
+
+    alert('学习进度已重置。');
+  };
+
+  /**
    * 开始学习
    */
   const handleStartStudy = () => {
@@ -345,6 +369,10 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
           <button className="btn btn-secondary" onClick={handleExportPDF}>
             <Download size={16} />
             导出PDF
+          </button>
+          <button className="btn btn-danger" onClick={handleResetProgress} title="重置此词书的学习进度">
+            <RotateCcw size={16} />
+            重置进度
           </button>
           <button className="btn btn-secondary" onClick={() => setShowModeSelector(true)}>
             <Settings size={16} />

@@ -58,13 +58,13 @@ export const wordBookStorage = {
   save(wordBook: WordBook): void {
     const books = this.getAll();
     const index = books.findIndex(book => book.id === wordBook.id);
-    
+
     if (index >= 0) {
       books[index] = wordBook;
     } else {
       books.push(wordBook);
     }
-    
+
     setStorageData(STORAGE_KEYS.WORD_BOOKS, books);
   },
 
@@ -108,13 +108,13 @@ export const studyRecordStorage = {
   save(record: StudyRecord): void {
     const records = this.getAll();
     const index = records.findIndex(r => r.wordId === record.wordId);
-    
+
     if (index >= 0) {
       records[index] = record;
     } else {
       records.push(record);
     }
-    
+
     setStorageData(STORAGE_KEYS.STUDY_RECORDS, records);
   },
 
@@ -133,6 +133,15 @@ export const studyRecordStorage = {
     const records = this.getAll();
     const now = Date.now();
     return records.filter(record => record.nextReview <= now);
+  },
+
+  /**
+   * 根据单词 ID 删除对应的学习记录（用于重置某个词书的进度）
+   */
+  deleteByWordIds(wordIds: string[]): void {
+    const records = this.getAll();
+    const filtered = records.filter(record => !wordIds.includes(record.wordId));
+    setStorageData(STORAGE_KEYS.STUDY_RECORDS, filtered);
   },
 
   /**
@@ -158,13 +167,13 @@ export const studyPlanStorage = {
   save(plan: StudyPlan): void {
     const plans = this.getAll();
     const index = plans.findIndex(p => p.id === plan.id);
-    
+
     if (index >= 0) {
       plans[index] = plan;
     } else {
       plans.push(plan);
     }
-    
+
     setStorageData(STORAGE_KEYS.STUDY_PLANS, plans);
   },
 
