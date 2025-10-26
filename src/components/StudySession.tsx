@@ -60,9 +60,21 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
       // 生成今日任务
       const todayTask = generateTodayTask(wordBook, plan);
 
+      // 获取今天的开始时间戳
+      const todayStart = new Date().setHours(0, 0, 0, 0);
+      
+      // 过滤掉今天已经完成的单词（检查 lastReviewed 是否在今天，且 reviewCount > 0）
+      const filterCompletedToday = (words: Word[]) => {
+        return words.filter(word => {
+          const record = studyRecordStorage.getByWordId(word.id);
+          // 如果没有记录，或者记录不是今天创建的，或者 reviewCount 为 0，则保留
+          return !record || record.lastReviewed < todayStart || record.reviewCount === 0;
+        });
+      };
+
       // 优先学习新词，然后复习
-      const newWords = todayTask.newWords;
-      const reviewWords = todayTask.reviewWords;
+      const newWords = filterCompletedToday(todayTask.newWords);
+      const reviewWords = filterCompletedToday(todayTask.reviewWords);
 
       if (newWords.length > 0) {
         setStudyQueue(newWords);
