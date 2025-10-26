@@ -38,15 +38,6 @@ export function generateTodayTask(wordBook: WordBook, studyPlan: StudyPlan): Tod
     return word && needsReview(record);
   });
 
-  // 获取今日已学习的新词数量（任何在今天被复习过的新词都算作已学习）
-  const todayLearned = records.filter(record => {
-    const word = wordBook.words.find(w => w.id === record.wordId);
-    return word && record.lastReviewed >= todayStart && record.reviewCount > 0;
-  }).length;
-
-  // 计算今日剩余新词数量
-  const remainingNewWords = Math.max(0, studyPlan.dailyNewWords - todayLearned);
-
   // 获取未学习的新词
   const unlearnedWords = wordBook.words.filter(word => {
     const record = records.find(r => r.wordId === word.id);
@@ -136,21 +127,50 @@ export function getStudyStats(wordBook: WordBook) {
   );
 
   const totalWords = wordBook.totalWords;
-  const learnedWords = wordRecords.length;
-  const masteredWords = wordRecords.filter(record => record.interval >= 30).length;
+  // 只统计实际学习过的单词（reviewCount > 0）
+  const learnedWords = wordRecords.filter(record => record.reviewCount > 0).length;
+
+  // 分级掌握统计
+  const beginnerWords = wordRecords.filter(record => record.reviewCount > 0 && record.interval < 7).length; // 初学：间隔<7天
+  const familiarWords = wordRecords.filter(record => record.reviewCount > 0 && record.interval >= 7 && record.interval < 30).length; // 熟悉：7-29天
+  const proficientWords = wordRecords.filter(record => record.reviewCount > 0 && record.interval >= 30 && record.interval < 60).length; // 熟练：30-59天
+  const masteredWords = wordRecords.filter(record => record.reviewCount > 0 && record.interval >= 60).length; // 完全掌握：60天+
+
+  // 综合掌握率：熟悉及以上的单词占比
+  const comprehensiveMastery = familiarWords + proficientWords + masteredWords;
+
+  // 准确率相关统计
   const totalReviews = wordRecords.reduce((sum, record) => sum + record.reviewCount, 0);
   const totalCorrect = wordRecords.reduce((sum, record) => sum + record.correctCount, 0);
   const totalWrong = wordRecords.reduce((sum, record) => sum + record.wrongCount, 0);
+  const totalDifficult = wordRecords.reduce((sum, record) => sum + record.difficultCount, 0);
   const accuracy = totalCorrect + totalWrong > 0 ?
     Math.round((totalCorrect / (totalCorrect + totalWrong)) * 100) : 0;
+
+  // 按复习次数分类统计
+  const reviewOnce = wordRecords.filter(record => record.reviewCount === 1).length;
+  const review2to5 = wordRecords.filter(record => record.reviewCount >= 2 && record.reviewCount <= 5).length;
+  const review6to10 = wordRecords.filter(record => record.reviewCount >= 6 && record.reviewCount <= 10).length;
+  const reviewMore10 = wordRecords.filter(record => record.reviewCount > 10).length;
 
   return {
     totalWords,
     learnedWords,
     masteredWords,
+    beginnerWords,
+    familiarWords,
+    proficientWords,
+    comprehensiveMastery,
     totalReviews,
+    totalCorrect,
+    totalWrong,
+    totalDifficult,
     accuracy,
-    progress: Math.round((learnedWords / totalWords) * 100),
-    masteryRate: Math.round((masteredWords / totalWords) * 100)
+    reviewOnce,
+    review2to5,
+    review6to10,
+    reviewMore10,
+    progress: totalWords > 0 ? Math.round((learnedWords / totalWords) * 100) : 0,
+    masteryRate: totalWords > 0 ? Math.round((comprehensiveMastery / totalWords) * 100) : 0
   };
 }

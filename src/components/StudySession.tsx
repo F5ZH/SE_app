@@ -62,7 +62,7 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
 
       // 获取今天的开始时间戳
       const todayStart = new Date().setHours(0, 0, 0, 0);
-      
+
       // 过滤掉今天已经完成的单词（检查 lastReviewed 是否在今天，且 reviewCount > 0）
       const filterCompletedToday = (words: Word[]) => {
         return words.filter(word => {
