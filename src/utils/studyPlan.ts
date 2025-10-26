@@ -53,17 +53,17 @@ export function generateTodayTask(wordBook: WordBook, studyPlan: StudyPlan): Tod
     return !record || record.reviewCount === 0;
   });
 
-  // 选择今日要学习的新词
-  const todayNewWords = unlearnedWords.slice(0, remainingNewWords);
+  // 选择今日要学习的新词 - 始终显示计划数量的新词，不管是否已完成
+  const todayNewWords = unlearnedWords.slice(0, studyPlan.dailyNewWords);
 
   // 获取今日要复习的单词 - 需要将 StudyRecord 转换为 Word
   const reviewWordIds = dueForReview.slice(0, 20).map(record => record.wordId); // 限制每日复习数量
   const todayReviewWords = wordBook.words.filter(word => reviewWordIds.includes(word.id));
 
-  // 计算今日已完成的新词和复习数量（基于 lastReviewed 时间）
+  // 计算今日已完成的新词和复习数量（基于今日的学习记录）
   const completedNew = todayNewWords.filter(word => {
     const record = records.find(r => r.wordId === word.id);
-    return !!record && record.lastReviewed >= todayStart;
+    return !!record && record.lastReviewed >= todayStart && record.reviewCount > 0;
   }).length;
 
   const completedReview = todayReviewWords.filter(word => {

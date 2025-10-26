@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { WordBook } from '../types';
-import { Trash2, BookOpen, Calendar, Eye } from 'lucide-react';
+import { exportWordsToPDF } from '../utils/pdfExport';
+import { Trash2, BookOpen, Calendar, Eye, Download } from 'lucide-react';
+import Modal from './Modal';
 
 interface WordBookCardProps {
   wordBook: WordBook;
@@ -38,6 +40,14 @@ const WordBookCard: React.FC<WordBookCardProps> = ({ wordBook, onDelete }) => {
       month: 'short',
       day: 'numeric'
     });
+  };
+
+  /**
+   * 导出词书为PDF
+   */
+  const handleExportPDF = () => {
+    const fileName = `${wordBook.name}_词书.pdf`;
+    exportWordsToPDF(wordBook.words, wordBook.name, fileName);
   };
 
   return (
@@ -124,26 +134,39 @@ const WordBookCard: React.FC<WordBookCardProps> = ({ wordBook, onDelete }) => {
         )}
       </div>
       {/* 预览弹窗 */}
-      {showPreview && (
-        <div className="preview-modal-overlay">
-          <div className="preview-modal">
-            <div className="preview-modal-header">
-              <h3>词书预览 — {wordBook.name}</h3>
-              <button className="btn btn-sm" onClick={() => setShowPreview(false)}>关闭</button>
-            </div>
-            <div className="preview-modal-content">
-              <div className="preview-list">
-                {wordBook.words.map(w => (
-                  <div key={w.id} className="preview-item">
-                    <span className="preview-word">{w.word}</span>
-                    <span className="preview-translation">{w.translation}</span>
-                  </div>
-                ))}
+      <Modal
+        isOpen={showPreview}
+        onClose={() => setShowPreview(false)}
+        title={`词书预览 — ${wordBook.name}`}
+        className="wordbook-preview-modal"
+      >
+        <div className="wordbook-preview-header">
+          <h3 className="wordbook-preview-title">
+            {wordBook.name} ({wordBook.totalWords} 个单词)
+          </h3>
+          <button className="btn btn-primary" onClick={handleExportPDF}>
+            <Download size={16} />
+            导出PDF
+          </button>
+        </div>
+        <div className="wordbook-preview-content">
+          <div className="wordbook-preview-list">
+            {wordBook.words.map((word, index) => (
+              <div key={word.id} className="wordbook-preview-item">
+                <div className="wordbook-preview-number">{index + 1}</div>
+                <div className="wordbook-preview-word">{word.word}</div>
+                <div className="wordbook-preview-translation">{word.translation}</div>
+                {word.pronunciation && (
+                  <div className="wordbook-preview-pronunciation">{word.pronunciation}</div>
+                )}
+                {word.example && (
+                  <div className="wordbook-preview-example">{word.example}</div>
+                )}
               </div>
-            </div>
+            ))}
           </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 };

@@ -11,7 +11,8 @@ const STORAGE_KEYS = {
   STUDY_RECORDS: 'vocabulary_app_study_records',
   STUDY_PLANS: 'vocabulary_app_study_plans',
   CURRENT_PLAN: 'vocabulary_app_current_plan',
-  USER_SETTINGS: 'vocabulary_app_user_settings'
+  USER_SETTINGS: 'vocabulary_app_user_settings',
+  CHECK_IN: 'vocabulary_app_check_in'
 } as const;
 
 /**
@@ -229,5 +230,71 @@ export const settingsStorage = {
     const settings = this.get();
     settings[key] = value;
     this.save(settings);
+  }
+};
+
+// 打卡签到管理
+export interface CheckInRecord {
+  date: string; // YYYY-MM-DD格式的日期
+  timestamp: number; // 打卡时间戳
+  planId?: string; // 关联的学习计划ID
+}
+
+export const checkInStorage = {
+  /**
+   * 获取所有打卡记录
+   */
+  getAll(): CheckInRecord[] {
+    return getStorageData(STORAGE_KEYS.CHECK_IN, []);
+  },
+
+  /**
+   * 记录今日打卡
+   */
+  checkIn(planId?: string): boolean {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const records = this.getAll();
+    
+    // 检查今日是否已打卡
+    const todayCheckIn = records.find(r => r.date === today);
+    if (todayCheckIn) {
+      return false; // 今日已打卡
+    }
+
+    // 记录打卡
+    const newRecord: CheckInRecord = {
+      date: today,
+      timestamp: Date.now(),
+      planId
+    };
+    
+    records.push(newRecord);
+    setStorageData(STORAGE_KEYS.CHECK_IN, records);
+    return true;
+  },
+
+  /**
+   * 检查今日是否已打卡
+   */
+  hasCheckedInToday(): boolean {
+    const today = new Date().toISOString().split('T')[0];
+    const records = this.getAll();
+    return records.some(r => r.date === today);
+  },
+
+  /**
+   * 获取今日打卡记录
+   */
+  getTodayCheckIn(): CheckInRecord | null {
+    const today = new Date().toISOString().split('T')[0];
+    const records = this.getAll();
+    return records.find(r => r.date === today) || null;
+  },
+
+  /**
+   * 清空打卡记录（用于词书变更或计划重置时）
+   */
+  clear(): void {
+    setStorageData(STORAGE_KEYS.CHECK_IN, []);
   }
 };

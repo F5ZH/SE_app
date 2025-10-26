@@ -25,6 +25,7 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
   const [showAnswer, setShowAnswer] = useState(false);
   const [studyQueue, setStudyQueue] = useState<Word[]>([]);
   const [completedCount, setCompletedCount] = useState(0);
+  const [completedWords, setCompletedWords] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [sessionType, setSessionType] = useState<'new' | 'review'>('new');
   const [showModeSelector, setShowModeSelector] = useState(true);
@@ -141,35 +142,37 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
     const updatedRecord = updateStudyRecord(currentRecord, quality, sessionConfig.mode);
     studyRecordStorage.save(updatedRecord);
 
-    // 移除当前单词
-    const newQueue = studyQueue.slice(1);
-    setStudyQueue(newQueue);
+    // 标记当前单词为已完成，但不从队列中移除
+    setCompletedWords(prev => new Set([...prev, currentWord.id]));
     setCompletedCount(prev => prev + 1);
 
     // 决定如何切换到下一个单词：
     // - 如果开启自动前进，延迟 500ms 后再切换（给用户短暂查看答案的时间）
     // - 否则立即切换到下一个单词，避免需要额外交互导致重复显示当前单词
     const switchToNext = () => {
-      if (newQueue.length === 0) {
+      // 查找下一个未完成的单词
+      const nextIncompleteWord = studyQueue.find(word => !completedWords.has(word.id));
+      
+      if (!nextIncompleteWord) {
+        // 所有单词都已完成
         onComplete();
         return;
       }
 
-      const next = newQueue[0];
-      setCurrentWord(next);
+      setCurrentWord(nextIncompleteWord);
       setShowAnswer(false);
 
       // 生成选择题选项（若当前模式为选择题）
       if (sessionConfig.mode === StudyMode.WORD_TO_CHOICE) {
-        generateChoiceOptions(next);
+        generateChoiceOptions(nextIncompleteWord);
       }
 
       // 获取或创建学习记录并设置
-      const existing = studyRecordStorage.getByWordId(next.id);
+      const existing = studyRecordStorage.getByWordId(nextIncompleteWord.id);
       if (existing) {
         setCurrentRecord(existing);
       } else {
-        const newRecord = createStudyRecord(next.id, next.word);
+        const newRecord = createStudyRecord(nextIncompleteWord.id, nextIncompleteWord.word);
         setCurrentRecord(newRecord);
       }
     };
@@ -352,13 +355,13 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
           </h1>
           <div className="session-progress">
             <span className="progress-text">
-              {completedCount} / {completedCount + studyQueue.length}
+              {completedCount} / {studyQueue.length}
             </span>
             <div className="progress-bar">
               <div
                 className="progress-fill"
                 style={{
-                  width: `${(completedCount / (completedCount + studyQueue.length)) * 100}%`
+                  width: `${(completedCount / studyQueue.length) * 100}%`
                 }}
               ></div>
             </div>

@@ -8,6 +8,7 @@ import StudyPlanCreator from './components/StudyPlanCreator';
 import StudySession from './components/StudySession';
 import Dashboard from './components/Dashboard';
 import './App.css';
+import './components/Modal.css';
 
 /**
  * 主应用组件
@@ -92,6 +93,24 @@ function App() {
     }
   };
 
+  /**
+   * 处理学习计划导航
+   */
+  const handlePlanNavigation = () => {
+    if (currentPlan) {
+      // 有现有计划，显示确认对话框
+      const confirmed = window.confirm(
+        '您已有一个学习计划，修改计划将重置当前的学习进度。\n\n确定要继续吗？'
+      );
+      if (confirmed) {
+        setCurrentView('plan');
+      }
+    } else {
+      // 没有现有计划，直接进入创建界面
+      setCurrentView('plan');
+    }
+  };
+
   // 加载状态
   if (isLoading) {
     return (
@@ -109,6 +128,7 @@ function App() {
       <Header
         currentView={currentView}
         onViewChange={setCurrentView}
+        onPlanNavigation={handlePlanNavigation}
         hasActivePlan={!!currentPlan}
       />
 
@@ -118,7 +138,7 @@ function App() {
             currentPlan={currentPlan}
             wordBooks={wordBooks}
             onStartStudy={handleStartStudy}
-            onCreatePlan={() => setCurrentView('plan')}
+            onCreatePlan={handlePlanNavigation}
           />
         )}
 

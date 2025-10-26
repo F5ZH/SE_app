@@ -4,6 +4,7 @@ import { BookOpen, Library, Calendar, Home } from 'lucide-react';
 interface HeaderProps {
   currentView: 'dashboard' | 'wordbooks' | 'study' | 'plan';
   onViewChange: (view: 'dashboard' | 'wordbooks' | 'study' | 'plan') => void;
+  onPlanNavigation?: () => void;
   hasActivePlan: boolean;
 }
 
@@ -11,7 +12,7 @@ interface HeaderProps {
  * 应用头部导航组件
  * 提供主要功能模块的导航
  */
-const Header: React.FC<HeaderProps> = ({ currentView, onViewChange, hasActivePlan }) => {
+const Header: React.FC<HeaderProps> = ({ currentView, onViewChange, onPlanNavigation, hasActivePlan }) => {
   const navItems = [
     {
       id: 'dashboard' as const,
@@ -64,7 +65,16 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange, hasActivePla
               <button
                 key={item.id}
                 className={`nav-item ${isActive ? 'active' : ''} ${item.disabled ? 'disabled' : ''}`}
-                onClick={() => !item.disabled && onViewChange(item.id)}
+                onClick={() => {
+                  if (item.disabled) return;
+                  
+                  // 特殊处理学习计划导航
+                  if (item.id === 'plan' && onPlanNavigation) {
+                    onPlanNavigation();
+                  } else {
+                    onViewChange(item.id);
+                  }
+                }}
                 disabled={item.disabled}
                 title={item.description}
               >

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { StudyPlan, WordBook, TodayTask } from '../types';
 import { generateTodayTask, getStudyStats } from '../utils/studyPlan';
-import { studyRecordStorage } from '../utils/storage';
-import { Play, Calendar, BookOpen, TrendingUp, Clock, Target } from 'lucide-react';
+import { studyRecordStorage, checkInStorage } from '../utils/storage';
+import { Play, Calendar, BookOpen, TrendingUp, Clock, Target, Eye, Download, Check } from 'lucide-react';
+import Modal from './Modal';
+import SelfStudy from './SelfStudy';
 
 interface DashboardProps {
   currentPlan: StudyPlan | null;
@@ -24,10 +26,21 @@ const Dashboard: React.FC<DashboardProps> = ({
   const [todayTask, setTodayTask] = useState<TodayTask | null>(null);
   const [studyStats, setStudyStats] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasCheckedIn, setHasCheckedIn] = useState(false);
+  
+  // 模态窗状态
+  const [showNewWordsModal, setShowNewWordsModal] = useState(false);
+  const [showReviewWordsModal, setShowReviewWordsModal] = useState(false);
+  const [showSelfStudyModal, setShowSelfStudyModal] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
   }, [currentPlan, wordBooks]);
+
+  useEffect(() => {
+    // 检查今日是否已打卡
+    setHasCheckedIn(checkInStorage.hasCheckedInToday());
+  }, []);
 
   /**
    * 加载仪表板数据
@@ -58,20 +71,44 @@ const Dashboard: React.FC<DashboardProps> = ({
   };
 
   /**
-   * 在 Dashboard 上直接重置当前计划对应词书的学习进度
+   * 处理打卡签到
+   */
+  const handleCheckIn = () => {
+    if (hasCheckedIn) {
+      alert('今日已打卡！');
+      return;
+    }
+
+    const success = checkInStorage.checkIn(currentPlan?.id);
+    if (success) {
+      setHasCheckedIn(true);
+      alert('打卡成功！继续加油💪');
+    } else {
+      alert('今日已打卡！');
+    }
+  };
+
+  /**
+   * 重置当前计划对应词书的学习进度
    */
   const handleResetProgress = () => {
     if (!currentPlan) return;
     const book = wordBooks.find(b => b.id === currentPlan.wordBookId);
     if (!book) return;
-    const ok = window.confirm(`确定要重置词书 "${book.name}" 的学习进度吗？此操作不可撤销。`);
-    if (!ok) return;
+    
+    const confirmed = window.confirm(
+      `确定要重置词书 "${book.name}" 的学习进度吗？\n\n此操作将：\n- 清零所有学习记录\n- 保持当前学习计划不变\n- 此操作不可撤销`
+    );
+    
+    if (!confirmed) return;
 
+    // 只删除该词书的学习记录，保持学习计划不变
     const ids = book.words.map(w => w.id);
     studyRecordStorage.deleteByWordIds(ids);
+    
     // 重新加载数据
     loadDashboardData();
-    alert('已重置该词书的学习进度。');
+    alert('已重置该词书的学习进度，学习计划保持不变。');
   };
 
   // 加载状态
@@ -130,7 +167,7 @@ const Dashboard: React.FC<DashboardProps> = ({
             <div className="task-progress">
               {todayTask.totalNew + todayTask.totalReview > 0 ? (
                 <span className="progress-text">
-                  {todayTask.completedNew + todayTask.completedReview} / {todayTask.totalNew + todayTask.totalReview}
+                  今日任务：{todayTask.totalNew + todayTask.totalReview} 个单词
                 </span>
               ) : (
                 <span className="progress-text">今日已完成</span>
@@ -139,27 +176,39 @@ const Dashboard: React.FC<DashboardProps> = ({
           </div>
 
           <div className="task-grid">
-            <div className="task-item new-words">
+            <div 
+              className="task-item new-words clickable"
+              onClick={() => setShowNewWordsModal(true)}
+            >
               <div className="task-icon">
                 <BookOpen size={24} />
               </div>
               <div className="task-content">
                 <h3 className="task-label">新词学习</h3>
                 <p className="task-count">
-                  {todayTask.completedNew} / {todayTask.totalNew}
+                  {todayTask.totalNew}
                 </p>
+              </div>
+              <div className="task-action">
+                <Eye size={16} />
               </div>
             </div>
 
-            <div className="task-item review-words">
+            <div 
+              className="task-item review-words clickable"
+              onClick={() => setShowReviewWordsModal(true)}
+            >
               <div className="task-icon">
                 <TrendingUp size={24} />
               </div>
               <div className="task-content">
                 <h3 className="task-label">复习巩固</h3>
                 <p className="task-count">
-                  {todayTask.completedReview} / {todayTask.totalReview}
+                  {todayTask.totalReview}
                 </p>
+              </div>
+              <div className="task-action">
+                <Eye size={16} />
               </div>
             </div>
           </div>
@@ -168,12 +217,27 @@ const Dashboard: React.FC<DashboardProps> = ({
             <button
               className="btn btn-primary btn-lg"
               onClick={onStartStudy}
-              disabled={todayTask.totalNew + todayTask.totalReview === 0}
             >
               <Play size={20} />
-              {todayTask.totalNew + todayTask.totalReview > 0 ? '开始学习' : '今日已完成'}
+              开始学习
             </button>
-            {/* 重置按钮已移至学习计划信息区域，以免与“开始学习”按钮冲突 */}
+            
+            <button
+              className="btn btn-secondary btn-lg"
+              onClick={() => setShowSelfStudyModal(true)}
+            >
+              <BookOpen size={20} />
+              自主学习
+            </button>
+            
+            <button
+              className={`btn btn-lg ${hasCheckedIn ? 'btn-success' : 'btn-success'}`}
+              onClick={handleCheckIn}
+              disabled={hasCheckedIn}
+            >
+              <Check size={20} />
+              {hasCheckedIn ? '已打卡' : '打卡签到'}
+            </button>
           </div>
         </div>
       )}
@@ -234,6 +298,93 @@ const Dashboard: React.FC<DashboardProps> = ({
         </div>
       )}
 
+
+      {/* 新词学习模态窗 */}
+      <Modal
+        isOpen={showNewWordsModal}
+        onClose={() => setShowNewWordsModal(false)}
+        title="今日新词学习"
+        className="task-detail-modal"
+      >
+        <div className="task-detail-header">
+          <h3 className="task-detail-title">新词学习</h3>
+          <p className="task-detail-subtitle">
+            共 {todayTask?.totalNew || 0} 个新词需要学习
+          </p>
+        </div>
+        <div className="task-word-list">
+          {todayTask?.newWords.map((word, index) => {
+            // 检查单词是否已完成
+            const record = studyRecordStorage.getByWordId(word.id);
+            const isCompleted = record && record.lastReviewed >= new Date().setHours(0, 0, 0, 0) && record.reviewCount > 0;
+            
+            return (
+              <div key={word.id} className={`task-word-item ${isCompleted ? 'completed' : ''}`}>
+                <div className="task-word-number">{index + 1}</div>
+                <div className="task-word-content">
+                  <div className="task-word-main">
+                    <span className="task-word-text">{word.word}</span>
+                    {word.pronunciation && (
+                      <span className="task-word-pronunciation">{word.pronunciation}</span>
+                    )}
+                    {isCompleted && (
+                      <span className="task-word-status-badge">✓ 已完成</span>
+                    )}
+                  </div>
+                  <p className="task-word-translation">{word.translation}</p>
+                  {word.example && (
+                    <p className="task-word-example">{word.example}</p>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </Modal>
+
+      {/* 复习巩固模态窗 */}
+      <Modal
+        isOpen={showReviewWordsModal}
+        onClose={() => setShowReviewWordsModal(false)}
+        title="今日复习巩固"
+        className="task-detail-modal"
+      >
+        <div className="task-detail-header">
+          <h3 className="task-detail-title">复习巩固</h3>
+          <p className="task-detail-subtitle">
+            共 {todayTask?.totalReview || 0} 个单词需要复习
+          </p>
+        </div>
+        <div className="task-word-list">
+          {todayTask?.reviewWords.map((word, index) => {
+            // 检查单词是否已完成
+            const record = studyRecordStorage.getByWordId(word.id);
+            const isCompleted = record && record.lastReviewed >= new Date().setHours(0, 0, 0, 0);
+            
+            return (
+              <div key={word.id} className={`task-word-item ${isCompleted ? 'completed' : ''}`}>
+                <div className="task-word-number">{index + 1}</div>
+                <div className="task-word-content">
+                  <div className="task-word-main">
+                    <span className="task-word-text">{word.word}</span>
+                    {word.pronunciation && (
+                      <span className="task-word-pronunciation">{word.pronunciation}</span>
+                    )}
+                    {isCompleted && (
+                      <span className="task-word-status-badge">✓ 已完成</span>
+                    )}
+                  </div>
+                  <p className="task-word-translation">{word.translation}</p>
+                  {word.example && (
+                    <p className="task-word-example">{word.example}</p>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </Modal>
+
       {/* 学习计划信息 */}
       <div className="card plan-info-card">
         <div className="card-header">
@@ -280,6 +431,20 @@ const Dashboard: React.FC<DashboardProps> = ({
           </div>
         </div>
       </div>
+
+      {/* 自主学习模态窗 */}
+      <Modal
+        isOpen={showSelfStudyModal}
+        onClose={() => setShowSelfStudyModal(false)}
+        title="自主学习"
+        className="self-study-modal"
+      >
+        <SelfStudy
+          plan={currentPlan!}
+          wordBooks={wordBooks}
+          onBack={() => setShowSelfStudyModal(false)}
+        />
+      </Modal>
     </div>
   );
 };
