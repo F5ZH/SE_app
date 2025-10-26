@@ -150,6 +150,13 @@ export const studyRecordStorage = {
    */
   saveAll(records: StudyRecord[]): void {
     setStorageData(STORAGE_KEYS.STUDY_RECORDS, records);
+  },
+
+  /**
+   * 清除所有学习记录
+   */
+  clearAll(): void {
+    setStorageData(STORAGE_KEYS.STUDY_RECORDS, []);
   }
 };
 
@@ -254,7 +261,7 @@ export const checkInStorage = {
   checkIn(planId?: string): boolean {
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
     const records = this.getAll();
-    
+
     // 检查今日是否已打卡
     const todayCheckIn = records.find(r => r.date === today);
     if (todayCheckIn) {
@@ -267,7 +274,7 @@ export const checkInStorage = {
       timestamp: Date.now(),
       planId
     };
-    
+
     records.push(newRecord);
     setStorageData(STORAGE_KEYS.CHECK_IN, records);
     return true;

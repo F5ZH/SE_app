@@ -26,6 +26,7 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
   const [studyQueue, setStudyQueue] = useState<Word[]>([]);
   const [completedCount, setCompletedCount] = useState(0);
   const [completedWords, setCompletedWords] = useState<Set<string>>(new Set());
+  const [totalWords, setTotalWords] = useState(0); // 初始单词总数
   const [isLoading, setIsLoading] = useState(true);
   const [sessionType, setSessionType] = useState<'new' | 'review'>('new');
   const [showModeSelector, setShowModeSelector] = useState(true);
@@ -65,13 +66,16 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
 
       if (newWords.length > 0) {
         setStudyQueue(newWords);
+        setTotalWords(newWords.length); // 设置初始总数
         setSessionType('new');
       } else if (reviewWords.length > 0) {
         setStudyQueue(reviewWords);
+        setTotalWords(reviewWords.length); // 设置初始总数
         setSessionType('review');
       } else {
         // 没有学习任务
         setStudyQueue([]);
+        setTotalWords(0);
       }
 
     } catch (error) {
@@ -138,21 +142,30 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
   const handleQualityRating = (quality: number) => {
     if (!currentWord || !currentRecord) return;
 
+    // 检查当前单词是否已经完成过
+    if (completedWords.has(currentWord.id)) {
+      // 如果已完成，只更新记录，不增加计数
+      const updatedRecord = updateStudyRecord(currentRecord, quality, sessionConfig.mode);
+      studyRecordStorage.save(updatedRecord);
+      return;
+    }
+
     // 更新学习记录
     const updatedRecord = updateStudyRecord(currentRecord, quality, sessionConfig.mode);
     studyRecordStorage.save(updatedRecord);
 
-    // 标记当前单词为已完成，但不从队列中移除
-    setCompletedWords(prev => new Set([...prev, currentWord.id]));
+    // 标记当前单词为已完成
+    const newCompletedWords = new Set([...completedWords, currentWord.id]);
+    setCompletedWords(newCompletedWords);
     setCompletedCount(prev => prev + 1);
 
     // 决定如何切换到下一个单词：
     // - 如果开启自动前进，延迟 500ms 后再切换（给用户短暂查看答案的时间）
     // - 否则立即切换到下一个单词，避免需要额外交互导致重复显示当前单词
     const switchToNext = () => {
-      // 查找下一个未完成的单词
-      const nextIncompleteWord = studyQueue.find(word => !completedWords.has(word.id));
-      
+      // 查找下一个未完成的单词（使用最新的 completed 集合）
+      const nextIncompleteWord = studyQueue.find(word => !newCompletedWords.has(word.id));
+
       if (!nextIncompleteWord) {
         // 所有单词都已完成
         onComplete();
@@ -240,6 +253,8 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
 
     // 重置本地会话状态并重新初始化
     setCompletedCount(0);
+    setCompletedWords(new Set());
+    setTotalWords(0);
     setCurrentWord(null);
     setCurrentRecord(null);
     setStudyQueue([]);
@@ -355,13 +370,13 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
           </h1>
           <div className="session-progress">
             <span className="progress-text">
-              {completedCount} / {studyQueue.length}
+              {completedCount} / {totalWords}
             </span>
             <div className="progress-bar">
               <div
                 className="progress-fill"
                 style={{
-                  width: `${(completedCount / studyQueue.length) * 100}%`
+                  width: `${totalWords > 0 ? (completedCount / totalWords) * 100 : 0}%`
                 }}
               ></div>
             </div>

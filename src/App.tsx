@@ -7,6 +7,7 @@ import WordBookList from './components/WordBookList';
 import StudyPlanCreator from './components/StudyPlanCreator';
 import StudySession from './components/StudySession';
 import Dashboard from './components/Dashboard';
+import DevTools from './components/DevTools';
 import './App.css';
 import './components/Modal.css';
 
@@ -166,6 +167,9 @@ function App() {
           />
         )}
       </main>
+
+      {/* 开发者工具 */}
+      <DevTools onRefresh={initializeApp} />
     </div>
   );
 }
