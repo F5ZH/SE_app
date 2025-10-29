@@ -1,6 +1,6 @@
 import React from 'react';
 import { StudyMode, StudySessionConfig } from '../types';
-import { BookOpen, Edit3, CheckSquare, Settings, Wand2 } from 'lucide-react';
+import { BookOpen, Edit3, CheckSquare, Settings, Wand2, Sparkles } from 'lucide-react';
 
 interface StudyModeSelectorProps {
   config: StudySessionConfig;
@@ -45,6 +45,13 @@ const StudyModeSelector: React.FC<StudyModeSelectorProps> = ({
       description: '用AI将单词串联成故事，情境记忆',
       icon: Wand2,
       color: '#8b5cf6'
+    },
+    {
+      mode: StudyMode.WORD_ODYSSEY,
+      title: 'Word Odyssey 冒险',
+      description: '交互式语言冒险RPG，在剧情中学习',
+      icon: Sparkles,
+      color: '#ec4899'
     }
   ];
 

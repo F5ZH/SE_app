@@ -8,6 +8,7 @@ import StudyModeSelector from './StudyModeSelector';
 import SpellingExercise from './SpellingExercise';
 import ChoiceExercise from './ChoiceExercise';
 import AIStoryGenerator from './AIStoryGenerator';
+import WordOdyssey from './WordOdyssey';
 import { Check, X, RotateCcw, ExternalLink, ArrowLeft, Download, Settings } from 'lucide-react';
 
 interface StudySessionProps {
@@ -379,7 +380,8 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
               sessionConfig.mode === StudyMode.WORD_TO_TRANSLATION ? '看英语回忆汉语' :
                 sessionConfig.mode === StudyMode.TRANSLATION_TO_WORD ? '看汉语拼写英语' :
                   sessionConfig.mode === StudyMode.WORD_TO_CHOICE ? '看英语选择汉语' :
-                    'AI故事串联学习'
+                    sessionConfig.mode === StudyMode.AI_STORY ? 'AI故事串联学习' :
+                      'Word Odyssey 冒险'
             }
           </h1>
           <div className="session-progress">
@@ -542,6 +544,14 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
       {/* AI 故事串联学习模式 */}
       {sessionConfig.mode === StudyMode.AI_STORY && (
         <AIStoryGenerator
+          words={studyQueue}
+          onClose={() => setShowModeSelector(true)}
+        />
+      )}
+
+      {/* Word Odyssey 交互式冒险 */}
+      {sessionConfig.mode === StudyMode.WORD_ODYSSEY && (
+        <WordOdyssey
           words={studyQueue}
           onClose={() => setShowModeSelector(true)}
         />
