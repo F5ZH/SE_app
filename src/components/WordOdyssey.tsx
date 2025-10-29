@@ -14,12 +14,12 @@ import {
     initializeWordEnergies,
     updateWordEnergy
 } from '../utils/wordOdyssey';
-import { 
-    Play, 
-    Send, 
-    Settings, 
-    Zap, 
-    Award, 
+import {
+    Play,
+    Send,
+    Settings,
+    Zap,
+    Award,
     TrendingUp,
     BookOpen,
     ArrowLeft,
@@ -142,7 +142,7 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
 
             // 评估词汇使用（即使是选择题，也要评估并给予能量奖励）
             let updatedEnergies = new Map(session.wordEnergies);
-            
+
             if (targetWord) {
                 // 在引导模式下，选择包含目标词的选项，自动给予能量奖励
                 const evaluations = await evaluateWordUsage(
@@ -177,7 +177,7 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
             }
 
             // 更新会话
-            const updatedSession = { 
+            const updatedSession = {
                 ...session,
                 wordEnergies: updatedEnergies
             };
@@ -224,7 +224,7 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
             });
 
             // 更新会话
-            const updatedSession = { 
+            const updatedSession = {
                 ...session,
                 wordEnergies: updatedEnergies
             };
@@ -258,7 +258,7 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
             const progress = calculateProgress(currentSession);
             const currentRound = currentSession.storyNodes.length;
             const wordCount = currentSession.words.length;
-            
+
             // 根据单词数量自适应调整通关要求
             const requirements = calculateCompletionRequirements(wordCount, currentRound, progress);
 
@@ -454,7 +454,7 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
                 {(() => {
                     const wordCount = Math.min(words.length, 50); // 最多50个单词
                     let requirements;
-                    
+
                     if (wordCount <= 5) {
                         requirements = { min: 3, max: 6, progress: 80 };
                     } else if (wordCount <= 10) {
@@ -486,8 +486,8 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
                     <Settings size={16} />
                     API设置
                 </button>
-                <button 
-                    className="btn btn-primary btn-lg" 
+                <button
+                    className="btn btn-primary btn-lg"
                     onClick={handleStartAdventure}
                     disabled={isGenerating}
                 >
@@ -526,8 +526,8 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
                             整体进度
                         </div>
                         <div className="progress-bar">
-                            <div 
-                                className="progress-fill" 
+                            <div
+                                className="progress-fill"
                                 style={{ width: `${progress}%` }}
                             />
                         </div>
@@ -537,8 +537,8 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
                     <div className="word-energies">
                         {energies.map(energy => (
                             <div key={energy.wordId} className="energy-badge" title={energy.word}>
-                                <Zap 
-                                    size={14} 
+                                <Zap
+                                    size={14}
                                     className={energy.unlocked ? 'unlocked' : ''}
                                 />
                                 <span>{energy.energy}</span>
@@ -611,7 +611,7 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
                                         onChange={(e) => setPlayerInput(e.target.value)}
                                         onKeyPress={(e) => e.key === 'Enter' && handleFreeResponse()}
                                     />
-                                    <button 
+                                    <button
                                         className="btn btn-primary"
                                         onClick={handleFreeResponse}
                                         disabled={!playerInput.trim()}
@@ -678,8 +678,8 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
                                 </div>
                                 <div className="word-stats">
                                     <div className="energy-bar">
-                                        <div 
-                                            className="energy-fill" 
+                                        <div
+                                            className="energy-fill"
                                             style={{ width: `${energy.energy}%` }}
                                         />
                                     </div>
@@ -734,10 +734,10 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
                 <div style={{ padding: '20px' }}>
                     <p style={{ marginBottom: '16px', color: '#666' }}>
                         Word Odyssey 需要 DeepSeek API 来生成动态冒险故事。
-                        <a 
-                            href="https://platform.deepseek.com" 
-                            target="_blank" 
-                            rel="noopener noreferrer" 
+                        <a
+                            href="https://platform.deepseek.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
                             style={{ color: '#2196F3', marginLeft: '4px' }}
                         >
                             获取 API Key
@@ -752,8 +752,8 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
                         style={{ width: '100%', marginBottom: '16px' }}
                     />
                     <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                        <button 
-                            className="btn btn-secondary" 
+                        <button
+                            className="btn btn-secondary"
                             onClick={() => setShowSettings(false)}
                         >
                             取消

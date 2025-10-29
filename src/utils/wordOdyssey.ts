@@ -377,7 +377,7 @@ export async function generateAdventureSummary(
     const correctUsageRate = totalAttempts > 0 ? correctUses / totalAttempts : 0;
 
     // 使用 LLM 生成个性化洞察
-    const wordStats = wordEnergies.map(w => 
+    const wordStats = wordEnergies.map(w =>
         `${w.word}: 能量${w.energy}/100, 正确${w.correctUses}/${w.totalAttempts}次, ${w.unlocked ? '已解锁✓' : '未解锁'}`
     ).join('\n');
 
