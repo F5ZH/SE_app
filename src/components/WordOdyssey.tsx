@@ -646,7 +646,7 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
                                         <div className="guidance-header">
                                             <BookOpen size={16} />
                                             <span>回答指导</span>
-                                            <button 
+                                            <button
                                                 className="guidance-toggle"
                                                 onClick={() => setShowGuidance(false)}
                                             >
@@ -665,7 +665,7 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
 
                                 {/* 显示引导按钮（当隐藏时） */}
                                 {currentNode.guidanceHint && !showGuidance && (
-                                    <button 
+                                    <button
                                         className="show-guidance-btn"
                                         onClick={() => setShowGuidance(true)}
                                     >
@@ -715,7 +715,7 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
                                                 <div key={idx} className="feedback-item">
                                                     <span className="feedback-type">{
                                                         item.type === 'grammar' ? '语法' :
-                                                        item.type === 'spelling' ? '拼写' : '表达'
+                                                            item.type === 'spelling' ? '拼写' : '表达'
                                                     }：</span>
                                                     <span className="feedback-message">{item.message}</span>
                                                     {item.suggestion && (
