@@ -22,6 +22,45 @@ export function calculateExpectedEndDate(
   return startDate + (daysNeeded * 24 * 60 * 60 * 1000);
 }
 
+// 简单的当日单词列表缓存（使用sessionStorage，仅在当前会话有效）
+function getCachedTodayWords(): { newWordIds: string[], reviewWordIds: string[] } | null {
+  try {
+    const cacheKey = `today_words_${new Date().toISOString().split('T')[0]}`;
+    const cached = sessionStorage.getItem(cacheKey);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+  } catch (error) {
+    console.error('Error reading cached words:', error);
+  }
+  return null;
+}
+
+function setCachedTodayWords(newWordIds: string[], reviewWordIds: string[]): void {
+  try {
+    const cacheKey = `today_words_${new Date().toISOString().split('T')[0]}`;
+    sessionStorage.setItem(cacheKey, JSON.stringify({ newWordIds, reviewWordIds }));
+  } catch (error) {
+    console.error('Error caching words:', error);
+  }
+}
+
+export function clearCachedTodayWords(): void {
+  try {
+    const cacheKey = `today_words_${new Date().toISOString().split('T')[0]}`;
+    sessionStorage.removeItem(cacheKey);
+    // 同时清除之前日期的缓存（清理旧数据）
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i);
+      if (key && key.startsWith('today_words_')) {
+        sessionStorage.removeItem(key);
+      }
+    }
+  } catch (error) {
+    console.error('Error clearing cached words:', error);
+  }
+}
+
 /**
  * 生成今日学习任务
  * @param wordBook 词书
@@ -32,24 +71,43 @@ export function generateTodayTask(wordBook: WordBook, studyPlan: StudyPlan): Tod
   const records = studyRecordStorage.getAll();
   const todayStart = new Date().setHours(0, 0, 0, 0);
 
-  // 获取需要复习的单词
-  const dueForReview = records.filter(record => {
-    const word = wordBook.words.find(w => w.id === record.wordId);
-    return word && needsReview(record);
-  });
+  // 检查是否有缓存的单词列表
+  const cachedWords = getCachedTodayWords();
+  
+  let todayNewWords: Word[] = [];
+  let todayReviewWords: Word[] = [];
 
-  // 获取未学习的新词
-  const unlearnedWords = wordBook.words.filter(word => {
-    const record = records.find(r => r.wordId === word.id);
-    return !record || record.reviewCount === 0;
-  });
+  if (cachedWords) {
+    // 使用缓存的单词ID列表，确保当天固定不变
+    todayNewWords = wordBook.words.filter(word => cachedWords.newWordIds.includes(word.id));
+    todayReviewWords = wordBook.words.filter(word => cachedWords.reviewWordIds.includes(word.id));
+  } else {
+    // 首次生成：计算今日单词列表并缓存
+    // 获取需要复习的单词
+    const dueForReview = records.filter(record => {
+      const word = wordBook.words.find(w => w.id === record.wordId);
+      return word && needsReview(record);
+    });
 
-  // 选择今日要学习的新词 - 始终显示计划数量的新词，不管是否已完成
-  const todayNewWords = unlearnedWords.slice(0, studyPlan.dailyNewWords);
+    // 获取未学习的新词
+    const unlearnedWords = wordBook.words.filter(word => {
+      const record = records.find(r => r.wordId === word.id);
+      return !record || record.reviewCount === 0;
+    });
 
-  // 获取今日要复习的单词 - 需要将 StudyRecord 转换为 Word
-  const reviewWordIds = dueForReview.slice(0, 20).map(record => record.wordId); // 限制每日复习数量
-  const todayReviewWords = wordBook.words.filter(word => reviewWordIds.includes(word.id));
+    // 选择今日要学习的新词
+    todayNewWords = unlearnedWords.slice(0, studyPlan.dailyNewWords);
+
+    // 获取今日要复习的单词 - 需要将 StudyRecord 转换为 Word
+    const reviewWordIds = dueForReview.slice(0, 20).map(record => record.wordId); // 限制每日复习数量
+    todayReviewWords = wordBook.words.filter(word => reviewWordIds.includes(word.id));
+
+    // 保存到缓存，确保当天固定不变
+    setCachedTodayWords(
+      todayNewWords.map(w => w.id),
+      todayReviewWords.map(w => w.id)
+    );
+  }
 
   // 计算今日已完成的新词和复习数量（基于今日的学习记录）
   const completedNew = todayNewWords.filter(word => {

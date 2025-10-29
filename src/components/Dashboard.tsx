@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StudyPlan, WordBook, TodayTask } from '../types';
-import { generateTodayTask, getStudyStats } from '../utils/studyPlan';
+import { generateTodayTask, getStudyStats, clearCachedTodayWords } from '../utils/studyPlan';
 import { studyRecordStorage, checkInStorage } from '../utils/storage';
 import { Play, Calendar, BookOpen, TrendingUp, Clock, Target, Eye, Check } from 'lucide-react';
 import Modal from './Modal';
@@ -108,6 +108,9 @@ const Dashboard: React.FC<DashboardProps> = ({
     // 只删除该词书的学习记录，保持学习计划不变
     const ids = book.words.map(w => w.id);
     studyRecordStorage.deleteByWordIds(ids);
+
+    // 清空今日单词列表缓存，以便重新生成
+    clearCachedTodayWords();
 
     // 重新加载数据
     loadDashboardData();

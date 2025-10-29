@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Word } from '../types';
 import { Check, X, RotateCcw, Volume2 } from 'lucide-react';
+import { speakWord } from '../utils/speech';
 
 interface SpellingExerciseProps {
   word: Word;
@@ -53,6 +54,9 @@ const SpellingExercise: React.FC<SpellingExerciseProps> = ({
     setIsCorrect(correct);
     setShowResult(true);
     
+    // 回答后自动朗读
+    speakWord(word.word);
+    
     // 延迟调用完成回调
     setTimeout(() => {
       onComplete(correct);
@@ -66,14 +70,6 @@ const SpellingExercise: React.FC<SpellingExerciseProps> = ({
     if (e.key === 'Enter' && userInput.trim()) {
       checkSpelling();
     }
-  };
-
-  /**
-   * 播放单词发音（模拟）
-   */
-  const playPronunciation = () => {
-    // 这里可以集成真实的TTS API
-    console.log(`Playing pronunciation for: ${word.word}`);
   };
 
   /**
@@ -99,13 +95,9 @@ const SpellingExercise: React.FC<SpellingExerciseProps> = ({
           <p className="translation-text">{word.translation}</p>
         </div>
 
-        {/* 音标显示 */}
-        {showPronunciation && word.pronunciation && (
+        {/* 音标显示 - 始终显示音标作为提示 */}
+        {word.pronunciation && (
           <div className="pronunciation-display">
-            <button className="pronunciation-btn" onClick={playPronunciation}>
-              <Volume2 size={16} />
-              播放发音
-            </button>
             <span className="pronunciation-text">{word.pronunciation}</span>
           </div>
         )}
@@ -177,11 +169,12 @@ const SpellingExercise: React.FC<SpellingExerciseProps> = ({
           </div>
         )}
 
-        {/* 例句显示 */}
-        {showExample && word.example && (
-          <div className="example-display">
-            <h4 className="example-title">例句：</h4>
-            <p className="example-text">{word.example}</p>
+        {/* 回答后显示音标和单词 */}
+        {showResult && word.pronunciation && (
+          <div className="pronunciation-result">
+            <p className="pronunciation-result-text">
+              音标：{word.pronunciation}
+            </p>
           </div>
         )}
 

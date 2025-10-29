@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Word } from '../types';
-import { Check, X, RotateCcw, Volume2 } from 'lucide-react';
+import { Check, X, RotateCcw } from 'lucide-react';
+import { speakWord } from '../utils/speech';
 
 interface ChoiceExerciseProps {
   word: Word;
@@ -50,18 +51,13 @@ const ChoiceExercise: React.FC<ChoiceExerciseProps> = ({
     setIsCorrect(correct);
     setShowResult(true);
     
+    // 回答后自动朗读
+    speakWord(word.word);
+    
     // 延迟调用完成回调
     setTimeout(() => {
       onComplete(correct);
     }, 2000);
-  };
-
-  /**
-   * 播放单词发音（模拟）
-   */
-  const playPronunciation = () => {
-    // 这里可以集成真实的TTS API
-    console.log(`Playing pronunciation for: ${word.word}`);
   };
 
   /**
@@ -96,18 +92,15 @@ const ChoiceExercise: React.FC<ChoiceExerciseProps> = ({
         {/* 英语单词 */}
         <div className="word-display">
           <h3 className="word-text">{word.word}</h3>
-          
-          {/* 音标显示 */}
-          {showPronunciation && word.pronunciation && (
-            <div className="pronunciation-display">
-              <button className="pronunciation-btn" onClick={playPronunciation}>
-                <Volume2 size={16} />
-                播放发音
-              </button>
-              <span className="pronunciation-text">{word.pronunciation}</span>
-            </div>
-          )}
         </div>
+
+        {/* 例句显示 - 作为提示信息 */}
+        {word.example && (
+          <div className="example-display">
+            <h4 className="example-title">例句：</h4>
+            <p className="example-text">{word.example}</p>
+          </div>
+        )}
 
         {/* 选项区域 */}
         <div className="choices-area">
@@ -151,11 +144,12 @@ const ChoiceExercise: React.FC<ChoiceExerciseProps> = ({
           </div>
         )}
 
-        {/* 例句显示 */}
-        {showExample && word.example && (
-          <div className="example-display">
-            <h4 className="example-title">例句：</h4>
-            <p className="example-text">{word.example}</p>
+        {/* 回答后显示音标 */}
+        {showResult && word.pronunciation && (
+          <div className="pronunciation-result">
+            <p className="pronunciation-result-text">
+              音标：{word.pronunciation}
+            </p>
           </div>
         )}
 

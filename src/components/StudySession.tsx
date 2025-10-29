@@ -3,11 +3,11 @@ import { StudyPlan, WordBook, Word, StudyRecord, StudyMode, StudySessionConfig }
 import { studyRecordStorage } from '../utils/storage';
 import { updateStudyRecord, createStudyRecord } from '../utils/ebbinghaus';
 import { generateTodayTask } from '../utils/studyPlan';
-import { exportTodayWordsToPDF } from '../utils/pdfExport';
+import { speakWord } from '../utils/speech';
 import StudyModeSelector from './StudyModeSelector';
 import SpellingExercise from './SpellingExercise';
 import ChoiceExercise from './ChoiceExercise';
-import { Check, X, RotateCcw, ExternalLink, ArrowLeft, Download, Settings } from 'lucide-react';
+import { Check, X, RotateCcw, ExternalLink, ArrowLeft, Settings } from 'lucide-react';
 
 interface StudySessionProps {
   plan: StudyPlan;
@@ -146,6 +146,10 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
    */
   const handleShowAnswer = () => {
     setShowAnswer(true);
+    // 显示答案后自动朗读单词
+    if (currentWord) {
+      speakWord(currentWord.word);
+    }
   };
 
   /**
@@ -235,20 +239,6 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
     window.open(searchUrl, '_blank');
   };
 
-  /**
-   * 导出今日单词表为PDF
-   */
-  const handleExportPDF = async () => {
-    if (!wordBook) return;
-
-    try {
-      const todayTask = generateTodayTask(wordBook, plan);
-      await exportTodayWordsToPDF(todayTask, wordBook.name);
-    } catch (error) {
-      console.error('导出PDF失败:', error);
-      alert('导出PDF失败，请重试');
-    }
-  };
 
   /**
    * 重置词书学习进度（调试用）
@@ -313,12 +303,6 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
             </p>
           </div>
 
-          <div className="session-actions">
-            <button className="btn btn-secondary" onClick={handleExportPDF}>
-              <Download size={16} />
-              导出PDF
-            </button>
-          </div>
         </div>
 
         <StudyModeSelector
@@ -349,10 +333,6 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
             </div>
           </div>
           <div className="complete-actions">
-            <button className="btn btn-secondary" onClick={handleExportPDF}>
-              <Download size={16} />
-              导出PDF
-            </button>
             <button className="btn btn-primary btn-lg" onClick={onComplete}>
               <ArrowLeft size={20} />
               返回首页
@@ -396,10 +376,6 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
         </div>
 
         <div className="session-actions">
-          <button className="btn btn-secondary" onClick={handleExportPDF}>
-            <Download size={16} />
-            导出PDF
-          </button>
           <button className="btn btn-danger" onClick={handleResetProgress} title="重置此词书的学习进度">
             <RotateCcw size={16} />
             重置进度
@@ -419,9 +395,6 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
               <div className="card-header">
                 <div className="word-info">
                   <h2 className="word-text">{currentWord.word}</h2>
-                  {sessionConfig.showPronunciation && currentWord.pronunciation && (
-                    <p className="word-pronunciation">{currentWord.pronunciation}</p>
-                  )}
                 </div>
 
                 <div className="word-actions">
@@ -434,6 +407,16 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
                   </button>
                 </div>
               </div>
+
+              {/* 例句显示 - 作为提示信息 */}
+              {!showAnswer && currentWord.example && (
+                <div className="card-content">
+                  <div className="word-example">
+                    <h4 className="example-title">例句：</h4>
+                    <p className="example-text">{currentWord.example}</p>
+                  </div>
+                </div>
+              )}
 
               {!showAnswer ? (
                 <div className="card-content">
@@ -453,10 +436,11 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
                     <h3 className="answer-title">翻译：</h3>
                     <p className="answer-translation">{currentWord.translation}</p>
 
-                    {sessionConfig.showExample && currentWord.example && (
-                      <div className="word-example">
-                        <h4 className="example-title">例句：</h4>
-                        <p className="example-text">{currentWord.example}</p>
+                    {/* 回答后显示音标 */}
+                    {currentWord.pronunciation && (
+                      <div className="word-pronunciation-result">
+                        <h4 className="pronunciation-title">音标：</h4>
+                        <p className="pronunciation-text">{currentWord.pronunciation}</p>
                       </div>
                     )}
 

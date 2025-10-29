@@ -52,7 +52,9 @@ const SelfStudy: React.FC<SelfStudyProps> = ({ plan, wordBooks, onBack }) => {
   const handleExportPDF = () => {
     if (!todayTask || !wordBook) return;
     
-    exportTodayWordsToPDF(todayTask, wordBook.name);
+    // 使用新的文件名格式：自主学习_日期.pdf
+    const date = new Date();
+    exportTodayWordsToPDF(todayTask, wordBook.name, date, `自主学习_${date.toISOString().split('T')[0]}.pdf`);
   };
 
   /**

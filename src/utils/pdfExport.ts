@@ -170,7 +170,8 @@ function createWordTable(words: Word[]): HTMLElement {
 export async function exportTodayWordsToPDF(
   todayTask: TodayTask,
   wordBookName: string,
-  date: Date = new Date()
+  date: Date = new Date(),
+  customFileName?: string
 ): Promise<void> {
   // 创建临时容器
   const container = createPDFContent(todayTask, wordBookName, date);
@@ -211,7 +212,7 @@ export async function exportTodayWordsToPDF(
     }
 
     // 保存PDF
-    const fileName = `今日单词表_${wordBookName}_${date.toISOString().split('T')[0]}.pdf`;
+    const fileName = customFileName || `今日单词表_${wordBookName}_${date.toISOString().split('T')[0]}.pdf`;
     pdf.save(fileName);
   } finally {
     // 清理临时元素

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { WordBook, StudyPlan } from './types';
 import { wordBookStorage, studyPlanStorage } from './utils/storage';
+import { clearCachedTodayWords } from './utils/studyPlan';
 import { presetWordBooks } from './data/presetWordBooks';
 import Header from './components/Header';
 import WordBookList from './components/WordBookList';
@@ -82,6 +83,10 @@ function App() {
     studyPlanStorage.save(plan);
     studyPlanStorage.setCurrent(plan.id);
     setCurrentPlan(plan);
+    
+    // 清空今日单词列表缓存，以便重新生成
+    clearCachedTodayWords();
+    
     setCurrentView('dashboard');
   };
 

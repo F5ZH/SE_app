@@ -46,7 +46,8 @@ const WordBookCard: React.FC<WordBookCardProps> = ({ wordBook, onDelete }) => {
    * 导出词书为PDF
    */
   const handleExportPDF = () => {
-    const fileName = `${wordBook.name}_词书.pdf`;
+    const date = new Date().toISOString().split('T')[0];
+    const fileName = `${wordBook.name}_${date}.pdf`;
     exportWordsToPDF(wordBook.words, wordBook.name, fileName);
   };
 
