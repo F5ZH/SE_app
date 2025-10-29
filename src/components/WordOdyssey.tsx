@@ -12,7 +12,8 @@ import {
     evaluateWordUsage,
     generateAdventureSummary,
     initializeWordEnergies,
-    updateWordEnergy
+    updateWordEnergy,
+    checkGrammarInstantly
 } from '../utils/wordOdyssey';
 import {
     Play,
@@ -61,7 +62,13 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
     // 总结数据
     const [summary, setSummary] = useState<any>(null);
 
+    // 自由模式相关状态
+    const [showGuidance, setShowGuidance] = useState(true); // 是否显示引导
+    const [instantFeedback, setInstantFeedback] = useState<any>(null); // 即时反馈
+    const [isChecking, setIsChecking] = useState(false); // 是否正在检查
+
     const chatContainerRef = useRef<HTMLDivElement>(null);
+    const inputDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
     // 滚动到底部
     useEffect(() => {
@@ -193,12 +200,42 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
         }
     };
 
+    // 处理输入变化（带防抖的即时检查）
+    const handleInputChange = (value: string) => {
+        setPlayerInput(value);
+        setInstantFeedback(null);
+
+        // 清除之前的定时器
+        if (inputDebounceRef.current) {
+            clearTimeout(inputDebounceRef.current);
+        }
+
+        // 如果输入为空或太短，不检查
+        if (!value || value.trim().length < 5) {
+            return;
+        }
+
+        // 设置新的防抖定时器（1秒后检查）
+        inputDebounceRef.current = setTimeout(async () => {
+            setIsChecking(true);
+            try {
+                const feedback = await checkGrammarInstantly(value, apiKey);
+                setInstantFeedback(feedback);
+            } catch (err) {
+                console.error('即时检查失败:', err);
+            } finally {
+                setIsChecking(false);
+            }
+        }, 1000);
+    };
+
     // 处理自由输入
     const handleFreeResponse = async () => {
         if (!session || !currentNode || !playerInput.trim()) return;
 
         setIsGenerating(true);
         setError('');
+        setInstantFeedback(null); // 清除即时反馈
 
         try {
             const response: PlayerResponse = {
@@ -602,14 +639,55 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
                                 <p className="interaction-prompt">
                                     {currentNode.openPrompt || '你会如何回应？'}
                                 </p>
+
+                                {/* 引导提示 */}
+                                {currentNode.guidanceHint && showGuidance && (
+                                    <div className="guidance-box">
+                                        <div className="guidance-header">
+                                            <BookOpen size={16} />
+                                            <span>回答指导</span>
+                                            <button 
+                                                className="guidance-toggle"
+                                                onClick={() => setShowGuidance(false)}
+                                            >
+                                                隐藏
+                                            </button>
+                                        </div>
+                                        <p className="guidance-text">{currentNode.guidanceHint}</p>
+                                        {currentNode.suggestedResponse && (
+                                            <div className="suggested-response">
+                                                <span className="label">参考示例：</span>
+                                                <span className="example">{currentNode.suggestedResponse}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* 显示引导按钮（当隐藏时） */}
+                                {currentNode.guidanceHint && !showGuidance && (
+                                    <button 
+                                        className="show-guidance-btn"
+                                        onClick={() => setShowGuidance(true)}
+                                    >
+                                        <BookOpen size={14} />
+                                        显示回答指导
+                                    </button>
+                                )}
+
+                                {/* 输入框 */}
                                 <div className="input-group">
-                                    <input
-                                        type="text"
-                                        className="input"
+                                    <textarea
+                                        className="input input-textarea"
                                         placeholder="用英文输入你的回答..."
                                         value={playerInput}
-                                        onChange={(e) => setPlayerInput(e.target.value)}
-                                        onKeyPress={(e) => e.key === 'Enter' && handleFreeResponse()}
+                                        onChange={(e) => handleInputChange(e.target.value)}
+                                        onKeyPress={(e) => {
+                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                e.preventDefault();
+                                                handleFreeResponse();
+                                            }
+                                        }}
+                                        rows={3}
                                     />
                                     <button
                                         className="btn btn-primary"
@@ -620,6 +698,45 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
                                         发送
                                     </button>
                                 </div>
+
+                                {/* 即时反馈 */}
+                                {isChecking && (
+                                    <div className="instant-feedback checking">
+                                        <Loader2 size={14} className="spin" />
+                                        <span>正在检查...</span>
+                                    </div>
+                                )}
+
+                                {instantFeedback && instantFeedback.hasErrors && (
+                                    <div className="instant-feedback error">
+                                        <XCircle size={16} />
+                                        <div className="feedback-list">
+                                            {instantFeedback.suggestions.map((item: any, idx: number) => (
+                                                <div key={idx} className="feedback-item">
+                                                    <span className="feedback-type">{
+                                                        item.type === 'grammar' ? '语法' :
+                                                        item.type === 'spelling' ? '拼写' : '表达'
+                                                    }：</span>
+                                                    <span className="feedback-message">{item.message}</span>
+                                                    {item.suggestion && (
+                                                        <span className="feedback-suggestion">
+                                                            → {item.suggestion}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {instantFeedback && !instantFeedback.hasErrors && playerInput.trim().length > 5 && (
+                                    <div className="instant-feedback success">
+                                        <CheckCircle size={16} />
+                                        <span>看起来不错！</span>
+                                    </div>
+                                )}
+
+                                {/* 目标词汇提示 */}
                                 <div className="target-words-hint">
                                     <Sparkles size={14} />
                                     目标词汇: {currentNode.targetWords.join(', ')}

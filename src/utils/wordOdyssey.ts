@@ -33,6 +33,8 @@ export interface StoryNode {
     narrative: string;         // 叙事文本（英文）
     choices?: StoryChoice[];   // 选项（引导模式）
     openPrompt?: string;       // 开放式问题（自由模式）
+    guidanceHint?: string;     // 回答指导（自由模式）
+    suggestedResponse?: string; // 参考回答示例（自由模式）
     targetWords: string[];     // 本节点期望使用的单词
     timestamp: number;
 }
@@ -174,7 +176,7 @@ ${contextPrompt}
 2. 自然使用目标单词（不要生硬堆砌）
 3. 制造适度悬念或冲突
 4. 语言地道优美，适合英语学习
-5. ${config.mode === GameMode.GUIDED ? '提供2-3个行动选项，每个选项鼓励使用特定单词' : '提出一个开放式问题，引导玩家使用目标单词'}
+5. ${config.mode === GameMode.GUIDED ? '提供2-3个行动选项，每个选项鼓励使用特定单词' : '提供明确的回答指导和参考示例，帮助玩家构建正确的回答'}
 
 【输出格式】严格使用以下JSON格式，不要添加任何其他内容：
 
@@ -192,11 +194,13 @@ ${config.mode === GameMode.GUIDED ? `{
       "targetWord": "期望使用的单词"
     }
   ],
-  "targetWords": ["本节点涉及的目标单词"]
+  "targetWords": ["本节点涉及的目标单词，每次1-2个即可"]
 }` : `{
   "narrative": "场景叙事文本（英文，100-150词）",
-  "openPrompt": "开放式问题（英文）",
-  "targetWords": ["本节点期望玩家使用的单词"]
+  "openPrompt": "开放式问题（英文，引导玩家思考如何回应）",
+  "guidanceHint": "回答指导（中文，详细说明玩家应该表达什么内容、采取什么行动或态度，建议使用哪1-2个目标词，50-80字）",
+  "suggestedResponse": "参考回答示例（英文，简短的1-2句话，10-20词，自然使用1-2个目标词）",
+  "targetWords": ["本节点建议使用的1-2个单词"]
 }`}
 
 现在开始创作！`;
@@ -246,6 +250,8 @@ ${config.mode === GameMode.GUIDED ? `{
             narrative: parsed.narrative,
             choices: parsed.choices,
             openPrompt: parsed.openPrompt,
+            guidanceHint: parsed.guidanceHint,
+            suggestedResponse: parsed.suggestedResponse,
             targetWords: parsed.targetWords || [],
             timestamp: Date.now()
         };
@@ -359,6 +365,92 @@ ${Array.from(usedWords).map(w => {
             feedback: '使用正确！',
             energyChange: 10
         }));
+    }
+}
+
+/**
+ * 即时检查用户输入（语法、拼写等）
+ */
+export async function checkGrammarInstantly(
+    input: string,
+    apiKey: string
+): Promise<{
+    hasErrors: boolean;
+    suggestions: Array<{
+        type: 'grammar' | 'spelling' | 'style';
+        message: string;
+        suggestion?: string;
+    }>;
+}> {
+    if (!input || input.trim().length < 3) {
+        return { hasErrors: false, suggestions: [] };
+    }
+
+    const prompt = `作为英语语法检查专家，请快速检查以下句子：
+
+【句子】
+${input}
+
+请检查：
+1. 语法错误（时态、主谓一致等）
+2. 拼写错误
+3. 表达是否地道
+
+【输出格式】JSON格式：
+
+{
+  "hasErrors": true/false,
+  "suggestions": [
+    {
+      "type": "grammar/spelling/style",
+      "message": "简短说明（20字以内）",
+      "suggestion": "修改建议（可选）"
+    }
+  ]
+}
+
+如果没有错误，返回空数组。`;
+
+    try {
+        const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: 'deepseek-chat',
+                messages: [
+                    {
+                        role: 'system',
+                        content: '你是一位专业的英语语法检查专家，能快速发现语法、拼写和表达问题。'
+                    },
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ],
+                temperature: 0.2,
+                max_tokens: 300
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('检查失败');
+        }
+
+        const data = await response.json();
+        const content = data.choices[0].message.content;
+
+        const jsonMatch = content.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+            return { hasErrors: false, suggestions: [] };
+        }
+
+        return JSON.parse(jsonMatch[0]);
+    } catch (error) {
+        console.error('即时检查失败:', error);
+        return { hasErrors: false, suggestions: [] };
     }
 }
 
