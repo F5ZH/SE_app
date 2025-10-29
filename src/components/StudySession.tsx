@@ -7,6 +7,7 @@ import { exportTodayWordsToPDF } from '../utils/pdfExport';
 import StudyModeSelector from './StudyModeSelector';
 import SpellingExercise from './SpellingExercise';
 import ChoiceExercise from './ChoiceExercise';
+import AIStoryGenerator from './AIStoryGenerator';
 import { Check, X, RotateCcw, ExternalLink, ArrowLeft, Download, Settings } from 'lucide-react';
 
 interface StudySessionProps {
@@ -377,7 +378,8 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
             {sessionType === 'new' ? '新词学习' : '复习巩固'} - {
               sessionConfig.mode === StudyMode.WORD_TO_TRANSLATION ? '看英语回忆汉语' :
                 sessionConfig.mode === StudyMode.TRANSLATION_TO_WORD ? '看汉语拼写英语' :
-                  '看英语选择汉语'
+                  sessionConfig.mode === StudyMode.WORD_TO_CHOICE ? '看英语选择汉语' :
+                    'AI故事串联学习'
             }
           </h1>
           <div className="session-progress">
@@ -535,6 +537,14 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
             />
           )}
         </>
+      )}
+
+      {/* AI 故事串联学习模式 */}
+      {sessionConfig.mode === StudyMode.AI_STORY && (
+        <AIStoryGenerator
+          words={studyQueue}
+          onClose={() => setShowModeSelector(true)}
+        />
       )}
 
       {/* 学习提示 */}

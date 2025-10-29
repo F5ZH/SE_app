@@ -39,7 +39,8 @@ export interface StudyRecord {
 export enum StudyMode {
   TRANSLATION_TO_WORD = 'translation_to_word',  // 看汉语释义拼写单词
   WORD_TO_CHOICE = 'word_to_choice',            // 看英语选择汉语释义
-  WORD_TO_TRANSLATION = 'word_to_translation'   // 看英语回忆汉语释义（原有模式）
+  WORD_TO_TRANSLATION = 'word_to_translation',  // 看英语回忆汉语释义（原有模式）
+  AI_STORY = 'ai_story'                         // AI故事生成模式
 }
 
 // 学习会话配置

@@ -1,0 +1,319 @@
+.ai-story-generator {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.generator-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.generator-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: 28px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.generator-subtitle {
+    color: #666;
+    font-size: 16px;
+}
+
+.generator-subtitle strong {
+    color: #2196F3;
+    font-size: 18px;
+}
+
+/* 配置区域 */
+.generator-config {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.config-section {
+    margin-bottom: 32px;
+}
+
+.config-section:last-child {
+    margin-bottom: 0;
+}
+
+.config-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 16px;
+}
+
+/* 风格选择 */
+.style-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 12px;
+}
+
+.style-option {
+    padding: 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.style-option:hover {
+    border-color: #2196F3;
+    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
+    transform: translateY(-2px);
+}
+
+.style-option.selected {
+    border-color: #2196F3;
+    background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+}
+
+.style-label {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.style-desc {
+    font-size: 13px;
+    color: #666;
+}
+
+/* 难度选择 */
+.difficulty-options {
+    display: flex;
+    gap: 12px;
+}
+
+.difficulty-btn {
+    flex: 1;
+    padding: 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.difficulty-btn:hover {
+    border-color: #4CAF50;
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.2);
+    transform: translateY(-2px);
+}
+
+.difficulty-btn.selected {
+    border-color: #4CAF50;
+    background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+}
+
+.difficulty-label {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #333;
+}
+
+.difficulty-desc {
+    font-size: 12px;
+    color: #666;
+}
+
+/* 复选框 */
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* 警告和错误框 */
+.warning-box,
+.error-box {
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.warning-box {
+    background: #FFF3E0;
+    border: 1px solid #FFB74D;
+}
+
+.warning-box p {
+    color: #F57C00;
+    margin: 0;
+}
+
+.error-box {
+    background: #FFEBEE;
+    border: 1px solid #EF5350;
+}
+
+.error-box p {
+    color: #C62828;
+    margin: 0;
+}
+
+/* 操作按钮 */
+.generator-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 24px;
+}
+
+/* 故事结果 */
+.story-result {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.story-header {
+    text-align: center;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.story-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 12px;
+}
+
+.story-meta {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.meta-tag {
+    padding: 4px 12px;
+    background: #E3F2FD;
+    color: #1976D2;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/* 故事内容 */
+.story-content {
+    margin-bottom: 24px;
+}
+
+.content-section {
+    margin-bottom: 24px;
+}
+
+.content-section:last-child {
+    margin-bottom: 0;
+}
+
+.content-section h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 12px;
+}
+
+.story-text {
+    padding: 16px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    line-height: 1.8;
+    font-size: 15px;
+    color: #333;
+    white-space: pre-wrap;
+}
+
+.story-text.translation {
+    background: #FFF8E1;
+}
+
+/* 单词标签 */
+.word-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.word-tag {
+    padding: 6px 12px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 16px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* 故事操作按钮 */
+.story-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* 加载动画 */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .style-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .difficulty-options {
+        flex-direction: column;
+    }
+
+    .generator-actions,
+    .story-actions {
+        flex-direction: column;
+    }
+
+    .generator-actions button,
+    .story-actions button {
+        width: 100%;
+    }
+}

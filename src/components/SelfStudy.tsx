@@ -3,7 +3,7 @@ import { StudyPlan, WordBook, Word, TodayTask } from '../types';
 import { studyRecordStorage } from '../utils/storage';
 import { generateTodayTask } from '../utils/studyPlan';
 import { exportTodayWordsToPDF } from '../utils/pdfExport';
-import { BookOpen, Download, ArrowLeft, Eye, EyeOff, Languages } from 'lucide-react';
+import { BookOpen, Download, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 
 interface SelfStudyProps {
   plan: StudyPlan;
@@ -34,7 +34,7 @@ const SelfStudy: React.FC<SelfStudyProps> = ({ plan, wordBooks, onBack }) => {
   const loadTodayTask = async () => {
     try {
       setIsLoading(true);
-      
+
       if (!wordBook) return;
 
       const task = generateTodayTask(wordBook, plan);
@@ -51,7 +51,7 @@ const SelfStudy: React.FC<SelfStudyProps> = ({ plan, wordBooks, onBack }) => {
    */
   const handleExportPDF = () => {
     if (!todayTask || !wordBook) return;
-    
+
     exportTodayWordsToPDF(todayTask, wordBook.name);
   };
 
@@ -61,7 +61,7 @@ const SelfStudy: React.FC<SelfStudyProps> = ({ plan, wordBooks, onBack }) => {
   const getWordStatus = (word: Word) => {
     const record = studyRecordStorage.getByWordId(word.id);
     if (!record) return 'new';
-    
+
     if (record.reviewCount === 0) return 'new';
     if (record.difficultCount > 0) return 'difficult';
     if (record.interval >= 30) return 'mastered';
@@ -169,7 +169,7 @@ const SelfStudy: React.FC<SelfStudyProps> = ({ plan, wordBooks, onBack }) => {
           <ArrowLeft size={20} />
           返回
         </button>
-        
+
         <div className="header-info">
           <h1 className="page-title">自主学习</h1>
           <p className="page-subtitle">
@@ -180,19 +180,19 @@ const SelfStudy: React.FC<SelfStudyProps> = ({ plan, wordBooks, onBack }) => {
         <div className="header-actions">
           <div className="display-controls">
             <div className="display-toggle">
-              <button 
+              <button
                 className={displayMode === 'both' ? 'active' : ''}
                 onClick={() => setDisplayMode('both')}
               >
                 全部
               </button>
-              <button 
+              <button
                 className={displayMode === 'chinese' ? 'active' : ''}
                 onClick={() => setDisplayMode('chinese')}
               >
                 只显示中文
               </button>
-              <button 
+              <button
                 className={displayMode === 'english' ? 'active' : ''}
                 onClick={() => setDisplayMode('english')}
               >
@@ -200,7 +200,7 @@ const SelfStudy: React.FC<SelfStudyProps> = ({ plan, wordBooks, onBack }) => {
               </button>
             </div>
           </div>
-          
+
           <button className="btn btn-primary" onClick={handleExportPDF}>
             <Download size={16} />
             导出PDF
@@ -219,7 +219,7 @@ const SelfStudy: React.FC<SelfStudyProps> = ({ plan, wordBooks, onBack }) => {
             <div className="stat-label">新词学习</div>
           </div>
         </div>
-        
+
         <div className="stat-card">
           <div className="stat-icon review">
             <BookOpen size={20} />
@@ -239,7 +239,7 @@ const SelfStudy: React.FC<SelfStudyProps> = ({ plan, wordBooks, onBack }) => {
               <BookOpen size={20} />
               新词学习 ({todayTask.newWords.length})
             </h2>
-            <button 
+            <button
               className="toggle-button"
               onClick={() => setShowNewWords(!showNewWords)}
             >
@@ -247,7 +247,7 @@ const SelfStudy: React.FC<SelfStudyProps> = ({ plan, wordBooks, onBack }) => {
               {showNewWords ? '隐藏' : '显示'}
             </button>
           </div>
-          
+
           {showNewWords && (
             <div className="word-list">
               {todayTask.newWords.map((word, index) => (
@@ -272,7 +272,7 @@ const SelfStudy: React.FC<SelfStudyProps> = ({ plan, wordBooks, onBack }) => {
               <BookOpen size={20} />
               复习巩固 ({todayTask.reviewWords.length})
             </h2>
-            <button 
+            <button
               className="toggle-button"
               onClick={() => setShowReviewWords(!showReviewWords)}
             >
@@ -280,7 +280,7 @@ const SelfStudy: React.FC<SelfStudyProps> = ({ plan, wordBooks, onBack }) => {
               {showReviewWords ? '隐藏' : '显示'}
             </button>
           </div>
-          
+
           {showReviewWords && (
             <div className="word-list">
               {todayTask.reviewWords.map((word, index) => (
