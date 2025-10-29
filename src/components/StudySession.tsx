@@ -54,27 +54,21 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
 
       if (!wordBook) return;
 
+      // 重置完成状态，允许重复学习
+      setCompletedWords(new Set());
+      setCompletedCount(0);
+      setShowAnswer(false);
+
       // 保存所有单词用于生成选择题选项
       setAllWords(wordBook.words);
 
       // 生成今日任务
       const todayTask = generateTodayTask(wordBook, plan);
 
-      // 获取今天的开始时间戳
-      const todayStart = new Date().setHours(0, 0, 0, 0);
-
-      // 过滤掉今天已经完成的单词（检查 lastReviewed 是否在今天，且 reviewCount > 0）
-      const filterCompletedToday = (words: Word[]) => {
-        return words.filter(word => {
-          const record = studyRecordStorage.getByWordId(word.id);
-          // 如果没有记录，或者记录不是今天创建的，或者 reviewCount 为 0，则保留
-          return !record || record.lastReviewed < todayStart || record.reviewCount === 0;
-        });
-      };
-
+      // 支持重复学习：直接使用今日任务的所有单词，不过滤已完成的
       // 优先学习新词，然后复习
-      const newWords = filterCompletedToday(todayTask.newWords);
-      const reviewWords = filterCompletedToday(todayTask.reviewWords);
+      const newWords = todayTask.newWords;
+      const reviewWords = todayTask.reviewWords;
 
       if (newWords.length > 0) {
         setStudyQueue(newWords);
@@ -183,8 +177,8 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
       const nextIncompleteWord = studyQueue.find(word => !newCompletedWords.has(word.id));
 
       if (!nextIncompleteWord) {
-        // 所有单词都已完成
-        onComplete();
+        // 所有单词都已完成，不需要切换单词
+        // 完成界面会通过 completedCount === totalWords 的条件自动显示
         return;
       }
 
@@ -315,7 +309,10 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
   }
 
   // 没有学习任务
-  if (studyQueue.length === 0) {
+  // 显示完成界面：所有单词已完成，或者没有单词可学
+  const isComplete = (totalWords > 0 && completedCount === totalWords) || (studyQueue.length === 0 && totalWords === 0);
+  
+  if (isComplete && !showModeSelector) {
     return (
       <div className="study-session">
         <div className="session-complete">
