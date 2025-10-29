@@ -19,13 +19,17 @@ const WordBookImporter: React.FC<WordBookImporterProps> = ({ onImport, onClose }
     message: string;
     wordBook?: WordBook;
   } | null>(null);
-  
+
   // 手动输入状态
   const [manualData, setManualData] = useState({
     name: '',
     description: '',
     words: ''
   });
+
+  // 文件导入自定义名称
+  const [customName, setCustomName] = useState('');
+  const [customDescription, setCustomDescription] = useState('');
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -43,9 +47,16 @@ const WordBookImporter: React.FC<WordBookImporterProps> = ({ onImport, onClose }
     const lines = text.trim().split('\n').filter(line => line.trim());
     const words: Word[] = [];
 
-    for (const line of lines) {
-      const parts = line.split('\t').map(part => part.trim());
-      
+    // 跳过第一行（如果是标题行）
+    const startIndex = lines[0]?.includes('单词') || lines[0]?.includes('word') ? 1 : 0;
+
+    for (let i = startIndex; i < lines.length; i++) {
+      const line = lines[i];
+
+      // 自动检测分隔符：优先使用逗号，如果没有逗号则使用Tab
+      const delimiter = line.includes(',') ? ',' : '\t';
+      const parts = line.split(delimiter).map(part => part.trim());
+
       if (parts.length >= 2) {
         const word: Word = {
           id: generateId(),
@@ -81,10 +92,12 @@ const WordBookImporter: React.FC<WordBookImporterProps> = ({ onImport, onClose }
         throw new Error('文件中没有找到有效的单词数据');
       }
 
+      // 使用自定义名称，如果没有则使用文件名
+      const defaultName = file.name.replace(/\.[^/.]+$/, '');
       const wordBook: WordBook = {
         id: generateId(),
-        name: file.name.replace(/\.[^/.]+$/, ''), // 移除文件扩展名
-        description: `从文件 ${file.name} 导入的词书`,
+        name: customName.trim() || defaultName,
+        description: customDescription.trim() || `从文件 ${file.name} 导入的词书`,
         words,
         totalWords: words.length,
         isPreset: false,
@@ -171,6 +184,8 @@ const WordBookImporter: React.FC<WordBookImporterProps> = ({ onImport, onClose }
   const handleReset = () => {
     setImportResult(null);
     setManualData({ name: '', description: '', words: '' });
+    setCustomName('');
+    setCustomDescription('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -211,6 +226,32 @@ const WordBookImporter: React.FC<WordBookImporterProps> = ({ onImport, onClose }
           {/* 文件导入 */}
           {importMethod === 'file' && (
             <div className="file-import">
+              {/* 自定义词书信息 */}
+              <div className="custom-info-section">
+                <div className="form-group">
+                  <label htmlFor="custom-name">词书名称（可选）</label>
+                  <input
+                    id="custom-name"
+                    type="text"
+                    className="form-input"
+                    placeholder="留空则使用文件名"
+                    value={customName}
+                    onChange={(e) => setCustomName(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="custom-desc">词书描述（可选）</label>
+                  <input
+                    id="custom-desc"
+                    type="text"
+                    className="form-input"
+                    placeholder="留空则自动生成"
+                    value={customDescription}
+                    onChange={(e) => setCustomDescription(e.target.value)}
+                  />
+                </div>
+              </div>
+
               <div className="file-upload-area">
                 <input
                   ref={fileInputRef}
@@ -226,7 +267,7 @@ const WordBookImporter: React.FC<WordBookImporterProps> = ({ onImport, onClose }
                   <small>支持 .txt 和 .csv 格式</small>
                 </label>
               </div>
-              
+
               <div className="file-format-help">
                 <h4>文件格式说明：</h4>
                 <p>每行一个单词，使用制表符分隔各字段：</p>

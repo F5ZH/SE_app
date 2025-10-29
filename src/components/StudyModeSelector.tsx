@@ -1,6 +1,6 @@
 import React from 'react';
 import { StudyMode, StudySessionConfig } from '../types';
-import { BookOpen, Edit3, CheckSquare, Settings } from 'lucide-react';
+import { BookOpen, Edit3, CheckSquare, Settings, Wand2, Sparkles } from 'lucide-react';
 
 interface StudyModeSelectorProps {
   config: StudySessionConfig;
@@ -38,6 +38,20 @@ const StudyModeSelector: React.FC<StudyModeSelectorProps> = ({
       description: '显示英语单词，四选一选择汉语释义',
       icon: CheckSquare,
       color: '#f59e0b'
+    },
+    {
+      mode: StudyMode.AI_STORY,
+      title: 'AI故事串联学习',
+      description: '用AI将单词串联成故事，情境记忆',
+      icon: Wand2,
+      color: '#8b5cf6'
+    },
+    {
+      mode: StudyMode.WORD_ODYSSEY,
+      title: 'Word Odyssey 冒险',
+      description: '交互式语言冒险RPG，在剧情中学习',
+      icon: Sparkles,
+      color: '#ec4899'
     }
   ];
 
@@ -94,7 +108,7 @@ const StudyModeSelector: React.FC<StudyModeSelectorProps> = ({
             />
             <span className="setting-label">显示音标</span>
           </label>
-          
+
           <label className="setting-item">
             <input
               type="checkbox"
@@ -103,7 +117,7 @@ const StudyModeSelector: React.FC<StudyModeSelectorProps> = ({
             />
             <span className="setting-label">显示例句</span>
           </label>
-          
+
           <label className="setting-item">
             <input
               type="checkbox"
