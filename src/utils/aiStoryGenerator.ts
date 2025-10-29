@@ -256,7 +256,7 @@ function parseStoryContent(content: string): {
         };
     } catch (error) {
         console.error('JSON解析失败，尝试备用解析:', error);
-        
+
         // 如果JSON解析失败，尝试旧的文本解析方式作为备用
         const lines = content.split('\n');
         let title = '学习故事';
