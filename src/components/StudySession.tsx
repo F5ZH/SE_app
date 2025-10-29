@@ -9,7 +9,7 @@ import SpellingExercise from './SpellingExercise';
 import ChoiceExercise from './ChoiceExercise';
 import AIStoryGenerator from './AIStoryGenerator';
 import WordOdyssey from './WordOdyssey';
-import { Check, X, RotateCcw, ExternalLink, ArrowLeft, Download, Settings } from 'lucide-react';
+import { Check, X, RotateCcw, ExternalLink, ArrowLeft, Download, Settings, BookOpen, Search } from 'lucide-react';
 
 interface StudySessionProps {
   plan: StudyPlan;
@@ -342,6 +342,9 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
     );
   }
 
+  // 判断是否为不需要进度条的模式
+  const isNoProgressMode = sessionConfig.mode === StudyMode.AI_STORY || sessionConfig.mode === StudyMode.WORD_ODYSSEY;
+
   return (
     <div className="study-session">
       {/* 学习进度 */}
@@ -351,41 +354,51 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
           返回
         </button>
 
-        <div className="session-info">
-          <h1 className="session-title">
-            {sessionType === 'new' ? '新词学习' : '复习巩固'} - {
-              sessionConfig.mode === StudyMode.WORD_TO_TRANSLATION ? '看英语回忆汉语' :
-                sessionConfig.mode === StudyMode.TRANSLATION_TO_WORD ? '看汉语拼写英语' :
-                  sessionConfig.mode === StudyMode.WORD_TO_CHOICE ? '看英语选择汉语' :
-                    sessionConfig.mode === StudyMode.AI_STORY ? 'AI故事串联学习' :
-                      'Word Odyssey 冒险'
-            }
-          </h1>
-          <div className="session-progress">
-            <span className="progress-text">
-              {completedCount} / {totalWords}
-            </span>
-            <div className="progress-bar">
-              <div
-                className="progress-fill"
-                style={{
-                  width: `${totalWords > 0 ? (completedCount / totalWords) * 100 : 0}%`
-                }}
-              ></div>
+        {!isNoProgressMode && (
+          <>
+            <div className="session-info">
+              <h1 className="session-title">
+                {sessionType === 'new' ? '新词学习' : '复习巩固'} - {
+                  sessionConfig.mode === StudyMode.WORD_TO_TRANSLATION ? '看英语回忆汉语' :
+                    sessionConfig.mode === StudyMode.TRANSLATION_TO_WORD ? '看汉语拼写英语' :
+                      '看英语选择汉语'
+                }
+              </h1>
+              <div className="session-progress">
+                <span className="progress-text">
+                  {completedCount} / {totalWords}
+                </span>
+                <div className="progress-bar">
+                  <div
+                    className="progress-fill"
+                    style={{
+                      width: `${totalWords > 0 ? (completedCount / totalWords) * 100 : 0}%`
+                    }}
+                  ></div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        <div className="session-actions">
-          <button className="btn btn-danger" onClick={handleResetProgress} title="重置此词书的学习进度">
-            <RotateCcw size={16} />
-            重置进度
-          </button>
-          <button className="btn btn-secondary" onClick={() => setShowModeSelector(true)}>
-            <Settings size={16} />
-            设置
-          </button>
-        </div>
+            <div className="session-actions">
+              <button className="btn btn-danger" onClick={handleResetProgress} title="重置此词书的学习进度">
+                <RotateCcw size={16} />
+                重置进度
+              </button>
+              <button className="btn btn-secondary" onClick={() => setShowModeSelector(true)}>
+                <Settings size={16} />
+                设置
+              </button>
+            </div>
+          </>
+        )}
+        
+        {isNoProgressMode && (
+          <div className="session-info">
+            <h1 className="session-title">
+              {sessionConfig.mode === StudyMode.AI_STORY ? 'AI故事串联学习' : 'Word Odyssey 冒险'}
+            </h1>
+          </div>
+        )}
       </div>
 
       {/* 根据学习模式渲染不同的练习组件 */}
@@ -400,11 +413,12 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
 
                 <div className="word-actions">
                   <button
-                    className="btn btn-secondary btn-sm"
+                    className="btn btn-primary dictionary-btn"
                     onClick={handleLookupWord}
-                    title="查词"
+                    title="查询词典"
                   >
-                    <ExternalLink size={16} />
+                    <BookOpen size={18} />
+                    <span>查词</span>
                   </button>
                 </div>
               </div>

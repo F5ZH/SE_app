@@ -63,7 +63,7 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
     const [summary, setSummary] = useState<any>(null);
 
     // 自由模式相关状态
-    const [showGuidance, setShowGuidance] = useState(true); // 是否显示引导
+    const [showGuidance, setShowGuidance] = useState(false); // 是否显示引导（默认隐藏，鼓励自主思考）
     const [instantFeedback, setInstantFeedback] = useState<any>(null); // 即时反馈
     const [isChecking, setIsChecking] = useState(false); // 是否正在检查
 
@@ -122,6 +122,8 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
             setSession(newSession);
             setCurrentNode(firstNode);
             setGameState('playing');
+            // 开始游戏时，指导默认隐藏，鼓励用户自主思考
+            setShowGuidance(false);
         } catch (err: any) {
             setError(err.message || '开始冒险失败，请稍后重试');
         } finally {
@@ -320,6 +322,8 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
             updatedSession.storyNodes.push(nextNode);
             setSession(updatedSession);
             setCurrentNode(nextNode);
+            // 新节点生成时，重置指导为隐藏状态，鼓励用户自主思考
+            setShowGuidance(false);
         } catch (err: any) {
             setError(err.message || '生成剧情失败');
         } finally {
