@@ -4,6 +4,8 @@ import { studyRecordStorage } from '../utils/storage';
 import { updateStudyRecord, createStudyRecord } from '../utils/ebbinghaus';
 import { generateTodayTask } from '../utils/studyPlan';
 import { speakWord } from '../utils/speech';
+import { recordInteraction, addWordsLearned, checkAchievements } from '../utils/wordMate';
+import { InteractionType } from '../types';
 import StudyModeSelector from './StudyModeSelector';
 import SpellingExercise from './SpellingExercise';
 import ChoiceExercise from './ChoiceExercise';
@@ -98,7 +100,14 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
    */
   const loadNextWord = () => {
     if (studyQueue.length === 0) {
-      // 学习完成
+      // 学习完成 - 奖励好感度和经验值
+      const wordsLearned = totalWords;
+      addWordsLearned(wordsLearned);
+      recordInteraction(InteractionType.STUDY_COMPLETE, `完成${wordsLearned}个单词`);
+      
+      // 检查新成就
+      checkAchievements();
+      
       onComplete();
       return;
     }

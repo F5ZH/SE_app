@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { StudyPlan, WordBook, TodayTask } from '../types';
 import { generateTodayTask, getStudyStats, clearCachedTodayWords } from '../utils/studyPlan';
 import { studyRecordStorage, checkInStorage } from '../utils/storage';
-import { Play, Calendar, BookOpen, TrendingUp, Clock, Target, Eye, Check } from 'lucide-react';
+import { getMateState } from '../utils/wordMate';
+import { Play, Calendar, BookOpen, TrendingUp, Clock, Target, Eye, Check, Heart, Star } from 'lucide-react';
 import Modal from './Modal';
 import SelfStudy from './SelfStudy';
 
@@ -11,6 +12,7 @@ interface DashboardProps {
   wordBooks: WordBook[];
   onStartStudy: () => void;
   onCreatePlan: () => void;
+  onOpenWordMate?: () => void;
 }
 
 /**
@@ -21,12 +23,14 @@ const Dashboard: React.FC<DashboardProps> = ({
   currentPlan,
   wordBooks,
   onStartStudy,
-  onCreatePlan
+  onCreatePlan,
+  onOpenWordMate
 }) => {
   const [todayTask, setTodayTask] = useState<TodayTask | null>(null);
   const [studyStats, setStudyStats] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasCheckedIn, setHasCheckedIn] = useState(false);
+  const [mateState] = useState(getMateState());
 
   // 模态窗状态
   const [showNewWordsModal, setShowNewWordsModal] = useState(false);
@@ -160,6 +164,29 @@ const Dashboard: React.FC<DashboardProps> = ({
         <p className="welcome-subtitle">
           词书：{wordBook?.name} | 计划：{currentPlan.dailyNewWords}词/天
         </p>
+      </div>
+
+      {/* WordMate 卡片 */}
+      <div className="card wordmate-card" onClick={onOpenWordMate}>
+        <div className="wordmate-content">
+          <div className="wordmate-avatar">
+            <span className="avatar-emoji">👧</span>
+          </div>
+          <div className="wordmate-info">
+            <h3 className="wordmate-name">{mateState.name}</h3>
+            <div className="wordmate-stats">
+              <div className="mini-stat">
+                <Star size={14} fill="#ffd700" color="#ffd700" />
+                <span>Lv.{mateState.level}</span>
+              </div>
+              <div className="mini-stat">
+                <Heart size={14} fill="#ff6b9d" color="#ff6b9d" />
+                <span>{mateState.affection}</span>
+              </div>
+            </div>
+            <p className="wordmate-hint">点击与我互动 →</p>
+          </div>
+        </div>
       </div>
 
       {/* 今日任务卡片 */}

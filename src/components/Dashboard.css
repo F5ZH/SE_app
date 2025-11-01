@@ -24,6 +24,83 @@
   margin: 0;
 }
 
+/* WordMate 卡片 */
+.wordmate-card {
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  border: none;
+  box-shadow: 0 8px 32px rgba(252, 182, 159, 0.3);
+  transition: all 0.3s ease;
+}
+
+.wordmate-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(252, 182, 159, 0.5);
+}
+
+.wordmate-content {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  position: relative;
+}
+
+.wordmate-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.wordmate-avatar:hover {
+  transform: scale(1.05);
+}
+
+.wordmate-avatar .avatar-emoji {
+  font-size: 3rem;
+}
+
+.wordmate-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.wordmate-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+.wordmate-stats {
+  display: flex;
+  gap: 1rem;
+}
+
+.mini-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-weight: 600;
+  color: #555;
+}
+
+.wordmate-hint {
+  font-size: 0.875rem;
+  color: #666;
+  margin: 0;
+  font-weight: 500;
+}
+
 /* 今日任务卡片 */
 .today-task-card {
   margin-bottom: 2rem;

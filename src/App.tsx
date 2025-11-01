@@ -9,6 +9,7 @@ import StudyPlanCreator from './components/StudyPlanCreator';
 import StudySession from './components/StudySession';
 import Dashboard from './components/Dashboard';
 import DevTools from './components/DevTools';
+import WordMateHome from './components/WordMateHome';
 import './App.css';
 import './components/Modal.css';
 
@@ -18,10 +19,11 @@ import './components/Modal.css';
  */
 function App() {
   // 应用状态
-  const [currentView, setCurrentView] = useState<'dashboard' | 'wordbooks' | 'study' | 'plan'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'wordbooks' | 'study' | 'plan' | 'wordmate'>('dashboard');
   const [wordBooks, setWordBooks] = useState<WordBook[]>([]);
   const [currentPlan, setCurrentPlan] = useState<StudyPlan | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [wordMateActivity, setWordMateActivity] = useState<'story' | 'adventure' | 'basic' | null>(null);
 
   // 初始化应用数据
   useEffect(() => {
@@ -145,6 +147,22 @@ function App() {
             wordBooks={wordBooks}
             onStartStudy={handleStartStudy}
             onCreatePlan={handlePlanNavigation}
+            onOpenWordMate={() => setCurrentView('wordmate')}
+          />
+        )}
+
+        {currentView === 'wordmate' && (
+          <WordMateHome
+            onStartActivity={(activityType) => {
+              setWordMateActivity(activityType);
+              if (activityType === 'basic') {
+                handleStartStudy();
+              } else {
+                // TODO: 启动 AI 故事或 Word Odyssey
+                setCurrentView('study');
+              }
+            }}
+            onBack={() => setCurrentView('dashboard')}
           />
         )}
 

@@ -1,0 +1,808 @@
+/* WordMate Home 养成系统界面样式 */
+
+.wordmate-home {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 2rem;
+  position: relative;
+}
+
+.back-button {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.back-button:hover {
+  background: white;
+  transform: translateX(-4px);
+}
+
+.mate-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: 2rem;
+  padding-top: 2rem;
+}
+
+/* ========== 左侧虚拟形象区域 ========== */
+
+.mate-character-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.character-card {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.character-avatar {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: visible;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.character-avatar:hover {
+  transform: scale(1.02);
+}
+
+.character-avatar:active {
+  transform: scale(0.98);
+}
+
+.avatar-placeholder {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-emoji {
+  font-size: 8rem;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+}
+
+.mood-indicator {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  font-size: 2rem;
+  background: white;
+  border-radius: 50%;
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* 气泡对话框 */
+.speech-bubble {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100%);
+  background: white;
+  padding: 1rem 1.5rem;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  max-width: 280px;
+  opacity: 0;
+  animation: bubbleAppear 0.5s ease forwards;
+  z-index: 10;
+}
+
+.bubble-text {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #333;
+  text-align: center;
+}
+
+.bubble-tail {
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 10px solid white;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+@keyframes bubbleAppear {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-100%) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-100%) scale(1);
+  }
+}
+
+/* 名称编辑 */
+.character-name {
+  width: 100%;
+  text-align: center;
+}
+
+.character-name h2 {
+  margin: 0;
+  font-size: 1.75rem;
+  color: #333;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color 0.2s;
+}
+
+.character-name h2:hover {
+  color: #667eea;
+}
+
+.edit-icon {
+  font-size: 1rem;
+  opacity: 0.5;
+}
+
+.name-edit {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.name-edit input {
+  padding: 0.5rem 1rem;
+  border: 2px solid #667eea;
+  border-radius: 8px;
+  font-size: 1.25rem;
+  text-align: center;
+  width: 150px;
+}
+
+.name-edit button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.name-edit button:first-of-type {
+  background: #4caf50;
+  color: white;
+}
+
+.name-edit button:last-of-type {
+  background: #f44336;
+  color: white;
+}
+
+/* 等级信息 */
+.level-info {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.level-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  border-radius: 20px;
+  font-weight: 600;
+  color: #333;
+  width: fit-content;
+  margin: 0 auto;
+}
+
+.exp-bar {
+  position: relative;
+  height: 24px;
+  background: #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.exp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px;
+  transition: width 0.5s ease;
+}
+
+.exp-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #333;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+/* 好感度 */
+.affection-info {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.affection-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+  font-weight: 600;
+  color: #ff6b9d;
+}
+
+.affection-title {
+  margin-left: auto;
+  font-size: 0.875rem;
+  color: #666;
+  background: #ffe0e9;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+}
+
+.affection-bar {
+  position: relative;
+  height: 24px;
+  background: #ffe0e9;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.affection-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff6b9d 0%, #ff8fab 100%);
+  border-radius: 12px;
+  transition: width 0.5s ease;
+}
+
+.affection-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #c02358;
+}
+
+/* 统计网格 */
+.stats-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stat-item svg {
+  color: #667eea;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: #666;
+}
+
+/* ========== 右侧互动区域 ========== */
+
+.interaction-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* 对话框 */
+.dialogue-box {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  animation: fadeInUp 0.5s ease;
+}
+
+.dialogue-icon {
+  flex-shrink: 0;
+  color: #667eea;
+}
+
+.dialogue-text {
+  flex: 1;
+  margin: 0;
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: #333;
+}
+
+/* 每日签到 */
+.checkin-banner {
+  margin-bottom: 1rem;
+  animation: slideIn 0.5s ease;
+}
+
+.checkin-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+
+.checkin-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(255, 215, 0, 0.5);
+}
+
+.checkin-btn:active {
+  transform: translateY(-2px);
+}
+
+.checkin-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.checkin-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.checkin-desc {
+  font-size: 0.875rem;
+  color: #666;
+  font-weight: 600;
+}
+
+/* 奖励提示 */
+.reward-toast {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+  color: white;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+  animation: slideInRight 0.5s ease, fadeOut 0.5s ease 2.5s forwards;
+  z-index: 1000;
+}
+
+/* 活动区域 */
+.activities {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.activities h3 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.activity-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.activity-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 1.5rem;
+  border: 2px solid transparent;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  gap: 0.5rem;
+}
+
+.activity-btn svg {
+  margin-bottom: 0.5rem;
+}
+
+.story-btn {
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+  color: #333;
+}
+
+.story-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(168, 237, 234, 0.5);
+  border-color: #a8edea;
+}
+
+.chat-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.chat-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.5);
+  border-color: #667eea;
+}
+
+.adventure-btn {
+  background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  color: #333;
+}
+
+.adventure-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(252, 182, 159, 0.5);
+  border-color: #fcb69f;
+}
+
+.basic-btn {
+  background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+  color: #333;
+}
+
+.basic-btn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(142, 197, 252, 0.5);
+  border-color: #8ec5fc;
+}
+
+.btn-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.btn-desc {
+  font-size: 0.875rem;
+  opacity: 0.8;
+}
+
+.btn-reward {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+/* 成就按钮 */
+.achievements-btn {
+  padding: 1rem 1.5rem;
+  background: white;
+  border: 2px solid #ffd700;
+  border-radius: 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.achievements-btn:hover {
+  background: #fffbf0;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 215, 0, 0.3);
+}
+
+/* ========== 模态框 ========== */
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  animation: scaleIn 0.3s ease;
+}
+
+.modal-content h2 {
+  margin: 0 0 1.5rem 0;
+  color: #333;
+}
+
+.close-btn {
+  width: 100%;
+  padding: 1rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1.5rem;
+  transition: all 0.2s;
+}
+
+.close-btn:hover {
+  background: #764ba2;
+}
+
+/* 成就列表 */
+.achievements-modal {
+  max-width: 800px;
+}
+
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.achievement-card {
+  padding: 1rem;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.achievement-card.unlocked {
+  background: linear-gradient(135deg, #fff9e6 0%, #ffe6cc 100%);
+  border: 2px solid #ffd700;
+}
+
+.achievement-card.locked {
+  background: #f5f5f5;
+  border: 2px solid #e0e0e0;
+  opacity: 0.6;
+}
+
+.achievement-icon {
+  font-size: 2.5rem;
+}
+
+.achievement-info h4 {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.achievement-info p {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.unlock-date {
+  font-size: 0.7rem;
+  color: #999;
+}
+
+/* 升级模态框 */
+.levelup-modal {
+  text-align: center;
+}
+
+.levelup-text {
+  font-size: 1.25rem;
+  margin: 1rem 0;
+}
+
+.levelup-text strong {
+  color: #667eea;
+  font-size: 1.5rem;
+}
+
+/* 成就解锁模态框 */
+.achievement-unlock-modal {
+  text-align: center;
+}
+
+.new-achievement {
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #fff9e6 0%, #ffe6cc 100%);
+  border-radius: 16px;
+  margin: 1rem 0;
+}
+
+.achievement-icon-large {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.new-achievement h3 {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+}
+
+.new-achievement p {
+  margin: 0 0 1rem 0;
+  color: #666;
+}
+
+.rewards {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  font-weight: 600;
+}
+
+/* 动画 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* 响应式 */
+@media (max-width: 1024px) {
+  .mate-container {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .character-card {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .wordmate-home {
+    padding: 1rem;
+  }
+
+  .achievements-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+  }
+}
