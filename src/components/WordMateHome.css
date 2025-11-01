@@ -312,36 +312,52 @@
     color: #c02358;
 }
 
-/* 统计网格 */
-.stats-grid {
+/* Combo 连击显示 */
+.combo-display {
     width: 100%;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid #e0e0e0;
+    padding: 1rem;
+    background: linear-gradient(135deg, #fff5e6 0%, #ffe8cc 100%);
+    border-radius: 12px;
+    border: 2px solid #ffa500;
+    margin-top: 1rem;
+    cursor: help;
+    transition: all 0.3s ease;
 }
 
-.stat-item {
+.combo-display:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 165, 0, 0.3);
+}
+
+.combo-header {
     display: flex;
-    flex-direction: column;
     align-items: center;
     gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #ff8c00;
 }
 
-.stat-item svg {
-    color: #667eea;
+.combo-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-.stat-value {
+.combo-count {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #333;
+    color: #ff8c00;
 }
 
-.stat-label {
-    font-size: 0.75rem;
-    color: #666;
+.combo-bonus {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ff6b00;
+    background: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
 }
 
 /* ========== 右侧互动区域 ========== */
@@ -613,18 +629,143 @@
     background: #764ba2;
 }
 
-/* 成就列表 */
+/* 成就列表 - 多级制 */
 .achievements-modal {
-    max-width: 800px;
+    max-width: 900px;
 }
 
 .achievements-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
     margin-bottom: 1rem;
 }
 
+.achievement-card-multi {
+    padding: 1.5rem;
+    border-radius: 16px;
+    background: white;
+    border: 2px solid #e0e0e0;
+    transition: all 0.3s;
+}
+
+.achievement-card-multi:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.achievement-header {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    align-items: flex-start;
+}
+
+.achievement-icon {
+    font-size: 2.5rem;
+    flex-shrink: 0;
+}
+
+.achievement-title h4 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1rem;
+    color: #333;
+}
+
+.achievement-title p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.achievement-tiers {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.tier-badge {
+    flex: 1;
+    padding: 0.75rem 0.5rem;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    position: relative;
+    transition: all 0.2s;
+    cursor: help;
+}
+
+.tier-badge.locked {
+    background: #f0f0f0;
+    color: #999;
+    border: 2px solid #ddd;
+}
+
+.tier-badge.unlocked {
+    color: white;
+    transform: scale(1.05);
+}
+
+.tier-badge.tier-bronze.unlocked {
+    background: linear-gradient(135deg, #cd7f32 0%, #b87333 100%);
+    border: 2px solid #8b4513;
+    box-shadow: 0 2px 8px rgba(205, 127, 50, 0.4);
+}
+
+.tier-badge.tier-silver.unlocked {
+    background: linear-gradient(135deg, #c0c0c0 0%, #a8a8a8 100%);
+    border: 2px solid #808080;
+    box-shadow: 0 2px 8px rgba(192, 192, 192, 0.4);
+}
+
+.tier-badge.tier-gold.unlocked {
+    background: linear-gradient(135deg, #ffd700 0%, #ffb700 100%);
+    border: 2px solid #b8860b;
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+}
+
+.tier-badge.tier-diamond.unlocked {
+    background: linear-gradient(135deg, #b9f2ff 0%, #00d4ff 100%);
+    border: 2px solid #0099cc;
+    box-shadow: 0 2px 8px rgba(0, 212, 255, 0.4);
+}
+
+.tier-name {
+    font-weight: 700;
+}
+
+.tier-check {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background: #4caf50;
+    color: white;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    border: 2px solid white;
+}
+
+.tier-target {
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+}
+
+.current-tier-info {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #667eea;
+    font-weight: 600;
+    padding-top: 0.5rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+/* 旧成就卡片样式（保留用于兼容） */
 .achievement-card {
     padding: 1rem;
     border-radius: 12px;
@@ -645,10 +786,6 @@
     background: #f5f5f5;
     border: 2px solid #e0e0e0;
     opacity: 0.6;
-}
-
-.achievement-icon {
-    font-size: 2.5rem;
 }
 
 .achievement-info h4 {
@@ -698,6 +835,43 @@
 .achievement-icon-large {
     font-size: 4rem;
     margin-bottom: 1rem;
+}
+
+.tier-badge-large {
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    border-radius: 20px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0.5rem 0;
+    color: white;
+}
+
+.tier-badge-large.tier-bronze {
+    background: linear-gradient(135deg, #cd7f32 0%, #b87333 100%);
+    box-shadow: 0 4px 12px rgba(205, 127, 50, 0.4);
+}
+
+.tier-badge-large.tier-silver {
+    background: linear-gradient(135deg, #c0c0c0 0%, #a8a8a8 100%);
+    box-shadow: 0 4px 12px rgba(192, 192, 192, 0.4);
+}
+
+.tier-badge-large.tier-gold {
+    background: linear-gradient(135deg, #ffd700 0%, #ffb700 100%);
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+}
+
+.tier-badge-large.tier-diamond {
+    background: linear-gradient(135deg, #b9f2ff 0%, #00d4ff 100%);
+    box-shadow: 0 4px 12px rgba(0, 212, 255, 0.4);
+}
+
+.tier-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #667eea;
+    margin: 0.5rem 0 1rem 0;
 }
 
 .new-achievement h3 {
@@ -799,6 +973,172 @@
     }
 }
 
+.combo-bonus {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #ffa500;
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.25rem 0.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(255, 165, 0, 0.4);
+}
+
+/* ========== 里程碑进度样式 ========== */
+.milestone-progress {
+    width: 100%;
+    background: linear-gradient(135deg, #fff9e6 0%, #ffedcc 100%);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+    border: 2px solid #ffd700;
+    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.2);
+    cursor: help;
+    transition: all 0.3s ease;
+}
+
+.milestone-progress:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(255, 215, 0, 0.3);
+}
+
+.milestone-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #b8860b;
+}
+
+.milestone-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.milestone-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #8b6914;
+}
+
+.milestone-reward {
+    font-size: 0.85rem;
+    color: #d4af37;
+    font-weight: 600;
+}
+
+.milestone-bar {
+    position: relative;
+    width: 100%;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #ffd700;
+}
+
+.milestone-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #ffd700 0%, #ffed4e 100%);
+    transition: width 0.5s ease;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.milestone-text {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #333;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+/* ========== 里程碑模态框样式 ========== */
+.milestone-modal {
+    max-width: 450px;
+}
+
+.milestone-celebration {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1rem 0;
+}
+
+.milestone-icon-large {
+    animation: celebrationBounce 0.8s ease-out;
+}
+
+@keyframes celebrationBounce {
+    0% {
+        transform: scale(0) rotate(0deg);
+    }
+
+    50% {
+        transform: scale(1.2) rotate(180deg);
+    }
+
+    100% {
+        transform: scale(1) rotate(360deg);
+    }
+}
+
+.milestone-modal h3 {
+    font-size: 1.8rem;
+    color: #ffd700;
+    margin: 0;
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.milestone-desc {
+    text-align: center;
+    color: #666;
+    font-size: 1rem;
+    margin: 0;
+}
+
+.milestone-rewards {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1rem;
+}
+
+.milestone-rewards .reward-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, #fff9e6 0%, #ffedcc 100%);
+    border-radius: 12px;
+    border: 2px solid #ffd700;
+}
+
+.milestone-rewards .reward-label {
+    font-size: 0.85rem;
+    color: #b8860b;
+    font-weight: 600;
+}
+
+.milestone-rewards .reward-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #d4af37;
+}
+
 @media (max-width: 768px) {
     .wordmate-home {
         padding: 1rem;
@@ -808,8 +1148,8 @@
         grid-template-columns: 1fr;
     }
 
-    .stats-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.5rem;
+    .milestone-rewards {
+        flex-direction: column;
+        gap: 1rem;
     }
 }

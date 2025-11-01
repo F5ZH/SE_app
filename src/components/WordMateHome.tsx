@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Star, Sparkles, Trophy, BookOpen, Map, Gift, Calendar, MessageCircle } from 'lucide-react';
+import { Heart, Star, Sparkles, Map, Gift, Calendar, MessageCircle, Zap, Award, BookOpen } from 'lucide-react';
 import { WordMateState, InteractionType, WordMateMood, Achievement } from '../types';
 import {
     getMateState,
@@ -9,7 +9,10 @@ import {
     recordInteraction,
     getAchievements,
     checkAchievements,
-    checkDailyCheckin
+    checkDailyCheckin,
+    getCurrentCombo,
+    getDailyCheckinReward,
+    getNextMilestone
 } from '../utils/wordMate';
 import { getDialogue, getGreetingByTime } from '../data/dialogues';
 import { UserContext } from '../utils/chat';
@@ -39,9 +42,14 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
     const [canCheckin, setCanCheckin] = useState(false);
     const [showCheckinReward, setShowCheckinReward] = useState(false);
     const [showChatBox, setShowChatBox] = useState(false);
+    const [comboCount, setComboCount] = useState(0);
+    const [showMilestoneModal, setShowMilestoneModal] = useState(false);
+    const [currentMilestone, setCurrentMilestone] = useState<any>(null);
 
     const levelProgress = getLevelProgress();
     const affectionTitle = getAffectionTitle(mate.affection);
+    const nextMilestone = getNextMilestone();
+    const dailyReward = getDailyCheckinReward();
 
     /**
      * 收集用户上下文数据
@@ -103,6 +111,10 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
         const isNewDay = checkDailyCheckin();
         setCanCheckin(isNewDay);
 
+        // 加载 combo 计数
+        const currentCombo = getCurrentCombo();
+        setComboCount(currentCombo);
+
         // 如果是新的一天，不自动签到，让用户点击
         if (!isNewDay) {
             // 记录问候互动
@@ -122,11 +134,18 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
 
     // 处理互动
     const handleInteraction = (type: InteractionType) => {
-        const { state, leveledUp } = recordInteraction(type);
+        const { state, leveledUp, comboCount: newCombo, milestone } = recordInteraction(type);
         setMate(state);
+        setComboCount(newCombo);
 
         if (leveledUp) {
             setShowLevelUpModal(true);
+        }
+
+        // 显示里程碑奖励
+        if (milestone) {
+            setCurrentMilestone(milestone);
+            setShowMilestoneModal(true);
         }
 
         const dialogue = getDialogue(type, state.level, state.affection, state.mood);
@@ -152,17 +171,24 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
     // 处理每日签到
     const handleDailyCheckin = () => {
         const currentMate = getMateState();
-        const { state, leveledUp } = recordInteraction(
+        const { state, leveledUp, comboCount: newCombo, milestone } = recordInteraction(
             InteractionType.DAILY_CHECKIN,
             `连续签到 ${currentMate.stats.consecutiveDays + 1} 天`
         );
 
         setMate(state);
+        setComboCount(newCombo);
         setCanCheckin(false);
         setShowCheckinReward(true);
 
         if (leveledUp) {
             setShowLevelUpModal(true);
+        }
+
+        // 显示里程碑奖励
+        if (milestone) {
+            setCurrentMilestone(milestone);
+            setShowMilestoneModal(true);
         }
 
         // 显示签到对话
@@ -300,24 +326,42 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
                             </div>
                         </div>
 
-                        {/* 统计信息 */}
-                        <div className="stats-grid">
-                            <div className="stat-item">
-                                <BookOpen size={18} />
-                                <span className="stat-value">{mate.stats.totalWordsLearned}</span>
-                                <span className="stat-label">学习单词</span>
+                        {/* Combo 连击显示 */}
+                        {comboCount > 0 && (
+                            <div className="combo-display" title="2小时内的连续互动次数，每5次增加10%奖励加成（最高100%）">
+                                <div className="combo-header">
+                                    <Zap size={16} fill="#ffa500" color="#ffa500" />
+                                    <span>连击中</span>
+                                </div>
+                                <div className="combo-info">
+                                    <span className="combo-count">{comboCount} Combo</span>
+                                    <span className="combo-bonus">+{Math.min(Math.floor(comboCount / 5) * 10, 100)}% 奖励</span>
+                                </div>
                             </div>
-                            <div className="stat-item">
-                                <Trophy size={18} />
-                                <span className="stat-value">{mate.stats.achievementsUnlocked}</span>
-                                <span className="stat-label">解锁成就</span>
+                        )}
+
+                        {/* 里程碑进度 */}
+                        {nextMilestone && (
+                            <div className="milestone-progress" title={`达到${nextMilestone.affection}好感度时解锁：${nextMilestone.reward.description}`}>
+                                <div className="milestone-header">
+                                    <Award size={16} color="#ffd700" />
+                                    <span>下一个里程碑</span>
+                                </div>
+                                <div className="milestone-info">
+                                    <span className="milestone-title">{nextMilestone.reward.title}</span>
+                                    <span className="milestone-reward">奖励: +{nextMilestone.reward.exp} 经验值</span>
+                                </div>
+                                <div className="milestone-bar">
+                                    <div
+                                        className="milestone-fill"
+                                        style={{ width: `${(mate.affection / nextMilestone.affection) * 100}%` }}
+                                    />
+                                    <span className="milestone-text">
+                                        {mate.affection} / {nextMilestone.affection}
+                                    </span>
+                                </div>
                             </div>
-                            <div className="stat-item">
-                                <Sparkles size={18} />
-                                <span className="stat-value">{mate.stats.consecutiveDays}</span>
-                                <span className="stat-label">连续打卡</span>
-                            </div>
-                        </div>
+                        )}
                     </div>
                 </div>
 
@@ -330,7 +374,10 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
                                 <Calendar size={24} />
                                 <div className="checkin-text">
                                     <span className="checkin-title">每日签到</span>
-                                    <span className="checkin-desc">+5 好感度 +20 经验值</span>
+                                    <span className="checkin-desc">
+                                        +{dailyReward.affection} 好感度 +{dailyReward.exp} 经验值
+                                        {mate.stats.consecutiveDays >= 7 && ' (连续签到奖励!)'}
+                                    </span>
                                 </div>
                             </button>
                         </div>
@@ -396,7 +443,7 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
                         onClick={() => setShowAchievements(true)}
                     >
                         <Gift size={20} />
-                        查看成就 ({mate.stats.achievementsUnlocked}/{achievements.length})
+                        查看成就 ({mate.stats.achievementsUnlocked}/{achievements.reduce((sum, a) => sum + a.tiers.length, 0)})
                     </button>
                 </div>
             </div>
@@ -410,18 +457,37 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
                             {achievements.map(achievement => (
                                 <div
                                     key={achievement.id}
-                                    className={`achievement-card ${achievement.unlocked ? 'unlocked' : 'locked'}`}
+                                    className="achievement-card-multi"
                                 >
-                                    <div className="achievement-icon">{achievement.icon}</div>
-                                    <div className="achievement-info">
-                                        <h4>{achievement.name}</h4>
-                                        <p>{achievement.description}</p>
-                                        {achievement.unlocked && achievement.unlockedAt && (
-                                            <span className="unlock-date">
-                                                {new Date(achievement.unlockedAt).toLocaleDateString()}
-                                            </span>
-                                        )}
+                                    <div className="achievement-header">
+                                        <div className="achievement-icon">{achievement.icon}</div>
+                                        <div className="achievement-title">
+                                            <h4>{achievement.name}</h4>
+                                            <p>{achievement.description}</p>
+                                        </div>
                                     </div>
+                                    <div className="achievement-tiers">
+                                        {achievement.tiers.map(tier => (
+                                            <div
+                                                key={tier.tier}
+                                                className={`tier-badge ${tier.unlocked ? 'unlocked' : 'locked'} tier-${tier.tier}`}
+                                                title={`${tier.reward.title} - 目标: ${tier.target} (奖励: ${tier.reward.affection > 0 ? `+${tier.reward.affection}好感` : ''} ${tier.reward.exp > 0 ? `+${tier.reward.exp}经验` : ''})`}
+                                            >
+                                                <div className="tier-name">{
+                                                    tier.tier === 'bronze' ? '青铜' :
+                                                        tier.tier === 'silver' ? '白银' :
+                                                            tier.tier === 'gold' ? '黄金' : '钻石'
+                                                }</div>
+                                                {tier.unlocked && <div className="tier-check">✓</div>}
+                                                {!tier.unlocked && <div className="tier-target">{tier.target}</div>}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {achievement.currentTier && (
+                                        <div className="current-tier-info">
+                                            当前: {achievement.tiers.find(t => t.tier === achievement.currentTier)?.reward.title}
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -453,23 +519,64 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
                 <div className="modal-overlay" onClick={() => setShowAchievementModal(false)}>
                     <div className="modal-content achievement-unlock-modal">
                         <h2>🎊 成就解锁！</h2>
-                        {newAchievements.map(achievement => (
-                            <div key={achievement.id} className="new-achievement">
-                                <div className="achievement-icon-large">{achievement.icon}</div>
-                                <h3>{achievement.name}</h3>
-                                <p>{achievement.description}</p>
-                                <div className="rewards">
-                                    {achievement.reward.affection > 0 && (
-                                        <span>❤️ +{achievement.reward.affection} 好感度</span>
-                                    )}
-                                    {achievement.reward.exp > 0 && (
-                                        <span>⭐ +{achievement.reward.exp} 经验值</span>
+                        {newAchievements.map(achievement => {
+                            const currentTierData = achievement.tiers.find(t => t.tier === achievement.currentTier);
+                            return (
+                                <div key={achievement.id} className="new-achievement">
+                                    <div className="achievement-icon-large">{achievement.icon}</div>
+                                    <h3>{achievement.name}</h3>
+                                    {currentTierData && (
+                                        <>
+                                            <div className={`tier-badge-large tier-${currentTierData.tier}`}>
+                                                {currentTierData.tier === 'bronze' ? '🥉 青铜' :
+                                                    currentTierData.tier === 'silver' ? '🥈 白银' :
+                                                        currentTierData.tier === 'gold' ? '🥇 黄金' : '💎 钻石'}
+                                            </div>
+                                            <p className="tier-title">{currentTierData.reward.title}</p>
+                                            <div className="rewards">
+                                                {currentTierData.reward.affection > 0 && (
+                                                    <span>❤️ +{currentTierData.reward.affection} 好感度</span>
+                                                )}
+                                                {currentTierData.reward.exp > 0 && (
+                                                    <span>⭐ +{currentTierData.reward.exp} 经验值</span>
+                                                )}
+                                            </div>
+                                        </>
                                     )}
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                         <button className="close-btn" onClick={() => setShowAchievementModal(false)}>
                             收下了！
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* 里程碑奖励提示 */}
+            {showMilestoneModal && currentMilestone && (
+                <div className="modal-overlay" onClick={() => setShowMilestoneModal(false)}>
+                    <div className="modal-content milestone-modal">
+                        <h2>🎊 里程碑达成！</h2>
+                        <div className="milestone-celebration">
+                            <div className="milestone-icon-large">
+                                <Award size={64} color="#ffd700" />
+                            </div>
+                            <h3>{currentMilestone.reward.title}</h3>
+                            <p className="milestone-desc">{currentMilestone.reward.description}</p>
+                            <div className="milestone-rewards">
+                                <div className="reward-item">
+                                    <span className="reward-label">好感度达到</span>
+                                    <span className="reward-value">{currentMilestone.affection}</span>
+                                </div>
+                                <div className="reward-item">
+                                    <span className="reward-label">获得经验值</span>
+                                    <span className="reward-value">+{currentMilestone.reward.exp}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button className="close-btn" onClick={() => setShowMilestoneModal(false)}>
+                            太棒了！
                         </button>
                     </div>
                 </div>

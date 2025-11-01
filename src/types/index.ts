@@ -172,26 +172,36 @@ export interface Dialogue {
 }
 
 // 成就系统
+export enum AchievementTier {
+  BRONZE = 'bronze',         // 青铜
+  SILVER = 'silver',         // 白银
+  GOLD = 'gold',             // 黄金
+  DIAMOND = 'diamond'        // 钻石
+}
+
 export interface Achievement {
   id: string;
   name: string;              // 成就名称
   description: string;       // 成就描述
   icon: string;              // 图标
-  condition: AchievementCondition; // 达成条件
+  category: 'words_learned' | 'consecutive_days' | 'stories' | 'adventures' | 'level' | 'affection'; // 成就类别
+  tiers: AchievementTierData[]; // 各级别数据
+  currentTier: AchievementTier | null; // 当前达成的等级
+  unlockedAt?: number;       // 最后解锁时间
+}
+
+// 成就等级数据
+export interface AchievementTierData {
+  tier: AchievementTier;     // 等级
+  target: number;            // 目标值
   reward: AchievementReward; // 奖励
   unlocked: boolean;         // 是否已解锁
   unlockedAt?: number;       // 解锁时间
-}
-
-// 成就条件
-export interface AchievementCondition {
-  type: 'words_learned' | 'consecutive_days' | 'stories' | 'adventures' | 'level' | 'affection';
-  target: number;            // 目标值
 }
 
 // 成就奖励
 export interface AchievementReward {
   affection: number;         // 好感度奖励
   exp: number;               // 经验值奖励
-  unlockContent?: string[];  // 解锁内容（服装、背景等）
+  title?: string;            // 称号奖励
 }
