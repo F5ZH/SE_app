@@ -197,9 +197,12 @@
 }
 
 @keyframes pulseWarning {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7);
     }
+
     50% {
         box-shadow: 0 0 0 10px rgba(255, 71, 87, 0);
     }
