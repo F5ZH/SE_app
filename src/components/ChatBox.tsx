@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Trash2, X } from 'lucide-react';
 import { ChatMessage, UserContext, sendChatMessage, generateMessageId, loadChatHistory, saveChatHistory, clearChatHistory } from '../utils/chat';
+import { getMateState } from '../utils/wordMate';
+import { getLevelTier } from '../data/outfitSystem';
 import './ChatBox.css';
 
 interface ChatBoxProps {
@@ -18,6 +20,11 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onClose, userContext }) => {
     const [isSending, setIsSending] = useState(false);
     const [apiKey, setApiKey] = useState('');
     const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    // 获取当前单词姬状态
+    const mateState = getMateState();
+    const levelTier = getLevelTier(mateState.level);
+    const mateAvatarUrl = `/assets/mate/base/${levelTier}.png`;
 
     useEffect(() => {
         // 加载 API Key
@@ -135,9 +142,11 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onClose, userContext }) => {
                 {/* 头部 */}
                 <div className="chatbox-header">
                     <div className="header-info">
-                        <span className="mate-avatar-mini">👧</span>
+                        <div className="mate-avatar-mini">
+                            <img src={mateAvatarUrl} alt={userContext.mateName} />
+                        </div>
                         <div>
-                            <h3>单词姬</h3>
+                            <h3>{userContext.mateName}</h3>
                             <span className="status-text">在线</span>
                         </div>
                     </div>
@@ -156,7 +165,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onClose, userContext }) => {
                     {messages.map(message => (
                         <div key={message.id} className={`message ${message.role}`}>
                             {message.role === 'assistant' && (
-                                <span className="message-avatar">👧</span>
+                                <div className="message-avatar">
+                                    <img src={mateAvatarUrl} alt={userContext.mateName} />
+                                </div>
                             )}
                             <div className="message-bubble">
                                 <p className="message-text">{message.content}</p>
@@ -174,7 +185,9 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onClose, userContext }) => {
                     ))}
                     {isSending && (
                         <div className="message assistant">
-                            <span className="message-avatar">👧</span>
+                            <div className="message-avatar">
+                                <img src={mateAvatarUrl} alt={userContext.mateName} />
+                            </div>
                             <div className="message-bubble typing">
                                 <div className="typing-indicator">
                                     <span></span>

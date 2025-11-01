@@ -6,6 +6,7 @@ import { getMateState } from '../utils/wordMate';
 import { Play, Calendar, BookOpen, TrendingUp, Clock, Target, Eye, Check, Heart, Star } from 'lucide-react';
 import Modal from './Modal';
 import SelfStudy from './SelfStudy';
+import MateAvatar from './MateAvatar';
 
 interface DashboardProps {
   currentPlan: StudyPlan | null;
@@ -170,7 +171,10 @@ const Dashboard: React.FC<DashboardProps> = ({
       <div className="card wordmate-card" onClick={onOpenWordMate}>
         <div className="wordmate-content">
           <div className="wordmate-avatar">
-            <span className="avatar-emoji">👧</span>
+            <MateAvatar
+              mate={mateState}
+              showMoodIndicator={false}
+            />
           </div>
           <div className="wordmate-info">
             <h3 className="wordmate-name">{mateState.name}</h3>

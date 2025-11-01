@@ -304,12 +304,12 @@ const DevTools: React.FC<DevToolsProps> = ({ onRefresh }) => {
      * 快速增加经验值
      */
     const handleAddExp = () => {
-        const amount = prompt('请输入要增加的经验值（1-500）:', '100');
+        const amount = prompt('请输入要增加的经验值（1-10000）:', '500');
         if (!amount) return;
 
         const expNum = parseInt(amount);
-        if (isNaN(expNum) || expNum < 1 || expNum > 500) {
-            alert('请输入1-500之间的有效数值！');
+        if (isNaN(expNum) || expNum < 1 || expNum > 10000) {
+            alert('请输入1-10000之间的有效数值！');
             return;
         }
 
@@ -323,6 +323,42 @@ const DevTools: React.FC<DevToolsProps> = ({ onRefresh }) => {
             if (onRefresh) onRefresh();
         } catch (error) {
             console.error('增加经验值失败:', error);
+            alert('操作失败，请查看控制台了解详情。');
+        }
+    };
+
+    /**
+     * 直接设置等级
+     */
+    const handleSetLevel = () => {
+        const mate = getMateState();
+        const level = prompt(`请输入要设置的等级（1-50）:\n当前等级: ${mate.level}`, mate.level.toString());
+        if (!level) return;
+
+        const levelNum = parseInt(level);
+        if (isNaN(levelNum) || levelNum < 1 || levelNum > 50) {
+            alert('请输入1-50之间的有效等级！');
+            return;
+        }
+
+        try {
+            // 直接修改等级和经验值 - 使用正确的 localStorage key
+            const STORAGE_KEY = 'wordmate_state';
+            const mateData = localStorage.getItem(STORAGE_KEY);
+            if (mateData) {
+                const mate = JSON.parse(mateData);
+                mate.level = levelNum;
+                mate.exp = 0; // 重置经验到0
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(mate));
+                alert(`等级已设置为 Lv.${levelNum}！\n页面将刷新以显示新等级。`);
+                
+                // 强制刷新页面以更新所有组件
+                window.location.reload();
+            } else {
+                alert('未找到单词姬数据！请先进入 WordMate 主页初始化数据。');
+            }
+        } catch (error) {
+            console.error('设置等级失败:', error);
             alert('操作失败，请查看控制台了解详情。');
         }
     };
@@ -363,7 +399,7 @@ const DevTools: React.FC<DevToolsProps> = ({ onRefresh }) => {
         try {
             // 清除旧的成就数据，强制重新加载
             localStorage.removeItem('wordmate_achievements');
-            
+
             // 刷新页面以重新加载
             alert('✅ 成就数据已更新！页面将刷新...');
             window.location.reload();
@@ -499,7 +535,11 @@ const DevTools: React.FC<DevToolsProps> = ({ onRefresh }) => {
                     </button>
                     <button className="dev-btn dev-btn-success" onClick={handleAddExp}>
                         <Star size={16} />
-                        增加经验值
+                        增加经验值 (最多10000)
+                    </button>
+                    <button className="dev-btn dev-btn-success" onClick={handleSetLevel}>
+                        <Zap size={16} />
+                        直接设置等级 (1-50)
                     </button>
                     <button className="dev-btn dev-btn-primary" onClick={handleAdjustStudyDays}>
                         <Zap size={16} />

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Heart, Star, Sparkles, Map, Gift, Calendar, MessageCircle, Award, BookOpen } from 'lucide-react';
-import { WordMateState, InteractionType, WordMateMood, Achievement } from '../types';
+import { WordMateState, InteractionType, Achievement } from '../types';
 import {
     getMateState,
     updateMateName,
@@ -18,6 +18,7 @@ import { UserContext } from '../utils/chat';
 import { studyPlanStorage, wordBookStorage } from '../utils/storage';
 import { generateTodayTask, getStudyStats } from '../utils/studyPlan';
 import ChatBox from './ChatBox';
+import MateAvatar from './MateAvatar';
 import './WordMateHome.css';
 
 interface WordMateHomeProps {
@@ -209,20 +210,6 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
         }, 1000);
     };
 
-    // 获取心情emoji
-    const getMoodEmoji = (mood: WordMateMood): string => {
-        const emojiMap: Record<WordMateMood, string> = {
-            [WordMateMood.HAPPY]: '😊',
-            [WordMateMood.EXCITED]: '✨',
-            [WordMateMood.NORMAL]: '📚',
-            [WordMateMood.TIRED]: '😴',
-            [WordMateMood.ENCOURAGING]: '💪',
-            [WordMateMood.PROUD]: '🌟',
-            [WordMateMood.WORRIED]: '😟'
-        };
-        return emojiMap[mood];
-    };
-
     // 点击头像触发随机对话
     const handleAvatarClick = () => {
         const randomDialogues = [
@@ -251,12 +238,13 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
                 {/* 左侧：虚拟形象 */}
                 <div className="mate-character-section">
                     <div className="character-card">
-                        {/* 立绘占位符 */}
+                        {/* 角色立绘 */}
                         <div className="character-avatar" onClick={handleAvatarClick}>
-                            <div className="avatar-placeholder">
-                                <span className="avatar-emoji">👧</span>
-                                <span className="mood-indicator">{getMoodEmoji(mate.mood)}</span>
-                            </div>
+                            <MateAvatar
+                                mate={mate}
+                                showMoodIndicator={true}
+                                className={mate.affection >= 150 ? 'high-affection' : ''}
+                            />
 
                             {/* 气泡对话框 */}
                             <div className="speech-bubble">
@@ -443,11 +431,11 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
                                     {achievements.map(achievement => {
                                         // 获取当前最高解锁等级
                                         const unlockedTiers = achievement.tiers.filter(t => t.unlocked);
-                                        const currentTierData = unlockedTiers.length > 0 
-                                            ? unlockedTiers[unlockedTiers.length - 1] 
+                                        const currentTierData = unlockedTiers.length > 0
+                                            ? unlockedTiers[unlockedTiers.length - 1]
                                             : null;
                                         const nextTier = achievement.tiers.find(t => !t.unlocked);
-                                        
+
                                         return (
                                             <div
                                                 key={achievement.id}
@@ -461,13 +449,13 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
                                                         <div className={`current-tier-badge tier-${currentTierData.tier}`}>
                                                             <span className="tier-icon">
                                                                 {currentTierData.tier === 'bronze' ? '🥉' :
-                                                                 currentTierData.tier === 'silver' ? '🥈' :
-                                                                 currentTierData.tier === 'gold' ? '🥇' : '💎'}
+                                                                    currentTierData.tier === 'silver' ? '🥈' :
+                                                                        currentTierData.tier === 'gold' ? '🥇' : '💎'}
                                                             </span>
                                                             <span className="tier-label">
                                                                 {currentTierData.tier === 'bronze' ? '青铜' :
-                                                                 currentTierData.tier === 'silver' ? '白银' :
-                                                                 currentTierData.tier === 'gold' ? '黄金' : '钻石'}
+                                                                    currentTierData.tier === 'silver' ? '白银' :
+                                                                        currentTierData.tier === 'gold' ? '黄金' : '钻石'}
                                                             </span>
                                                         </div>
                                                     ) : (
@@ -491,8 +479,8 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
                         ) : (
                             /* 成就详情界面 - 显示完整晋升路径 */
                             <>
-                                <button 
-                                    className="back-to-list-btn" 
+                                <button
+                                    className="back-to-list-btn"
                                     onClick={() => setSelectedAchievement(null)}
                                 >
                                     ← 返回列表
@@ -505,7 +493,7 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
                                             <p>{selectedAchievement.description}</p>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="achievement-progression">
                                         <h3>晋升之路</h3>
                                         <div className="tier-progression-list">
@@ -524,8 +512,8 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
                                                         <div className="tier-progression-header">
                                                             <span className={`tier-progression-name tier-${tier.tier}`}>
                                                                 {tier.tier === 'bronze' ? '🥉 青铜' :
-                                                                 tier.tier === 'silver' ? '🥈 白银' :
-                                                                 tier.tier === 'gold' ? '🥇 黄金' : '💎 钻石'}
+                                                                    tier.tier === 'silver' ? '🥈 白银' :
+                                                                        tier.tier === 'gold' ? '🥇 黄金' : '💎 钻石'}
                                                             </span>
                                                             {tier.unlocked && tier.unlockedAt && (
                                                                 <span className="tier-unlock-date">

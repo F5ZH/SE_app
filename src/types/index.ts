@@ -123,7 +123,7 @@ export enum WordMateMood {
 
 // 外观配置
 export interface MateAppearance {
-  avatar: string;            // 头像/立绘标识（由等级决定：lv1-10, lv11-20, lv21-35, lv36-50）
+  avatar: string;            // 头像/立绘标识（由等级决定：lv1-10, lv11-20, lv21-30, lv31-40, lv41-50）
   outfit: string;            // 服装ID
   accessory?: string;        // 配饰ID
   background: string;        // 背景场景

@@ -49,21 +49,31 @@
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: white;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: transform 0.2s;
+  background: white;
 }
 
 .wordmate-avatar:hover {
   transform: scale(1.05);
 }
 
-.wordmate-avatar .avatar-emoji {
-  font-size: 3rem;
+/* MateAvatar 在 Dashboard 中的适配 */
+.wordmate-avatar .mate-avatar-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.wordmate-avatar .level-tag,
+.wordmate-avatar .mood-indicator,
+.wordmate-avatar .click-hint {
+  display: none; /* 在小尺寸显示中隐藏这些元素 */
 }
 
 .wordmate-info {

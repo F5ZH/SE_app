@@ -19,9 +19,25 @@ const INTERACTIONS_KEY = 'wordmate_interactions';
 const ACHIEVEMENTS_KEY = 'wordmate_achievements';
 const MILESTONES_KEY = 'wordmate_milestones';
 
-// 等级经验值配置（指数增长）
+// 等级经验值配置（优化后的增长曲线 - 150天左右满级）
+// 假设每天学习50单词，获得约200-300经验，150天累计约30000-45000经验
 const getLevelExpRequirement = (level: number): number => {
-    return Math.floor(100 * Math.pow(1.5, level - 1));
+    if (level <= 10) {
+        // Lv1-10: 快速体验 (50, 60, 70...140) 累计: ~950
+        return 40 + level * 10;
+    } else if (level <= 20) {
+        // Lv11-20: 稳步增长 (160, 180, 200...340) 累计: ~3,450
+        return 140 + (level - 10) * 20;
+    } else if (level <= 30) {
+        // Lv21-30: 中速增长 (380, 420, 460...740) 累计: ~9,050
+        return 340 + (level - 20) * 40;
+    } else if (level <= 40) {
+        // Lv31-40: 后期挑战 (820, 920, 1020...1820) 累计: ~22,250
+        return 740 + (level - 30) * 100;
+    } else {
+        // Lv41-50: 终极目标 (2020, 2220, 2420...3820) 累计: ~50,000
+        return 1820 + (level - 40) * 200;
+    }
 };
 
 // 好感度里程碑奖励
@@ -497,13 +513,13 @@ export const getAchievements = (): Achievement[] => {
             // 验证数据格式是否为新的多级制格式
             if (achievements.length > 0 && achievements[0].tiers && Array.isArray(achievements[0].tiers)) {
                 // 检查是否需要更新目标值（版本v1.1更新）
-                const needsUpdate = 
+                const needsUpdate =
                     achievements.find(a => a.id === 'words_learned')?.tiers[0].target === 50 ||
                     achievements.find(a => a.id === 'stories')?.tiers[0].target === 5 ||
                     achievements.find(a => a.id === 'adventures')?.tiers[0].target === 3 ||
                     achievements.find(a => a.id === 'stories')?.icon === '�' ||
                     achievements.find(a => a.id === 'adventures')?.icon === '�️';
-                
+
                 if (needsUpdate) {
                     console.log('检测到旧版本成就数据，更新到v1.1版本...');
                     // 保留用户的解锁状态，但更新目标值和图标
@@ -527,7 +543,7 @@ export const getAchievements = (): Achievement[] => {
                     console.log('✅ 成就数据已更新到v1.1版本');
                     return updatedAchievements;
                 }
-                
+
                 return achievements;
             }
             // 旧格式数据，清除并使用默认值
