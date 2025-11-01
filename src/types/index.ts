@@ -123,10 +123,89 @@ export enum WordMateMood {
 
 // 外观配置
 export interface MateAppearance {
-  avatar: string;            // 头像/立绘标识
-  outfit: string;            // 服装
-  accessory?: string;        // 配饰
+  avatar: string;            // 头像/立绘标识（由等级决定：lv1-10, lv11-20, lv21-35, lv36-50）
+  outfit: string;            // 服装ID
+  accessory?: string;        // 配饰ID
   background: string;        // 背景场景
+}
+
+// 服装配置
+export interface OutfitConfig {
+  id: string;
+  name: string;
+  description: string;
+  rarity: 'common' | 'rare' | 'epic' | 'legendary';
+  unlockCondition: {
+    affection?: number;      // 需要的好感度
+    level?: number;          // 需要的等级
+    achievement?: string;    // 需要的成就ID
+    special?: string;        // 特殊条件
+  };
+  storyId?: string;          // 关联的小剧场ID
+  previewImage: string;      // 预览图路径
+  unlocked?: boolean;
+  unlockedAt?: number;
+}
+
+// 配饰配置
+export interface AccessoryConfig {
+  id: string;
+  name: string;
+  description: string;
+  position: 'head' | 'hair' | 'face' | 'back' | 'hand';
+  unlockCondition: {
+    affection?: number;
+    level?: number;
+    achievement?: string;
+    outfit?: string;         // 需要特定服装
+    special?: string;        // 特殊条件
+  };
+  previewImage: string;
+  unlocked?: boolean;
+}
+
+// 小剧场配置
+export interface StoryScene {
+  id: string;
+  title: string;
+  type: 'outfit' | 'milestone' | 'special' | 'hidden';
+  unlockCondition: {
+    affection?: number;
+    level?: number;
+    outfit?: string;
+    achievement?: string;
+    special?: string;        // 'midnight_study', 'birthday', 'perfect_score'
+  };
+  dialogues: StoryDialogue[];
+  choices?: StoryChoice[];
+  rewards?: {
+    affection?: number;
+    exp?: number;
+    item?: string;
+    outfit?: string;
+  };
+  unlocked: boolean;
+  viewed: boolean;
+  unlockedAt?: number;
+}
+
+// 对话内容
+export interface StoryDialogue {
+  speaker: 'mate' | 'narrator' | 'user';
+  text: string;
+  emotion?: 'happy' | 'shy' | 'excited' | 'sad' | 'surprised' | 'normal';
+  avatar?: string;           // 特殊立绘路径
+  background?: string;       // 背景图路径
+  effect?: 'shake' | 'flash' | 'fade' | 'sparkle';
+}
+
+// 对话选项
+export interface StoryChoice {
+  text: string;
+  affectionChange?: number;
+  nextDialogueIndex?: number; // 跳转到的对话索引
+  unlockOutfit?: string;
+  unlockAccessory?: string;
 }
 
 // 统计数据

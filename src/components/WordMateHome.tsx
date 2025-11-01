@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Star, Sparkles, Map, Gift, Calendar, MessageCircle, Zap, Award, BookOpen } from 'lucide-react';
+import { Heart, Star, Sparkles, Map, Gift, Calendar, MessageCircle, Award, BookOpen } from 'lucide-react';
 import { WordMateState, InteractionType, WordMateMood, Achievement } from '../types';
 import {
     getMateState,
@@ -10,7 +10,6 @@ import {
     getAchievements,
     checkAchievements,
     checkDailyCheckin,
-    getCurrentCombo,
     getDailyCheckinReward,
     getNextMilestone
 } from '../utils/wordMate';
@@ -42,9 +41,9 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
     const [canCheckin, setCanCheckin] = useState(false);
     const [showCheckinReward, setShowCheckinReward] = useState(false);
     const [showChatBox, setShowChatBox] = useState(false);
-    const [comboCount, setComboCount] = useState(0);
     const [showMilestoneModal, setShowMilestoneModal] = useState(false);
     const [currentMilestone, setCurrentMilestone] = useState<any>(null);
+    const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
 
     const levelProgress = getLevelProgress();
     const affectionTitle = getAffectionTitle(mate.affection);
@@ -111,11 +110,7 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
         const isNewDay = checkDailyCheckin();
         setCanCheckin(isNewDay);
 
-        // 加载 combo 计数
-        const currentCombo = getCurrentCombo();
-        setComboCount(currentCombo);
-
-        // 如果是新的一天，不自动签到，让用户点击
+        // 如果是新的一天，不自动签到,让用户点击
         if (!isNewDay) {
             // 记录问候互动
             recordInteraction(InteractionType.GREETING);
@@ -134,9 +129,8 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
 
     // 处理互动
     const handleInteraction = (type: InteractionType) => {
-        const { state, leveledUp, comboCount: newCombo, milestone } = recordInteraction(type);
+        const { state, leveledUp, milestone } = recordInteraction(type);
         setMate(state);
-        setComboCount(newCombo);
 
         if (leveledUp) {
             setShowLevelUpModal(true);
@@ -171,13 +165,12 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
     // 处理每日签到
     const handleDailyCheckin = () => {
         const currentMate = getMateState();
-        const { state, leveledUp, comboCount: newCombo, milestone } = recordInteraction(
+        const { state, leveledUp, milestone } = recordInteraction(
             InteractionType.DAILY_CHECKIN,
             `连续签到 ${currentMate.stats.consecutiveDays + 1} 天`
         );
 
         setMate(state);
-        setComboCount(newCombo);
         setCanCheckin(false);
         setShowCheckinReward(true);
 
@@ -320,25 +313,11 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
                             <div className="affection-bar">
                                 <div
                                     className="affection-fill"
-                                    style={{ width: `${mate.affection}%` }}
+                                    style={{ width: `${(mate.affection / 200) * 100}%` }}
                                 />
-                                <span className="affection-text">{mate.affection} / 100</span>
+                                <span className="affection-text">{mate.affection} / 200</span>
                             </div>
                         </div>
-
-                        {/* Combo 连击显示 */}
-                        {comboCount > 0 && (
-                            <div className="combo-display" title="2小时内的连续互动次数，每5次增加10%奖励加成（最高100%）">
-                                <div className="combo-header">
-                                    <Zap size={16} fill="#ffa500" color="#ffa500" />
-                                    <span>连击中</span>
-                                </div>
-                                <div className="combo-info">
-                                    <span className="combo-count">{comboCount} Combo</span>
-                                    <span className="combo-bonus">+{Math.min(Math.floor(comboCount / 5) * 10, 100)}% 奖励</span>
-                                </div>
-                            </div>
-                        )}
 
                         {/* 里程碑进度 */}
                         {nextMilestone && (
@@ -443,57 +422,139 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
                         onClick={() => setShowAchievements(true)}
                     >
                         <Gift size={20} />
-                        查看成就 ({mate.stats.achievementsUnlocked}/{achievements.reduce((sum, a) => sum + a.tiers.length, 0)})
+                        查看成就 ({achievements.filter(a => a.tiers.some(t => t.unlocked)).length}/{achievements.length})
                     </button>
                 </div>
             </div>
 
             {/* 成就列表模态框 */}
             {showAchievements && (
-                <div className="modal-overlay" onClick={() => setShowAchievements(false)}>
+                <div className="modal-overlay" onClick={() => {
+                    setShowAchievements(false);
+                    setSelectedAchievement(null);
+                }}>
                     <div className="modal-content achievements-modal" onClick={(e) => e.stopPropagation()}>
-                        <h2>🏆 成就列表</h2>
-                        <div className="achievements-grid">
-                            {achievements.map(achievement => (
-                                <div
-                                    key={achievement.id}
-                                    className="achievement-card-multi"
-                                >
-                                    <div className="achievement-header">
-                                        <div className="achievement-icon">{achievement.icon}</div>
-                                        <div className="achievement-title">
-                                            <h4>{achievement.name}</h4>
-                                            <p>{achievement.description}</p>
-                                        </div>
-                                    </div>
-                                    <div className="achievement-tiers">
-                                        {achievement.tiers.map(tier => (
+                        {!selectedAchievement ? (
+                            /* 成就列表主界面 - 显示当前等级 */
+                            <>
+                                <h2>🏆 成就列表</h2>
+                                <p className="achievements-subtitle">点击成就查看详细晋升路径</p>
+                                <div className="achievements-compact-grid">
+                                    {achievements.map(achievement => {
+                                        // 获取当前最高解锁等级
+                                        const unlockedTiers = achievement.tiers.filter(t => t.unlocked);
+                                        const currentTierData = unlockedTiers.length > 0 
+                                            ? unlockedTiers[unlockedTiers.length - 1] 
+                                            : null;
+                                        const nextTier = achievement.tiers.find(t => !t.unlocked);
+                                        
+                                        return (
                                             <div
-                                                key={tier.tier}
-                                                className={`tier-badge ${tier.unlocked ? 'unlocked' : 'locked'} tier-${tier.tier}`}
-                                                title={`${tier.reward.title} - 目标: ${tier.target} (奖励: ${tier.reward.affection > 0 ? `+${tier.reward.affection}好感` : ''} ${tier.reward.exp > 0 ? `+${tier.reward.exp}经验` : ''})`}
+                                                key={achievement.id}
+                                                className="achievement-compact-card"
+                                                onClick={() => setSelectedAchievement(achievement)}
                                             >
-                                                <div className="tier-name">{
-                                                    tier.tier === 'bronze' ? '青铜' :
-                                                        tier.tier === 'silver' ? '白银' :
-                                                            tier.tier === 'gold' ? '黄金' : '钻石'
-                                                }</div>
-                                                {tier.unlocked && <div className="tier-check">✓</div>}
-                                                {!tier.unlocked && <div className="tier-target">{tier.target}</div>}
+                                                <div className="achievement-compact-icon">{achievement.icon}</div>
+                                                <div className="achievement-compact-info">
+                                                    <h4>{achievement.name}</h4>
+                                                    {currentTierData ? (
+                                                        <div className={`current-tier-badge tier-${currentTierData.tier}`}>
+                                                            <span className="tier-icon">
+                                                                {currentTierData.tier === 'bronze' ? '🥉' :
+                                                                 currentTierData.tier === 'silver' ? '🥈' :
+                                                                 currentTierData.tier === 'gold' ? '🥇' : '💎'}
+                                                            </span>
+                                                            <span className="tier-label">
+                                                                {currentTierData.tier === 'bronze' ? '青铜' :
+                                                                 currentTierData.tier === 'silver' ? '白银' :
+                                                                 currentTierData.tier === 'gold' ? '黄金' : '钻石'}
+                                                            </span>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="tier-locked-badge">未解锁</div>
+                                                    )}
+                                                    {nextTier && (
+                                                        <div className="next-tier-hint">
+                                                            下一级: {nextTier.target}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="achievement-arrow">›</div>
                                             </div>
-                                        ))}
-                                    </div>
-                                    {achievement.currentTier && (
-                                        <div className="current-tier-info">
-                                            当前: {achievement.tiers.find(t => t.tier === achievement.currentTier)?.reward.title}
-                                        </div>
-                                    )}
+                                        );
+                                    })}
                                 </div>
-                            ))}
-                        </div>
-                        <button className="close-btn" onClick={() => setShowAchievements(false)}>
-                            关闭
-                        </button>
+                                <button className="close-btn" onClick={() => setShowAchievements(false)}>
+                                    关闭
+                                </button>
+                            </>
+                        ) : (
+                            /* 成就详情界面 - 显示完整晋升路径 */
+                            <>
+                                <button 
+                                    className="back-to-list-btn" 
+                                    onClick={() => setSelectedAchievement(null)}
+                                >
+                                    ← 返回列表
+                                </button>
+                                <div className="achievement-detail">
+                                    <div className="achievement-detail-header">
+                                        <span className="achievement-detail-icon">{selectedAchievement.icon}</span>
+                                        <div>
+                                            <h2>{selectedAchievement.name}</h2>
+                                            <p>{selectedAchievement.description}</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="achievement-progression">
+                                        <h3>晋升之路</h3>
+                                        <div className="tier-progression-list">
+                                            {selectedAchievement.tiers.map((tier, index) => (
+                                                <div
+                                                    key={tier.tier}
+                                                    className={`tier-progression-item ${tier.unlocked ? 'unlocked' : 'locked'}`}
+                                                >
+                                                    <div className="tier-progression-badge">
+                                                        <div className={`tier-progression-icon tier-${tier.tier}`}>
+                                                            {tier.unlocked ? '✓' : (index + 1)}
+                                                        </div>
+                                                        <div className="tier-progression-line"></div>
+                                                    </div>
+                                                    <div className="tier-progression-content">
+                                                        <div className="tier-progression-header">
+                                                            <span className={`tier-progression-name tier-${tier.tier}`}>
+                                                                {tier.tier === 'bronze' ? '🥉 青铜' :
+                                                                 tier.tier === 'silver' ? '🥈 白银' :
+                                                                 tier.tier === 'gold' ? '🥇 黄金' : '💎 钻石'}
+                                                            </span>
+                                                            {tier.unlocked && tier.unlockedAt && (
+                                                                <span className="tier-unlock-date">
+                                                                    {new Date(tier.unlockedAt).toLocaleDateString()}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                        <div className="tier-progression-title">{tier.reward.title}</div>
+                                                        <div className="tier-progression-target">
+                                                            目标: {tier.target}
+                                                        </div>
+                                                        <div className="tier-progression-reward">
+                                                            {tier.reward.affection > 0 && <span>❤️ +{tier.reward.affection}</span>}
+                                                            {tier.reward.exp > 0 && <span>⭐ +{tier.reward.exp}</span>}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                                <button className="close-btn" onClick={() => {
+                                    setSelectedAchievement(null);
+                                    setShowAchievements(false);
+                                }}>
+                                    关闭
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
             )}

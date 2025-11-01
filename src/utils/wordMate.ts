@@ -17,80 +17,11 @@ import {
 const STORAGE_KEY = 'wordmate_state';
 const INTERACTIONS_KEY = 'wordmate_interactions';
 const ACHIEVEMENTS_KEY = 'wordmate_achievements';
-const COMBO_KEY = 'wordmate_combo';
 const MILESTONES_KEY = 'wordmate_milestones';
 
 // 等级经验值配置（指数增长）
 const getLevelExpRequirement = (level: number): number => {
     return Math.floor(100 * Math.pow(1.5, level - 1));
-};
-
-// 连击系统
-interface ComboData {
-    count: number;
-    lastInteractionTime: number;
-    lastInteractionDate: string;
-    todayInteractionCount: number;
-}
-
-const COMBO_TIMEOUT = 2 * 60 * 60 * 1000; // 2小时内连续互动才算连击
-
-// 获取连击数据
-const getComboData = (): ComboData => {
-    const stored = localStorage.getItem(COMBO_KEY);
-    if (stored) {
-        return JSON.parse(stored);
-    }
-    return {
-        count: 0,
-        lastInteractionTime: 0,
-        lastInteractionDate: '',
-        todayInteractionCount: 0
-    };
-};
-
-// 保存连击数据
-const saveComboData = (data: ComboData): void => {
-    localStorage.setItem(COMBO_KEY, JSON.stringify(data));
-};
-
-// 更新连击
-const updateCombo = (): { comboCount: number; comboBonus: number } => {
-    const combo = getComboData();
-    const now = Date.now();
-    const today = new Date().toDateString();
-
-    // 检查是否是新的一天
-    if (combo.lastInteractionDate !== today) {
-        combo.todayInteractionCount = 1;
-        combo.lastInteractionDate = today;
-    } else {
-        combo.todayInteractionCount++;
-    }
-
-    // 检查连击是否中断
-    if (now - combo.lastInteractionTime > COMBO_TIMEOUT) {
-        combo.count = 1;
-    } else {
-        combo.count++;
-    }
-
-    combo.lastInteractionTime = now;
-    saveComboData(combo);
-
-    // 计算连击加成（每5次连击增加10%，最高100%）
-    const comboBonus = Math.min(Math.floor(combo.count / 5) * 0.1, 1.0);
-    return { comboCount: combo.count, comboBonus };
-};
-
-// 获取当前连击
-export const getCurrentCombo = (): number => {
-    const combo = getComboData();
-    const now = Date.now();
-    if (now - combo.lastInteractionTime > COMBO_TIMEOUT) {
-        return 0;
-    }
-    return combo.count;
 };
 
 // 好感度里程碑奖励
@@ -103,17 +34,21 @@ interface AffectionMilestone {
     };
 }
 
+// 好感度上限提升到200，让养成周期更长，更适合长期背单词
 const AFFECTION_MILESTONES: AffectionMilestone[] = [
-    { affection: 10, reward: { exp: 50, title: '初识之喜', description: '我们开始熟悉啦~' } },
-    { affection: 20, reward: { exp: 100, title: '渐入佳境', description: '和你聊天真开心！' } },
-    { affection: 30, reward: { exp: 150, title: '志趣相投', description: '感觉我们很合得来呢~' } },
-    { affection: 40, reward: { exp: 200, title: '心心相印', description: '你已经成为我重要的学习伙伴了！' } },
-    { affection: 50, reward: { exp: 300, title: '知心好友', description: '有你陪伴，学习变得好有趣！' } },
-    { affection: 60, reward: { exp: 400, title: '亲密无间', description: '我们的默契度满分！' } },
-    { affection: 70, reward: { exp: 500, title: '形影不离', description: '每天都想见到你~' } },
-    { affection: 80, reward: { exp: 700, title: '心有灵犀', description: '不用说我也懂你在想什么！' } },
-    { affection: 90, reward: { exp: 1000, title: '灵魂伴侣', description: '感谢你一直陪伴着我！' } },
-    { affection: 100, reward: { exp: 2000, title: '永恒之约', description: '我们永远是最好的伙伴！💕' } }
+    { affection: 10, reward: { exp: 50, title: '初次相遇', description: '你好呀，请多指教~' } },
+    { affection: 20, reward: { exp: 100, title: '渐渐熟悉', description: '我们开始熟悉啦！' } },
+    { affection: 30, reward: { exp: 150, title: '互相了解', description: '感觉我们挺合得来的~' } },
+    { affection: 40, reward: { exp: 200, title: '学习伙伴', description: '一起学习真开心！' } },
+    { affection: 50, reward: { exp: 250, title: '默契配合', description: '我们越来越有默契了！' } },
+    { affection: 60, reward: { exp: 300, title: '志同道合', description: '和你聊天总是很愉快~' } },
+    { affection: 80, reward: { exp: 400, title: '知心朋友', description: '你已经是我重要的朋友了！' } },
+    { affection: 100, reward: { exp: 500, title: '亲密无间', description: '有你陪伴，每天都充满动力！' } },
+    { affection: 120, reward: { exp: 600, title: '形影不离', description: '每天都期待和你见面~' } },
+    { affection: 140, reward: { exp: 700, title: '心有灵犀', description: '不用说我也懂你在想什么！' } },
+    { affection: 160, reward: { exp: 800, title: '互相信赖', description: '我会永远支持你的！' } },
+    { affection: 180, reward: { exp: 1000, title: '灵魂伴侣', description: '感谢你一路以来的陪伴！' } },
+    { affection: 200, reward: { exp: 1500, title: '永恒之约', description: '我们永远是最好的伙伴！💕' } }
 ];
 
 // 检查并触发里程碑
@@ -172,13 +107,13 @@ export const getMateState = (): WordMateState => {
     if (stored) {
         const state: WordMateState = JSON.parse(stored);
 
-        // 检查好感度衰减
+        // 检查好感度衰减（适配200上限，衰减速度保持不变）
         const now = Date.now();
         const daysSinceLastInteraction = Math.floor((now - state.lastInteraction) / (1000 * 60 * 60 * 24));
 
         // 如果超过3天没有互动，开始衰减好感度
         if (daysSinceLastInteraction >= 3) {
-            // 每天衰减2点好感度（从第3天开始）
+            // 每天衰减2点好感度（从第3天开始），适用于200上限
             const decayDays = daysSinceLastInteraction - 2;
             const decayAmount = Math.min(decayDays * 2, state.affection); // 最多衰减到0
 
@@ -209,18 +144,21 @@ export const updateMateName = (name: string): WordMateState => {
     return state;
 };
 
-// 计算好感度等级标题
+// 计算好感度等级标题（适配200上限）
 export const getAffectionTitle = (affection: number): string => {
-    if (affection >= 90) return '心有灵犀';
-    if (affection >= 80) return '亲密无间';
-    if (affection >= 70) return '志同道合';
-    if (affection >= 60) return '相知相惜';
-    if (affection >= 50) return '渐入佳境';
-    if (affection >= 40) return '日渐熟悉';
-    if (affection >= 30) return '初步了解';
-    if (affection >= 20) return '逐渐熟悉';
-    if (affection >= 10) return '初次相识';
-    return '萍水相逢';
+    if (affection >= 180) return '永恒之约';
+    if (affection >= 160) return '互相信赖';
+    if (affection >= 140) return '心有灵犀';
+    if (affection >= 120) return '形影不离';
+    if (affection >= 100) return '亲密无间';
+    if (affection >= 80) return '知心朋友';
+    if (affection >= 60) return '志同道合';
+    if (affection >= 50) return '默契配合';
+    if (affection >= 40) return '学习伙伴';
+    if (affection >= 30) return '互相了解';
+    if (affection >= 20) return '渐渐熟悉';
+    if (affection >= 10) return '初次相遇';
+    return '初来乍到';
 };
 
 // 增加经验值并处理升级
@@ -260,7 +198,7 @@ export const addAffection = (amount: number): {
 } => {
     const state = getMateState();
     const oldAffection = state.affection;
-    state.affection = Math.min(100, state.affection + amount);
+    state.affection = Math.min(200, state.affection + amount); // 上限调整为200
 
     // 检查里程碑
     const milestone = checkAffectionMilestones(oldAffection, state.affection);
@@ -292,65 +230,62 @@ export const recordInteraction = (
     expGain: number;
     state: WordMateState;
     leveledUp: boolean;
-    comboCount: number;
-    comboBonus: number;
     milestone: AffectionMilestone | null;
 } => {
     const state = getMateState();
 
-    // 更新连击
-    const { comboCount, comboBonus } = updateCombo();
-
-    // 根据互动类型计算基础奖励
+    // 根据互动类型计算基础奖励（大幅降低好感度增长，让养成周期更长）
     let baseAffectionGain = 0;
     let baseExpGain = 0;
 
     switch (type) {
         case InteractionType.GREETING:
-            baseAffectionGain = 1;
+            baseAffectionGain = 0; // 仅问候不增加好感度
             baseExpGain = 5;
             break;
         case InteractionType.STUDY_START:
-            baseAffectionGain = 2;
+            baseAffectionGain = 0; // 开始学习不增加，完成才增加
             baseExpGain = 10;
             break;
         case InteractionType.STUDY_COMPLETE:
-            baseAffectionGain = 5;
+            baseAffectionGain = 2; // 降低：5 -> 2
             baseExpGain = 30;
             break;
         case InteractionType.WORD_MASTERED:
-            baseAffectionGain = 1; // 降低：3 -> 1
-            baseExpGain = 10; // 降低：15 -> 10
+            baseAffectionGain = 0; // 降低：1 -> 0，掌握单词主要奖励经验
+            baseExpGain = 10;
             break;
         case InteractionType.STORY_COMPLETE:
-            baseAffectionGain = 5; // 降低：10 -> 5
-            baseExpGain = 30; // 降低：50 -> 30
+            baseAffectionGain = 3; // 降低：5 -> 3
+            baseExpGain = 30;
             state.stats.storiesCompleted++;
             break;
         case InteractionType.ADVENTURE_COMPLETE:
-            baseAffectionGain = 10; // 降低：20 -> 10
-            baseExpGain = 60; // 降低：100 -> 60
+            baseAffectionGain = 5; // 降低：10 -> 5
+            baseExpGain = 60;
             state.stats.adventuresCompleted++;
             break;
         case InteractionType.MILESTONE:
-            baseAffectionGain = 8; // 降低：15 -> 8
-            baseExpGain = 50; // 降低：75 -> 50
+            baseAffectionGain = 4; // 降低：8 -> 4
+            baseExpGain = 50;
             break;
         case InteractionType.DAILY_CHECKIN:
-            // 每日签到奖励随连续天数递增
+            // 每日签到是主要好感度来源，但递进更慢（适配200上限）
             const consecutiveDays = state.stats.consecutiveDays;
-            baseAffectionGain = 3 + Math.min(Math.floor(consecutiveDays / 10), 5); // 降低：5 + (days/7) -> 3 + (days/10), 最多+5
-            baseExpGain = 15 + Math.min(Math.floor(consecutiveDays / 5) * 5, 30); // 降低：20 + (days/3)*5 -> 15 + (days/5)*5，最多+30
+            // 基础2点 + 每20天增加1点（最多+10点）= 最终12点/天
+            baseAffectionGain = 2 + Math.min(Math.floor(consecutiveDays / 20), 10);
+            // 经验值保持不变
+            baseExpGain = 15 + Math.min(Math.floor(consecutiveDays / 5) * 5, 30);
             break;
     }
 
-    // 应用连击加成
-    const affectionGain = Math.round(baseAffectionGain * (1 + comboBonus));
-    const expGain = Math.round(baseExpGain * (1 + comboBonus));
+    // 直接使用基础奖励（移除连击加成）
+    const affectionGain = baseAffectionGain;
+    const expGain = baseExpGain;
 
-    // 应用好感度
+    // 应用好感度（上限调整为200）
     const oldAffection = state.affection;
-    state.affection = Math.min(100, state.affection + affectionGain);
+    state.affection = Math.min(200, state.affection + affectionGain);
 
     // 检查里程碑
     const milestone = checkAffectionMilestones(oldAffection, state.affection);
@@ -377,7 +312,7 @@ export const recordInteraction = (
     }
     const { leveledUp } = addExp(totalExpGain);
 
-    return { affectionGain, expGain: totalExpGain, state, leveledUp, comboCount, comboBonus, milestone };
+    return { affectionGain, expGain: totalExpGain, state, leveledUp, milestone };
 };
 
 // 保存互动记录
@@ -475,10 +410,10 @@ export const DEFAULT_ACHIEVEMENTS: Achievement[] = [
         category: 'words_learned',
         currentTier: null,
         tiers: [
-            { tier: AchievementTier.BRONZE, target: 50, reward: { affection: 2, exp: 20, title: '初学者' }, unlocked: false },
-            { tier: AchievementTier.SILVER, target: 200, reward: { affection: 5, exp: 50, title: '学习者' }, unlocked: false },
-            { tier: AchievementTier.GOLD, target: 500, reward: { affection: 10, exp: 100, title: '词汇专家' }, unlocked: false },
-            { tier: AchievementTier.DIAMOND, target: 1000, reward: { affection: 20, exp: 200, title: '单词大师' }, unlocked: false }
+            { tier: AchievementTier.BRONZE, target: 100, reward: { affection: 2, exp: 20, title: '初学者' }, unlocked: false },
+            { tier: AchievementTier.SILVER, target: 500, reward: { affection: 5, exp: 50, title: '学习者' }, unlocked: false },
+            { tier: AchievementTier.GOLD, target: 1500, reward: { affection: 10, exp: 100, title: '词汇专家' }, unlocked: false },
+            { tier: AchievementTier.DIAMOND, target: 3000, reward: { affection: 20, exp: 200, title: '单词大师' }, unlocked: false }
         ]
     },
     {
@@ -499,28 +434,28 @@ export const DEFAULT_ACHIEVEMENTS: Achievement[] = [
         id: 'stories',
         name: 'AI 故事冒险家',
         description: '完成 AI 故事数量成就',
-        icon: '�',
+        icon: '📖',
         category: 'stories',
         currentTier: null,
         tiers: [
-            { tier: AchievementTier.BRONZE, target: 5, reward: { affection: 2, exp: 25, title: '故事新手' }, unlocked: false },
-            { tier: AchievementTier.SILVER, target: 20, reward: { affection: 5, exp: 60, title: '故事爱好者' }, unlocked: false },
-            { tier: AchievementTier.GOLD, target: 50, reward: { affection: 10, exp: 120, title: '故事收藏家' }, unlocked: false },
-            { tier: AchievementTier.DIAMOND, target: 100, reward: { affection: 20, exp: 250, title: '故事大师' }, unlocked: false }
+            { tier: AchievementTier.BRONZE, target: 10, reward: { affection: 2, exp: 25, title: '故事新手' }, unlocked: false },
+            { tier: AchievementTier.SILVER, target: 30, reward: { affection: 5, exp: 60, title: '故事爱好者' }, unlocked: false },
+            { tier: AchievementTier.GOLD, target: 100, reward: { affection: 10, exp: 120, title: '故事收藏家' }, unlocked: false },
+            { tier: AchievementTier.DIAMOND, target: 200, reward: { affection: 20, exp: 250, title: '故事大师' }, unlocked: false }
         ]
     },
     {
         id: 'adventures',
         name: 'Word Odyssey 探险者',
         description: '完成冒险次数成就',
-        icon: '�️',
+        icon: '🗺️',
         category: 'adventures',
         currentTier: null,
         tiers: [
-            { tier: AchievementTier.BRONZE, target: 3, reward: { affection: 3, exp: 35, title: '见习冒险者' }, unlocked: false },
-            { tier: AchievementTier.SILVER, target: 10, reward: { affection: 7, exp: 70, title: '冒险者' }, unlocked: false },
-            { tier: AchievementTier.GOLD, target: 30, reward: { affection: 12, exp: 140, title: '资深探险家' }, unlocked: false },
-            { tier: AchievementTier.DIAMOND, target: 100, reward: { affection: 25, exp: 280, title: '传奇冒险家' }, unlocked: false }
+            { tier: AchievementTier.BRONZE, target: 5, reward: { affection: 3, exp: 35, title: '见习冒险者' }, unlocked: false },
+            { tier: AchievementTier.SILVER, target: 20, reward: { affection: 7, exp: 70, title: '冒险者' }, unlocked: false },
+            { tier: AchievementTier.GOLD, target: 50, reward: { affection: 12, exp: 140, title: '资深探险家' }, unlocked: false },
+            { tier: AchievementTier.DIAMOND, target: 150, reward: { affection: 25, exp: 280, title: '传奇冒险家' }, unlocked: false }
         ]
     },
     {
@@ -545,10 +480,10 @@ export const DEFAULT_ACHIEVEMENTS: Achievement[] = [
         category: 'affection',
         currentTier: null,
         tiers: [
-            { tier: AchievementTier.BRONZE, target: 25, reward: { affection: 0, exp: 30, title: '初识之喜' }, unlocked: false },
-            { tier: AchievementTier.SILVER, target: 50, reward: { affection: 0, exp: 80, title: '知心好友' }, unlocked: false },
-            { tier: AchievementTier.GOLD, target: 75, reward: { affection: 0, exp: 150, title: '亲密伙伴' }, unlocked: false },
-            { tier: AchievementTier.DIAMOND, target: 100, reward: { affection: 0, exp: 300, title: '永恒之约' }, unlocked: false }
+            { tier: AchievementTier.BRONZE, target: 50, reward: { affection: 0, exp: 30, title: '初识之喜' }, unlocked: false },
+            { tier: AchievementTier.SILVER, target: 100, reward: { affection: 0, exp: 80, title: '亲密无间' }, unlocked: false },
+            { tier: AchievementTier.GOLD, target: 150, reward: { affection: 0, exp: 150, title: '心有灵犀' }, unlocked: false },
+            { tier: AchievementTier.DIAMOND, target: 200, reward: { affection: 0, exp: 300, title: '永恒之约' }, unlocked: false }
         ]
     }
 ];
@@ -561,6 +496,38 @@ export const getAchievements = (): Achievement[] => {
             const achievements: Achievement[] = JSON.parse(stored);
             // 验证数据格式是否为新的多级制格式
             if (achievements.length > 0 && achievements[0].tiers && Array.isArray(achievements[0].tiers)) {
+                // 检查是否需要更新目标值（版本v1.1更新）
+                const needsUpdate = 
+                    achievements.find(a => a.id === 'words_learned')?.tiers[0].target === 50 ||
+                    achievements.find(a => a.id === 'stories')?.tiers[0].target === 5 ||
+                    achievements.find(a => a.id === 'adventures')?.tiers[0].target === 3 ||
+                    achievements.find(a => a.id === 'stories')?.icon === '�' ||
+                    achievements.find(a => a.id === 'adventures')?.icon === '�️';
+                
+                if (needsUpdate) {
+                    console.log('检测到旧版本成就数据，更新到v1.1版本...');
+                    // 保留用户的解锁状态，但更新目标值和图标
+                    const updatedAchievements = DEFAULT_ACHIEVEMENTS.map(defaultAch => {
+                        const userAch = achievements.find(a => a.id === defaultAch.id);
+                        if (userAch) {
+                            // 保留用户的解锁状态和解锁时间
+                            return {
+                                ...defaultAch,
+                                currentTier: userAch.currentTier,
+                                tiers: defaultAch.tiers.map((defaultTier, index) => ({
+                                    ...defaultTier,
+                                    unlocked: userAch.tiers[index]?.unlocked || false,
+                                    unlockedAt: userAch.tiers[index]?.unlockedAt
+                                }))
+                            };
+                        }
+                        return defaultAch;
+                    });
+                    localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(updatedAchievements));
+                    console.log('✅ 成就数据已更新到v1.1版本');
+                    return updatedAchievements;
+                }
+                
                 return achievements;
             }
             // 旧格式数据，清除并使用默认值
@@ -636,11 +603,12 @@ export const checkAchievements = (): Achievement[] => {
     return newlyUnlocked;
 };
 
-// 获取每日签到奖励预览
+// 获取每日签到奖励预览（适配新的计算公式）
 export const getDailyCheckinReward = (): { affection: number; exp: number } => {
     const state = getMateState();
     const consecutiveDays = state.stats.consecutiveDays;
-    const affection = 3 + Math.min(Math.floor(consecutiveDays / 10), 5);
+    // 基础2点 + 每20天增加1点（最多+10点）
+    const affection = 2 + Math.min(Math.floor(consecutiveDays / 20), 10);
     const exp = 15 + Math.min(Math.floor(consecutiveDays / 5) * 5, 30);
     return { affection, exp };
 };
@@ -711,7 +679,6 @@ export const getInteractionReward = (type: InteractionType): { affection: number
 // 获取详细统计
 export const getDetailedStats = () => {
     const state = getMateState();
-    const combo = getCurrentCombo();
     const nextMilestone = getNextMilestone();
     const levelProgress = getLevelProgress();
     const reachedMilestones = getReachedMilestones();
@@ -721,7 +688,6 @@ export const getDetailedStats = () => {
         exp: state.exp,
         affection: state.affection,
         affectionTitle: getAffectionTitle(state.affection),
-        combo,
         levelProgress,
         nextMilestone,
         milestoneProgress: {
@@ -737,6 +703,5 @@ export const resetMateData = (): void => {
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem(INTERACTIONS_KEY);
     localStorage.removeItem(ACHIEVEMENTS_KEY);
-    localStorage.removeItem(COMBO_KEY);
     localStorage.removeItem(MILESTONES_KEY);
 };

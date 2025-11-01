@@ -255,7 +255,7 @@ const DevTools: React.FC<DevToolsProps> = ({ onRefresh }) => {
                 '名称': mate.name,
                 '等级': `Lv.${mate.level}`,
                 '经验值': `${mate.exp} EXP`,
-                '好感度': `${mate.affection}/100`,
+                '好感度': `${mate.affection}/200`,
                 '心情': mate.mood,
                 '总学习天数': mate.stats.totalStudyDays,
                 '连续打卡天数': mate.stats.consecutiveDays,
@@ -278,15 +278,15 @@ const DevTools: React.FC<DevToolsProps> = ({ onRefresh }) => {
     };
 
     /**
-     * 快速增加好感度
+     * 快速增加好感度（适配200上限）
      */
     const handleAddAffection = () => {
-        const amount = prompt('请输入要增加的好感度（1-50）:', '10');
+        const amount = prompt('请输入要增加的好感度（1-100）:', '10');
         if (!amount) return;
 
         const affectionNum = parseInt(amount);
-        if (isNaN(affectionNum) || affectionNum < 1 || affectionNum > 50) {
-            alert('请输入1-50之间的有效数值！');
+        if (isNaN(affectionNum) || affectionNum < 1 || affectionNum > 100) {
+            alert('请输入1-100之间的有效数值！');
             return;
         }
 
@@ -351,11 +351,34 @@ const DevTools: React.FC<DevToolsProps> = ({ onRefresh }) => {
     };
 
     /**
+     * 强制更新成就数据（用于修复乱码和更新目标值）
+     */
+    const handleForceUpdateAchievements = () => {
+        const confirmed = window.confirm(
+            '🔄 强制更新成就数据\n\n这将:\n✓ 修复图标乱码（📖 和 🗺️）\n✓ 更新成就目标值到v1.1版本\n✓ 保留你已解锁的成就\n\n确定继续吗？'
+        );
+
+        if (!confirmed) return;
+
+        try {
+            // 清除旧的成就数据，强制重新加载
+            localStorage.removeItem('wordmate_achievements');
+            
+            // 刷新页面以重新加载
+            alert('✅ 成就数据已更新！页面将刷新...');
+            window.location.reload();
+        } catch (error) {
+            console.error('更新成就数据失败:', error);
+            alert('操作失败，请查看控制台了解详情。');
+        }
+    };
+
+    /**
      * 重置单词姬数据
      */
     const handleResetMateData = () => {
         const confirmed = window.confirm(
-            '⚠️ 警告：此操作将重置单词姬的所有数据！\n\n包括:\n- 等级和经验\n- 好感度\n- 所有统计数据\n- 成就进度\n- 连击记录\n\n确定要继续吗？'
+            '⚠️ 警告：此操作将重置单词姬的所有数据！\n\n包括:\n- 等级和经验\n- 好感度\n- 所有统计数据\n- 成就进度\n\n确定要继续吗？'
         );
 
         if (!confirmed) return;
@@ -482,6 +505,10 @@ const DevTools: React.FC<DevToolsProps> = ({ onRefresh }) => {
                         <Zap size={16} />
                         调整连续天数
                     </button>
+                    <button className="dev-btn dev-btn-info" onClick={handleForceUpdateAchievements}>
+                        <Award size={16} />
+                        🔄 更新成就数据
+                    </button>
                     <button className="dev-btn dev-btn-warning" onClick={handleResetMateData}>
                         <Award size={16} />
                         重置单词姬
@@ -489,7 +516,7 @@ const DevTools: React.FC<DevToolsProps> = ({ onRefresh }) => {
                 </div>
 
                 <div className="dev-tools-section">
-                    <h4>�📊 数据管理</h4>
+                    <h4>� 数据管理</h4>
                     <button className="dev-btn dev-btn-info" onClick={handleShowStats}>
                         <BarChart3 size={16} />
                         查看学习统计
