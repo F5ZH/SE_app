@@ -64,7 +64,8 @@
     overflow: visible;
     cursor: pointer;
     transition: transform 0.3s ease;
-    background: transparent; /* 移除背景，让 MateAvatar 自己控制 */
+    background: transparent;
+    /* 移除背景，让 MateAvatar 自己控制 */
 }
 
 .character-avatar:hover {

@@ -38,7 +38,7 @@ export interface UserContext {
 const generateSystemPrompt = (context: UserContext): string => {
     // 根据等级确定角色性格和语气
     let personalityPrompt = '';
-    
+
     if (context.mateLevel <= 10) {
         // Lv 1-10: 幼女形态 - 天真活泼
         personalityPrompt = `

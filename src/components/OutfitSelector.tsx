@@ -25,7 +25,7 @@ const OutfitSelector: React.FC<OutfitSelectorProps> = ({
     onClose
 }) => {
     const [selectedOutfit, setSelectedOutfit] = useState<string>(currentOutfitId);
-    
+
     // 获取已解锁的服装ID列表
     const unlockedOutfitIds = getUnlockedOutfits();
 

@@ -43,6 +43,7 @@
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -70,9 +71,12 @@
 }
 
 @keyframes float {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateY(0);
     }
+
     50% {
         transform: translateY(-10px);
     }
@@ -124,9 +128,12 @@
 }
 
 @keyframes bounce {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateY(0);
     }
+
     50% {
         transform: translateY(-5px);
     }
@@ -236,9 +243,12 @@
 }
 
 @keyframes levelUpFlash {
-    0%, 100% {
+
+    0%,
+    100% {
         filter: brightness(1);
     }
+
     50% {
         filter: brightness(1.5) drop-shadow(0 0 30px rgba(255, 215, 0, 0.8));
     }
@@ -257,10 +267,13 @@
 }
 
 @keyframes pulse {
-    0%, 100% {
+
+    0%,
+    100% {
         opacity: 0.5;
         transform: scale(1);
     }
+
     50% {
         opacity: 1;
         transform: scale(1.05);

@@ -351,7 +351,7 @@ const DevTools: React.FC<DevToolsProps> = ({ onRefresh }) => {
                 mate.exp = 0; // 重置经验到0
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(mate));
                 alert(`等级已设置为 Lv.${levelNum}！\n页面将刷新以显示新等级。`);
-                
+
                 // 强制刷新页面以更新所有组件
                 window.location.reload();
             } else {

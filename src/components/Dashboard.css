@@ -73,7 +73,8 @@
 .wordmate-avatar .level-tag,
 .wordmate-avatar .mood-indicator,
 .wordmate-avatar .click-hint {
-  display: none; /* 在小尺寸显示中隐藏这些元素 */
+  display: none;
+  /* 在小尺寸显示中隐藏这些元素 */
 }
 
 .wordmate-info {
