@@ -1,17 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Trash2, X } from 'lucide-react';
-import { ChatMessage, sendChatMessage, generateMessageId, loadChatHistory, saveChatHistory, clearChatHistory } from '../utils/chat';
+import { ChatMessage, UserContext, sendChatMessage, generateMessageId, loadChatHistory, saveChatHistory, clearChatHistory } from '../utils/chat';
 import './ChatBox.css';
 
 interface ChatBoxProps {
     onClose: () => void;
+    userContext: UserContext;
 }
 
 /**
  * AI 聊天框组件
  * 与单词姬自由对话
  */
-const ChatBox: React.FC<ChatBoxProps> = ({ onClose }) => {
+const ChatBox: React.FC<ChatBoxProps> = ({ onClose, userContext }) => {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [inputText, setInputText] = useState('');
     const [isSending, setIsSending] = useState(false);
@@ -28,15 +29,28 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onClose }) => {
         if (history.length > 0) {
             setMessages(history);
         } else {
+            // 根据用户数据生成个性化问候
+            let greeting = `嗨！我是${userContext.mateName}~ `;
+            
+            if (userContext.todayNewWords !== undefined && userContext.todayNewWords > 0) {
+                greeting += `今天还有${userContext.todayNewWords}个新单词要学呢！`;
+            } else if (userContext.todayReviewWords !== undefined && userContext.todayReviewWords > 0) {
+                greeting += `今天还有${userContext.todayReviewWords}个单词需要复习哦！`;
+            } else if (userContext.totalMastered !== undefined && userContext.totalMastered > 0) {
+                greeting += `你已经掌握了${userContext.totalMastered}个单词啦，好棒！`;
+            } else {
+                greeting += `有什么想和我聊的吗？学习上的问题、单词记忆技巧，或者随便聊聊天都可以哦！`;
+            }
+            
             // 初始问候
             setMessages([{
                 id: generateMessageId(),
                 role: 'assistant',
-                content: '嗨！我是单词姬~ 有什么想和我聊的吗？学习上的问题、单词记忆技巧，或者随便聊聊天都可以哦！💕',
+                content: greeting,
                 timestamp: Date.now()
             }]);
         }
-    }, []);
+    }, [userContext]);
 
     useEffect(() => {
         // 滚动到最新消息
@@ -72,7 +86,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onClose }) => {
         try {
             // 只发送最近 10 条消息作为上下文
             const contextMessages = [...messages, userMessage].slice(-10);
-            const response = await sendChatMessage(contextMessages, apiKey);
+            const response = await sendChatMessage(contextMessages, apiKey, userContext);
 
             const assistantMessage: ChatMessage = {
                 id: generateMessageId(),
@@ -87,7 +101,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onClose }) => {
             const errorMessage: ChatMessage = {
                 id: generateMessageId(),
                 role: 'assistant',
-                content: '啊呀，我好像走神了...能再说一遍吗？😅',
+                content: '啊呀，我好像走神了...能再说一遍吗？',
                 timestamp: Date.now()
             };
             setMessages(prev => [...prev, errorMessage]);
@@ -109,7 +123,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onClose }) => {
             setMessages([{
                 id: generateMessageId(),
                 role: 'assistant',
-                content: '聊天记录已清空~ 让我们重新开始吧！✨',
+                content: `聊天记录已清空~ 让我们重新开始吧！我是${userContext.mateName}，随时准备陪你学习！`,
                 timestamp: Date.now()
             }]);
         }
@@ -181,15 +195,16 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onClose }) => {
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
                         onKeyPress={handleKeyPress}
-                        rows={1}
+                        rows={4}
                         disabled={isSending}
+                        style={{ minHeight: '80px', height: '80px' }}
                     />
                     <button
                         className="send-btn"
                         onClick={handleSendMessage}
                         disabled={!inputText.trim() || isSending}
                     >
-                        <Send size={20} />
+                        <Send size={24} />
                     </button>
                 </div>
             </div>

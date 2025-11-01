@@ -12,6 +12,9 @@ import {
     checkDailyCheckin
 } from '../utils/wordMate';
 import { getDialogue, getGreetingByTime } from '../data/dialogues';
+import { UserContext } from '../utils/chat';
+import { studyPlanStorage, wordBookStorage } from '../utils/storage';
+import { generateTodayTask, getStudyStats } from '../utils/studyPlan';
 import ChatBox from './ChatBox';
 import './WordMateHome.css';
 
@@ -39,6 +42,57 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
 
     const levelProgress = getLevelProgress();
     const affectionTitle = getAffectionTitle(mate.affection);
+
+    /**
+     * 收集用户上下文数据
+     */
+    const getUserContext = (): UserContext => {
+        // 获取当前学习计划和词书
+        const currentPlan = studyPlanStorage.getCurrent();
+        const wordBooks = wordBookStorage.getAll();
+        const currentBook = currentPlan ? wordBooks.find(b => b.id === currentPlan.wordBookId) : null;
+
+        let context: UserContext = {
+            mateName: mate.name,
+            mateLevel: mate.level,
+            mateAffection: mate.affection,
+            consecutiveDays: mate.stats.consecutiveDays,
+            totalInteractions: mate.stats.totalStudyDays + mate.stats.storiesCompleted + mate.stats.adventuresCompleted
+        };
+
+        // 添加学习数据
+        if (currentPlan && currentBook) {
+            const todayTask = generateTodayTask(currentBook, currentPlan);
+            const stats = getStudyStats(currentBook);
+
+            context = {
+                ...context,
+                todayNewWords: todayTask.totalNew,
+                todayReviewWords: todayTask.totalReview,
+                totalMastered: stats.masteredWords,
+                totalLearning: stats.learnedWords,
+                currentPlanName: currentBook.name,
+                dailyTarget: currentPlan.dailyNewWords,
+                accuracyRate: stats.accuracy,
+                studyStreak: mate.stats.consecutiveDays
+            };
+
+            // 获取最近学习的单词（最多5个）
+            if (todayTask.newWords.length > 0) {
+                context.recentWords = todayTask.newWords.slice(0, 5).map(w => ({
+                    word: w.word,
+                    translation: w.translation
+                }));
+            } else if (todayTask.reviewWords.length > 0) {
+                context.recentWords = todayTask.reviewWords.slice(0, 5).map(w => ({
+                    word: w.word,
+                    translation: w.translation
+                }));
+            }
+        }
+
+        return context;
+    };
 
     // 初始化问候
     useEffect(() => {
@@ -423,7 +477,10 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
 
             {/* AI 聊天框 */}
             {showChatBox && (
-                <ChatBox onClose={() => setShowChatBox(false)} />
+                <ChatBox 
+                    onClose={() => setShowChatBox(false)} 
+                    userContext={getUserContext()}
+                />
             )}
         </div>
     );
