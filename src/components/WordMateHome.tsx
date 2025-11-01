@@ -477,8 +477,8 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
 
             {/* AI 聊天框 */}
             {showChatBox && (
-                <ChatBox 
-                    onClose={() => setShowChatBox(false)} 
+                <ChatBox
+                    onClose={() => setShowChatBox(false)}
                     userContext={getUserContext()}
                 />
             )}

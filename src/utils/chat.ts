@@ -17,7 +17,7 @@ export interface UserContext {
     mateAffection: number;
     consecutiveDays: number;
     totalInteractions: number;
-    
+
     // 学习数据
     todayNewWords?: number;
     todayReviewWords?: number;
@@ -26,7 +26,7 @@ export interface UserContext {
     recentWords?: Array<{ word: string; translation: string }>;
     currentPlanName?: string;
     dailyTarget?: number;
-    
+
     // 学习统计
     accuracyRate?: number;
     studyStreak?: number;

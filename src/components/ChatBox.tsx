@@ -31,7 +31,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onClose, userContext }) => {
         } else {
             // 根据用户数据生成个性化问候
             let greeting = `嗨！我是${userContext.mateName}~ `;
-            
+
             if (userContext.todayNewWords !== undefined && userContext.todayNewWords > 0) {
                 greeting += `今天还有${userContext.todayNewWords}个新单词要学呢！`;
             } else if (userContext.todayReviewWords !== undefined && userContext.todayReviewWords > 0) {
@@ -41,7 +41,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onClose, userContext }) => {
             } else {
                 greeting += `有什么想和我聊的吗？学习上的问题、单词记忆技巧，或者随便聊聊天都可以哦！`;
             }
-            
+
             // 初始问候
             setMessages([{
                 id: generateMessageId(),
