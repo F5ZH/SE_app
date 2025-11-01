@@ -104,10 +104,10 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
       const wordsLearned = totalWords;
       addWordsLearned(wordsLearned);
       recordInteraction(InteractionType.STUDY_COMPLETE, `完成${wordsLearned}个单词`);
-      
+
       // 检查新成就
       checkAchievements();
-      
+
       onComplete();
       return;
     }
@@ -322,7 +322,7 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
   // 没有学习任务
   // 显示完成界面：所有单词已完成，或者没有单词可学
   const isComplete = (totalWords > 0 && completedCount === totalWords) || (studyQueue.length === 0 && totalWords === 0);
-  
+
   if (isComplete && !showModeSelector) {
     return (
       <div className="study-session">
@@ -400,7 +400,7 @@ const StudySession: React.FC<StudySessionProps> = ({ plan, wordBooks, onComplete
             </div>
           </>
         )}
-        
+
         {isNoProgressMode && (
           <div className="session-info">
             <h1 className="session-title">

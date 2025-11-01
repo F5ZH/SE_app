@@ -67,7 +67,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange, onPlanNaviga
                 className={`nav-item ${isActive ? 'active' : ''} ${item.disabled ? 'disabled' : ''}`}
                 onClick={() => {
                   if (item.disabled) return;
-                  
+
                   // 特殊处理学习计划导航
                   if (item.id === 'plan' && onPlanNavigation) {
                     onPlanNavigation();

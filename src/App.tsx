@@ -85,10 +85,10 @@ function App() {
     studyPlanStorage.save(plan);
     studyPlanStorage.setCurrent(plan.id);
     setCurrentPlan(plan);
-    
+
     // 清空今日单词列表缓存，以便重新生成
     clearCachedTodayWords();
-    
+
     setCurrentView('dashboard');
   };
 
