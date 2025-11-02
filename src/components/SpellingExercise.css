@@ -1,0 +1,354 @@
+/* 拼写练习组件样式 */
+.spelling-exercise {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  margin-bottom: 2rem;
+  overflow: hidden;
+}
+
+/* 练习头部 */
+.exercise-header {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.exercise-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.exercise-progress {
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
+/* 练习内容 */
+.exercise-content {
+  padding: 2rem;
+}
+
+/* 汉语释义显示 */
+.translation-display {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: #f8fafc;
+  border-radius: 12px;
+  border-left: 4px solid #10b981;
+}
+
+.translation-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 0.75rem 0;
+}
+
+.translation-text {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+}
+
+/* 音标显示 */
+.pronunciation-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f1f5f9;
+  border-radius: 8px;
+}
+
+.pronunciation-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #cbd5e1;
+  background: white;
+  color: #64748b;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.pronunciation-btn:hover {
+  background: #e2e8f0;
+  color: #374151;
+}
+
+.pronunciation-text {
+  font-size: 1.125rem;
+  color: #64748b;
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* 输入区域 */
+.input-area {
+  margin-bottom: 2rem;
+}
+
+.input-group {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.spelling-input {
+  flex: 1;
+  padding: 1rem 1.5rem;
+  border: 2px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1.125rem;
+  font-weight: 500;
+  text-align: center;
+  transition: all 0.2s ease;
+  background: white;
+}
+
+.spelling-input:focus {
+  outline: none;
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+.spelling-input.correct {
+  border-color: #10b981;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.spelling-input.incorrect {
+  border-color: #ef4444;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+/* 提示区域 */
+.hint-area {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.hint-display {
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 2rem;
+}
+
+.hint-text {
+  font-size: 0.875rem;
+  color: #92400e;
+  margin: 0 0 0.5rem 0;
+  font-weight: 500;
+}
+
+.hint-text:last-child {
+  margin-bottom: 0;
+}
+
+/* 结果显示 */
+.result-display {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  animation: slideIn 0.3s ease-out;
+}
+
+.result-display.correct {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+.result-display.incorrect {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.result-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.result-display.correct .result-icon {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.result-display.incorrect .result-icon {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.result-content {
+  flex: 1;
+}
+
+.result-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.result-display.correct .result-title {
+  color: #166534;
+}
+
+.result-display.incorrect .result-title {
+  color: #991b1b;
+}
+
+.result-word {
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0 0 0.25rem 0;
+}
+
+.result-display.correct .result-word {
+  color: #166534;
+}
+
+.result-display.incorrect .result-word {
+  color: #991b1b;
+}
+
+.user-answer {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0;
+}
+
+/* 例句显示 */
+.example-display {
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border-left: 4px solid #3b82f6;
+}
+
+.example-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 0.75rem 0;
+}
+
+.example-text {
+  font-size: 1rem;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+/* 练习操作 */
+.exercise-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .exercise-content {
+    padding: 1.5rem;
+  }
+
+  .translation-text {
+    font-size: 1.25rem;
+  }
+
+  .input-group {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .spelling-input {
+    font-size: 1rem;
+    padding: 0.875rem 1.25rem;
+  }
+
+  .pronunciation-display {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .result-display {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+
+  .exercise-actions {
+    flex-direction: column;
+  }
+
+  .exercise-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .exercise-header {
+    padding: 1rem;
+  }
+
+  .exercise-title {
+    font-size: 1.25rem;
+  }
+
+  .exercise-content {
+    padding: 1rem;
+  }
+
+  .translation-display {
+    padding: 1rem;
+  }
+
+  .translation-text {
+    font-size: 1.125rem;
+  }
+
+  .spelling-input {
+    font-size: 0.875rem;
+    padding: 0.75rem 1rem;
+  }
+}

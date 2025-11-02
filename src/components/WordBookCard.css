@@ -1,0 +1,290 @@
+/* 词书卡片组件样式 */
+.wordbook-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.wordbook-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.wordbook-card.preset {
+  border-left: 4px solid #3b82f6;
+}
+
+.wordbook-card.custom {
+  border-left: 4px solid #10b981;
+}
+
+/* 卡片头部 */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.book-info {
+  display: flex;
+  gap: 1rem;
+  flex: 1;
+}
+
+.book-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border-radius: 8px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.book-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 0.25rem 0;
+  line-height: 1.3;
+}
+
+.description {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.book-badge {
+  flex-shrink: 0;
+}
+
+/* 卡片统计 */
+.card-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.stat-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: white;
+  border-radius: 6px;
+  color: #3b82f6;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.stat-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.stat-value {
+  display: block;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.2;
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 0.125rem;
+}
+
+/* 词汇预览 */
+.card-preview {
+  margin-bottom: 1.5rem;
+}
+
+.preview-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 0.75rem 0;
+}
+
+.word-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.word-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.word-text {
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.word-translation {
+  color: #64748b;
+}
+
+.word-more {
+  text-align: center;
+  padding: 0.5rem;
+  color: #64748b;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+/* 卡片操作 */
+.card-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
+/* 词书预览模态窗样式 */
+.wordbook-preview-number {
+  width: 32px;
+  height: 32px;
+  background: #f1f5f9;
+  color: #64748b;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  margin-right: 16px;
+  flex-shrink: 0;
+}
+
+.wordbook-preview-word {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+  width: 150px;
+  margin-right: 16px;
+  flex-shrink: 0;
+}
+
+.wordbook-preview-translation {
+  font-size: 14px;
+  color: #475569;
+  flex: 1;
+  margin-right: 16px;
+}
+
+.wordbook-preview-pronunciation {
+  font-size: 12px;
+  color: #64748b;
+  font-style: italic;
+  width: 120px;
+  margin-right: 16px;
+  flex-shrink: 0;
+}
+
+.wordbook-preview-example {
+  font-size: 12px;
+  color: #64748b;
+  font-style: italic;
+  width: 200px;
+  flex-shrink: 0;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .wordbook-card {
+    padding: 1rem;
+  }
+
+  .book-info {
+    gap: 0.75rem;
+  }
+
+  .book-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .title {
+    font-size: 1.125rem;
+  }
+
+  .card-stats {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .card-actions {
+    flex-direction: column;
+  }
+
+  .card-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-header {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .book-info {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .book-badge {
+    align-self: center;
+  }
+
+  .stat-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+
+  .stat-icon {
+    width: 28px;
+    height: 28px;
+  }
+}

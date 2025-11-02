@@ -1,0 +1,269 @@
+/* 头部组件样式 */
+.header {
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 70px;
+}
+
+/* 品牌区域 */
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.brand-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  border-radius: 12px;
+  color: white;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.brand-subtitle {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.2;
+}
+
+/* 导航菜单 */
+.header-nav {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #64748b;
+  position: relative;
+  min-width: 80px;
+}
+
+.nav-item:hover:not(.disabled) {
+  background-color: #f1f5f9;
+  color: #3b82f6;
+  transform: translateY(-1px);
+}
+
+.nav-item.active {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+  font-weight: 500;
+}
+
+.nav-item.active::before {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 20px;
+  height: 3px;
+  background-color: #3b82f6;
+  border-radius: 2px;
+}
+
+.nav-item.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.nav-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.nav-disabled-indicator {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: #fef3c7;
+  color: #92400e;
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  font-size: 0.625rem;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .header-container {
+    padding: 0 1rem;
+    flex-direction: column;
+    gap: 1rem;
+    min-height: auto;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+
+  .header-brand {
+    gap: 0.75rem;
+  }
+
+  .brand-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .brand-title {
+    font-size: 1.25rem;
+  }
+
+  .brand-subtitle {
+    font-size: 0.8rem;
+  }
+
+  .header-nav {
+    width: 100%;
+    justify-content: space-around;
+    gap: 0.25rem;
+  }
+
+  .nav-item {
+    min-width: 60px;
+    padding: 0.5rem 0.25rem;
+  }
+
+  .nav-label {
+    font-size: 0.7rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-text {
+    display: none;
+  }
+
+  .nav-label {
+    display: none;
+  }
+
+  .nav-item {
+    min-width: 44px;
+    padding: 0.75rem 0.5rem;
+  }
+}
+
+/* ... (文件末尾) */
+
+/* 用户信息区域 */
+.header-user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-welcome {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #475569;
+}
+
+.btn-logout {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #ef4444;
+  /* 红色以示退出 */
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.btn-logout:hover {
+  background-color: #fef2f2;
+  border-color: #fecaca;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .header-container {
+    gap: 1.5rem;
+    /* 增加一点间距 */
+  }
+
+  .header-user-info {
+    /* 在中等屏幕上，将其放在导航栏下方 */
+    order: 3;
+    /* 确保它在导航栏之后 */
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+
+  /* 在小屏幕上，隐藏用户名和 "退出" 文字 */
+  .user-welcome span {
+    display: none;
+  }
+
+  .btn-logout span {
+    display: none;
+  }
+
+  .header-user-info {
+    /* 将其放回品牌旁边 */
+    order: 0;
+    width: auto;
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+  }
+
+  .header-brand {
+    padding-right: 60px;
+    /* 为退出按钮留出空间 */
+  }
+}

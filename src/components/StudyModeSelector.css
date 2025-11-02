@@ -1,0 +1,241 @@
+/* 学习模式选择器样式 */
+.study-mode-selector {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* 选择器头部 */
+.selector-header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.selector-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
+}
+
+.selector-subtitle {
+  font-size: 1rem;
+  color: #64748b;
+  margin: 0;
+}
+
+/* 模式选项 */
+.mode-options {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.mode-option {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.mode-option:hover {
+  border-color: var(--mode-color, #3b82f6);
+  background: #f8fafc;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.mode-option.selected {
+  border-color: var(--mode-color, #3b82f6);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(59, 130, 246, 0.1));
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+}
+
+.mode-option.selected::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--mode-color, #3b82f6);
+}
+
+.option-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--mode-color, #3b82f6);
+  color: white;
+  flex-shrink: 0;
+}
+
+.mode-option.selected .option-icon {
+  background: var(--mode-color, #3b82f6);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.option-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.option-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 0.25rem 0;
+}
+
+.option-description {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.option-radio {
+  flex-shrink: 0;
+}
+
+.radio-button {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #d1d5db;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.radio-button.checked {
+  border-color: var(--mode-color, #3b82f6);
+  background: var(--mode-color, #3b82f6);
+}
+
+.radio-dot {
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+}
+
+/* 学习设置 */
+.study-settings {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid #e2e8f0;
+}
+
+.settings-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 1rem 0;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.setting-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.setting-item:hover {
+  background: white;
+}
+
+.setting-item input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #3b82f6;
+  cursor: pointer;
+}
+
+.setting-label {
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* 选择器操作 */
+.selector-actions {
+  text-align: center;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .mode-option {
+    padding: 1rem;
+  }
+
+  .option-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .option-title {
+    font-size: 1rem;
+  }
+
+  .option-description {
+    font-size: 0.8rem;
+  }
+
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .selector-title {
+    font-size: 1.25rem;
+  }
+
+  .mode-option {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+
+  .option-content {
+    order: 1;
+  }
+
+  .option-icon {
+    order: 0;
+  }
+
+  .option-radio {
+    order: 2;
+  }
+}

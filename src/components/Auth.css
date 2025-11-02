@@ -1,0 +1,135 @@
+.auth-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #f8fafc;
+    padding: 2rem;
+}
+
+.auth-box {
+    width: 100%;
+    max-width: 400px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+}
+
+.auth-header {
+    text-align: center;
+    padding: 2rem 2rem 1.5rem 2rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.auth-logo {
+    margin-bottom: 1rem;
+}
+
+.auth-header h1 {
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.auth-header p {
+    font-size: 0.875rem;
+    opacity: 0.9;
+}
+
+.auth-form {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.auth-form .input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.auth-form .input-group svg {
+    position: absolute;
+    left: 12px;
+    color: #94a3b8;
+}
+
+.auth-form .input-group input {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    background-color: white;
+}
+
+.auth-form .input-group input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.auth-button {
+    width: 100%;
+    padding: 0.875rem;
+    font-size: 1rem;
+}
+
+.auth-error {
+    color: #dc2626;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    padding: 0.75rem;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 0.875rem;
+}
+
+.auth-info {
+    color: #059669;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    padding: 0.75rem;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 0.875rem;
+}
+
+.auth-toggle {
+    padding: 1.5rem 2rem;
+    background: #f8fafc;
+    text-align: center;
+    font-size: 0.875rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.auth-toggle p {
+    margin: 0;
+    color: #475569;
+}
+
+.auth-toggle button {
+    background: none;
+    border: none;
+    color: #3b82f6;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0 0.25rem;
+    font-size: 0.875rem;
+}
+
+.auth-toggle button:hover {
+    text-decoration: underline;
+}
+
+.auth-security-warning {
+    padding: 1rem 2rem;
+    font-size: 0.75rem;
+    text-align: center;
+    color: #92400e;
+    background: #fef3c7;
+}

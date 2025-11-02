@@ -1,0 +1,197 @@
+/* 开发者工具样式 */
+
+.dev-tools-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 999;
+}
+
+.dev-tools-toggle:hover {
+    transform: scale(1.1) rotate(90deg);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.dev-tools-panel {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 380px;
+    max-height: 80vh;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.dev-tools-header {
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dev-tools-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.dev-tools-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+.dev-tools-close:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.dev-tools-content {
+    padding: 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.dev-tools-section {
+    margin-bottom: 24px;
+}
+
+.dev-tools-section:last-of-type {
+    margin-bottom: 0;
+}
+
+.dev-tools-section h4 {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.dev-btn {
+    width: 100%;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: white;
+}
+
+.dev-btn:last-child {
+    margin-bottom: 0;
+}
+
+.dev-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.dev-btn:active {
+    transform: translateY(0);
+}
+
+.dev-btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.dev-btn-primary:hover {
+    background: linear-gradient(135deg, #5568d3 0%, #65408b 100%);
+}
+
+.dev-btn-secondary {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.dev-btn-secondary:hover {
+    background: linear-gradient(135deg, #e082ea 0%, #e4465b 100%);
+}
+
+.dev-btn-info {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.dev-btn-info:hover {
+    background: linear-gradient(135deg, #3e9bed 0%, #00e1ed 100%);
+}
+
+.dev-btn-success {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.dev-btn-success:hover {
+    background: linear-gradient(135deg, #32d86a 0%, #27e8c6 100%);
+}
+
+.dev-btn-danger {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+.dev-btn-danger:hover {
+    background: linear-gradient(135deg, #e95f89 0%, #edd02f 100%);
+}
+
+.dev-tools-note {
+    margin-top: 16px;
+    padding: 12px;
+    background: #fff3cd;
+    border-left: 4px solid #ffc107;
+    border-radius: 4px;
+}
+
+.dev-tools-note p {
+    margin: 0;
+    font-size: 12px;
+    color: #856404;
+    line-height: 1.5;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .dev-tools-panel {
+        width: calc(100% - 40px);
+        right: 20px;
+        left: 20px;
+    }
+
+    .dev-tools-toggle {
+        bottom: 15px;
+        right: 15px;
+    }
+}

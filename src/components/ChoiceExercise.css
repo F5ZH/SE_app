@@ -1,0 +1,402 @@
+/* 选择题练习组件样式 */
+.choice-exercise {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e2e8f0;
+  margin-bottom: 2rem;
+  overflow: hidden;
+}
+
+/* 练习头部 */
+.exercise-header {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.exercise-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.exercise-progress {
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
+/* 练习内容 */
+.exercise-content {
+  padding: 2rem;
+}
+
+/* 单词显示 */
+.word-display {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: #f8fafc;
+  border-radius: 12px;
+  border-left: 4px solid #f59e0b;
+}
+
+.word-text {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 1rem 0;
+}
+
+/* 音标显示 */
+.pronunciation-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.pronunciation-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #cbd5e1;
+  background: white;
+  color: #64748b;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+}
+
+.pronunciation-btn:hover {
+  background: #e2e8f0;
+  color: #374151;
+}
+
+.pronunciation-text {
+  font-size: 1.125rem;
+  color: #64748b;
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* 选项区域 */
+.choices-area {
+  margin-bottom: 2rem;
+}
+
+.choices-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 1.5rem 0;
+  text-align: center;
+}
+
+.choices-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.choice-option {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.choice-option:hover:not(.disabled) {
+  border-color: #f59e0b;
+  background: #fef3c7;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+}
+
+.choice-option.selected {
+  border-color: #f59e0b;
+  background: #fef3c7;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+}
+
+.choice-option.correct {
+  border-color: #10b981;
+  background: #f0fdf4;
+  color: #166534;
+  cursor: default;
+}
+
+.choice-option.incorrect {
+  border-color: #ef4444;
+  background: #fef2f2;
+  color: #991b1b;
+  cursor: default;
+}
+
+.choice-option.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.choice-letter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.choice-option.selected .choice-letter {
+  background: #f59e0b;
+  color: white;
+}
+
+.choice-option.correct .choice-letter {
+  background: #10b981;
+  color: white;
+}
+
+.choice-option.incorrect .choice-letter {
+  background: #ef4444;
+  color: white;
+}
+
+.choice-text {
+  flex: 1;
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: left;
+}
+
+.choice-icon {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.correct-icon {
+  color: #10b981;
+}
+
+.incorrect-icon {
+  color: #ef4444;
+}
+
+/* 结果显示 */
+.result-display {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  animation: slideIn 0.3s ease-out;
+}
+
+.result-display.correct {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+.result-display.incorrect {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.result-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.result-display.correct .result-icon {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.result-display.incorrect .result-icon {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.result-content {
+  flex: 1;
+}
+
+.result-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.result-display.correct .result-title {
+  color: #166534;
+}
+
+.result-display.incorrect .result-title {
+  color: #991b1b;
+}
+
+.result-answer {
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 0 0 0.25rem 0;
+}
+
+.result-display.correct .result-answer {
+  color: #166534;
+}
+
+.result-display.incorrect .result-answer {
+  color: #991b1b;
+}
+
+.user-answer {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin: 0;
+}
+
+/* 例句显示 */
+.example-display {
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border-left: 4px solid #3b82f6;
+}
+
+.example-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  margin: 0 0 0.75rem 0;
+}
+
+.example-text {
+  font-size: 1rem;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+/* 练习操作 */
+.exercise-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .exercise-content {
+    padding: 1.5rem;
+  }
+
+  .word-text {
+    font-size: 1.75rem;
+  }
+
+  .choices-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .choice-option {
+    padding: 0.875rem 1.25rem;
+  }
+
+  .choice-text {
+    font-size: 0.875rem;
+  }
+
+  .pronunciation-display {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .result-display {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.75rem;
+  }
+
+  .exercise-actions {
+    flex-direction: column;
+  }
+
+  .exercise-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .exercise-header {
+    padding: 1rem;
+  }
+
+  .exercise-title {
+    font-size: 1.25rem;
+  }
+
+  .exercise-content {
+    padding: 1rem;
+  }
+
+  .word-display {
+    padding: 1rem;
+  }
+
+  .word-text {
+    font-size: 1.5rem;
+  }
+
+  .choice-option {
+    padding: 0.75rem 1rem;
+  }
+
+  .choice-letter {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+  }
+}
