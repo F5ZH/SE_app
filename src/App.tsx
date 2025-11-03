@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { WordBook, StudyPlan } from './types';
 import { wordBookStorage, studyPlanStorage } from './utils/storage';
-import { clearCachedTodayWords } from './utils/studyPlan';
+import { clearCachedTodayWords, generateTodayTask } from './utils/studyPlan';
 import { presetWordBooks } from './data/presetWordBooks';
 import Header from './components/Header';
 import WordBookList from './components/WordBookList';
@@ -10,6 +10,8 @@ import StudySession from './components/StudySession';
 import Dashboard from './components/Dashboard';
 import DevTools from './components/DevTools';
 import WordMateHome from './components/WordMateHome';
+import AIStoryGenerator from './components/AIStoryGenerator';
+import WordOdyssey from './components/WordOdyssey';
 import './App.css';
 import './components/Modal.css';
 
@@ -19,11 +21,10 @@ import './components/Modal.css';
  */
 function App() {
   // 应用状态
-  const [currentView, setCurrentView] = useState<'dashboard' | 'wordbooks' | 'study' | 'plan' | 'wordmate'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'wordbooks' | 'study' | 'plan' | 'wordmate' | 'story' | 'odyssey'>('dashboard');
   const [wordBooks, setWordBooks] = useState<WordBook[]>([]);
   const [currentPlan, setCurrentPlan] = useState<StudyPlan | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [wordMateActivity, setWordMateActivity] = useState<'story' | 'adventure' | 'basic' | null>(null);
 
   // 初始化应用数据
   useEffect(() => {
@@ -102,6 +103,21 @@ function App() {
   };
 
   /**
+   * 获取今天要学习的单词（用于 AI 故事和 Word Odyssey）
+   */
+  const getTodayWords = () => {
+    if (!currentPlan) return [];
+    
+    // 获取对应的词书
+    const wordBook = wordBooks.find(wb => wb.id === currentPlan.wordBookId);
+    if (!wordBook) return [];
+    
+    // 生成今日任务并返回单词列表
+    const todayTask = generateTodayTask(wordBook, currentPlan);
+    return todayTask ? [...todayTask.newWords, ...todayTask.reviewWords] : [];
+  };
+
+  /**
    * 处理学习计划导航
    */
   const handlePlanNavigation = () => {
@@ -153,16 +169,24 @@ function App() {
 
         {currentView === 'wordmate' && (
           <WordMateHome
-            onStartActivity={(activityType) => {
-              setWordMateActivity(activityType);
-              if (activityType === 'basic') {
-                handleStartStudy();
-              } else {
-                // TODO: 启动 AI 故事或 Word Odyssey
-                setCurrentView('study');
-              }
-            }}
+            onStartBasicStudy={handleStartStudy}
+            onStartStory={() => setCurrentView('story')}
+            onStartOdyssey={() => setCurrentView('odyssey')}
             onBack={() => setCurrentView('dashboard')}
+          />
+        )}
+
+        {currentView === 'story' && currentPlan && (
+          <AIStoryGenerator
+            words={getTodayWords()}
+            onClose={() => setCurrentView('wordmate')}
+          />
+        )}
+
+        {currentView === 'odyssey' && currentPlan && (
+          <WordOdyssey
+            words={getTodayWords()}
+            onClose={() => setCurrentView('wordmate')}
           />
         )}
 

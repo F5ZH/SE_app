@@ -16,6 +16,16 @@ import {
     checkGrammarInstantly
 } from '../utils/wordOdyssey';
 import {
+    getMateState,
+    completeOdysseySession
+} from '../utils/wordMate';
+import {
+    getOdysseyGreeting,
+    getOdysseyGoodChoice,
+    getOdysseyEnergyUp,
+    getOdysseyCompletion
+} from '../utils/chat';
+import {
     Play,
     Send,
     Settings,
@@ -30,6 +40,7 @@ import {
     Sparkles
 } from 'lucide-react';
 import Modal from './Modal';
+import MateAvatar from './MateAvatar';
 import './WordOdyssey.css';
 
 interface WordOdysseyProps {
@@ -38,6 +49,10 @@ interface WordOdysseyProps {
 }
 
 const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
+    // 单词姬状态
+    const [mateState, setMateState] = useState(getMateState());
+    const [mateDialogue, setMateDialogue] = useState<string>('');
+    
     // 配置状态
     const [config, setConfig] = useState<AdventureConfig>({
         theme: AdventureTheme.FANTASY,
@@ -88,6 +103,10 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
             setError('没有可用的单词来创建冒险');
             return;
         }
+
+        // 显示单词姬的鼓励
+        const themeInfo = THEME_INFO[config.theme];
+        setMateDialogue(getOdysseyGreeting(mateState.level, words.length, themeInfo.name));
 
         setIsGenerating(true);
         setError('');
@@ -164,6 +183,14 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
                     const updated = updateWordEnergy(updatedEnergies, evaluation);
                     if (updated) {
                         response.usedWords.push(evaluation.word);
+                        // 单词姬赞扬好的选择
+                        if (evaluation.correct && evaluation.energyChange > 0) {
+                            setMateDialogue(getOdysseyGoodChoice(mateState.level, evaluation.word));
+                            // 显示能量提升提示
+                            setTimeout(() => {
+                                setMateDialogue(getOdysseyEnergyUp(mateState.level, evaluation.energyChange));
+                            }, 2000);
+                        }
                     }
                 });
 
@@ -181,6 +208,8 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
                         };
                         updateWordEnergy(updatedEnergies, mockEvaluation);
                         response.usedWords.push(wordToReward.word);
+                        // 单词姬赞扬
+                        setMateDialogue(getOdysseyGoodChoice(mateState.level, wordToReward.word));
                     }
                 }
             }
@@ -397,6 +426,32 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
 
             const adventureSummary = await generateAdventureSummary(currentSession, apiKey);
             setSummary(adventureSummary);
+            
+            // 计算奖励
+            const sessionDuration = Math.round((currentSession.endTime! - currentSession.startTime) / 60000); // 分钟
+            const wordsUsed = adventureSummary.unlockedWords; // 解锁的单词数即为使用过的单词数
+            const totalWords = currentSession.words.length;
+            const turnsCount = currentSession.storyNodes.length;
+            
+            const reward = completeOdysseySession(
+                wordsUsed,
+                totalWords,
+                turnsCount,
+                sessionDuration
+            );
+            
+            // 更新单词姬状态
+            setMateState(reward.state);
+            
+            // 显示单词姬的总结评价
+            setMateDialogue(getOdysseyCompletion(
+                reward.state.level,
+                wordsUsed,
+                totalWords,
+                reward.affectionGain,
+                reward.expGain
+            ));
+            
             setGameState('summary');
         } catch (err: any) {
             setError('生成总结失败');
@@ -423,6 +478,23 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
     // 渲染配置界面
     const renderConfigScreen = () => (
         <div className="odyssey-config">
+            {/* 单词姬头像 */}
+            <div className="mate-companion-card">
+                <MateAvatar
+                    mate={mateState}
+                    showMoodIndicator={true}
+                />
+                <div className="companion-info">
+                    <div className="companion-title">
+                        <Sparkles size={16} />
+                        <span>{mateState.name}陪你冒险</span>
+                    </div>
+                    <div className="companion-desc">
+                        在冒险中灵活运用单词，{mateState.name}会为你加油打气！
+                    </div>
+                </div>
+            </div>
+
             <div className="config-header">
                 <h2>
                     <Sparkles size={24} />
@@ -559,6 +631,21 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
 
         return (
             <div className="odyssey-game">
+                {/* 单词姬对话提示 */}
+                {mateDialogue && (
+                    <div className="mate-dialogue-floating">
+                        <div className="mate-avatar-small">
+                            <MateAvatar
+                                mate={mateState}
+                                showMoodIndicator={false}
+                            />
+                        </div>
+                        <div className="dialogue-bubble">
+                            {mateDialogue}
+                        </div>
+                    </div>
+                )}
+
                 {/* 顶部进度栏 */}
                 <div className="game-header">
                     <div className="progress-section">
@@ -763,6 +850,20 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
 
         return (
             <div className="odyssey-summary">
+                {/* 单词姬评价 */}
+                {mateDialogue && (
+                    <div className="mate-completion-card">
+                        <MateAvatar
+                            mate={mateState}
+                            showMoodIndicator={true}
+                        />
+                        <div className="completion-dialogue">
+                            <div className="mate-name">{mateState.name}</div>
+                            <div className="dialogue-text">{mateDialogue}</div>
+                        </div>
+                    </div>
+                )}
+
                 <div className="summary-header">
                     <Award size={48} className="summary-icon" />
                     <h2>冒险完成！</h2>

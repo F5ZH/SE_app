@@ -1,11 +1,156 @@
 .ai-story-generator {
-    max-width: 900px;
+    max-width: 1000px;
     margin: 0 auto;
+    padding-left: 300px; /* 减少左侧留白，给主内容更多空间 */
+    padding-right: 20px;
+}
+
+@media (max-width: 1024px) {
+    .ai-story-generator {
+        padding-left: 0;
+    }
+}
+
+/* 单词姬头像区域 - 左侧紧凑助手风格 */
+.mate-header {
+    position: fixed;
+    top: 100px;
+    left: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 8px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+    z-index: 90;
+    width: 120px;
+    animation: slideInLeft 0.5s ease-out;
+}
+
+.mate-header .mate-avatar-container {
+    width: 80px !important;
+    height: 80px !important;
+    flex-shrink: 0;
+}
+
+/* 隐藏MateAvatar内部的标签，避免重复显示 */
+.mate-header .level-tag,
+.mate-header .mood-indicator,
+.mate-header .click-hint {
+    display: none !important;
+}
+
+.mate-info {
+    width: 100%;
+    color: white;
+    text-align: center;
+}
+
+.mate-name {
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 4px;
+}
+
+.mate-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 11px;
+    opacity: 0.95;
+}
+
+.mate-stats span {
+    white-space: nowrap;
+}
+
+/* 单词姬对话气泡 - 左侧紧凑风格 */
+.mate-dialogue-bubble {
+    position: fixed;
+    top: 290px;
+    left: 24px;
+    width: 250px;
+    background: white;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    animation: fadeInUp 0.5s ease-out;
+    z-index: 89;
+}
+
+.mate-dialogue-bubble::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-bottom: 8px solid white;
+}
+
+.dialogue-content {
+    font-size: 12px;
+    line-height: 1.5;
+    color: #333;
+    white-space: pre-line;
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .generator-header {
     text-align: center;
     margin-bottom: 32px;
+    padding-top: 20px;
 }
 
 .generator-title {
@@ -282,6 +427,62 @@
     flex-wrap: wrap;
 }
 
+/* 奖励横幅 */
+.reward-banner {
+    margin-top: 24px;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(255, 165, 0, 0.3);
+    animation: slideInRight 0.5s ease-out;
+}
+
+.reward-text {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.reward-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 15px;
+}
+
+.reward-item.level-up {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 12px;
+    border-radius: 20px;
+    animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
 /* 加载动画 */
 @keyframes spin {
     from {
@@ -298,6 +499,44 @@
 }
 
 /* 响应式设计 */
+@media (max-width: 1024px) {
+    .mate-header,
+    .mate-dialogue-bubble {
+        position: relative;
+        top: auto;
+        left: auto;
+        right: auto;
+        max-width: 100%;
+        margin-bottom: 16px;
+    }
+    
+    .mate-header {
+        border-radius: 16px;
+        flex-direction: row;
+        padding: 16px;
+    }
+    
+    .mate-info {
+        text-align: left;
+        flex: 1;
+    }
+    
+    .mate-stats {
+        flex-direction: row;
+        gap: 12px;
+    }
+    
+    .mate-dialogue-bubble::before {
+        left: 40px;
+        right: auto;
+        top: -8px;
+        border-left: 8px solid transparent;
+        border-right: 8px solid transparent;
+        border-bottom: 8px solid white;
+        border-top: none;
+    }
+}
+
 @media (max-width: 768px) {
     .style-grid {
         grid-template-columns: 1fr;
@@ -315,5 +554,17 @@
     .generator-actions button,
     .story-actions button {
         width: 100%;
+    }
+    
+    .mate-header {
+        padding: 16px;
+    }
+    
+    .mate-name {
+        font-size: 16px;
+    }
+    
+    .mate-stats {
+        font-size: 13px;
     }
 }

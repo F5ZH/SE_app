@@ -8,8 +8,18 @@ import {
     StoryConfig,
     GeneratedStory
 } from '../utils/aiStoryGenerator';
-import { BookOpen, Wand2, Volume2, Copy, Settings, Loader2 } from 'lucide-react';
+import { 
+    getMateState, 
+    completeStorySession 
+} from '../utils/wordMate';
+import {
+    getStoryGreeting,
+    getStoryGenerating,
+    getStoryFeedback
+} from '../utils/chat';
+import { BookOpen, Wand2, Volume2, Copy, Settings, Loader2, Sparkles, Award } from 'lucide-react';
 import Modal from './Modal';
+import MateAvatar from './MateAvatar';
 import './AIStoryGenerator.css';
 
 interface AIStoryGeneratorProps {
@@ -18,6 +28,16 @@ interface AIStoryGeneratorProps {
 }
 
 const AIStoryGenerator: React.FC<AIStoryGeneratorProps> = ({ words, onClose }) => {
+    // 单词姬状态
+    const [mateState, setMateState] = useState(getMateState());
+    const [mateDialogue, setMateDialogue] = useState<string>('');
+    const [showReward, setShowReward] = useState(false);
+    const [rewardData, setRewardData] = useState<{
+        affectionGain: number;
+        expGain: number;
+        leveledUp: boolean;
+    } | null>(null);
+    
     const [config, setConfig] = useState<StoryConfig>({
         style: StoryStyle.DAILY,
         difficulty: StoryDifficulty.MEDIUM,
@@ -52,6 +72,8 @@ const AIStoryGenerator: React.FC<AIStoryGeneratorProps> = ({ words, onClose }) =
             return;
         }
 
+        // 显示单词姬的生成提示
+        setMateDialogue(getStoryGenerating(mateState.level));
         setIsGenerating(true);
         setError('');
         setStory(null);
@@ -67,8 +89,34 @@ const AIStoryGenerator: React.FC<AIStoryGeneratorProps> = ({ words, onClose }) =
             }
 
             setStory(generatedStory);
+            
+            // 完成故事，给予奖励
+            const reward = completeStorySession(
+                generatedStory.words.length,
+                generatedStory.content.length
+            );
+            
+            // 更新单词姬状态
+            setMateState(reward.state);
+            setRewardData({
+                affectionGain: reward.affectionGain,
+                expGain: reward.expGain,
+                leveledUp: reward.leveledUp
+            });
+            
+            // 显示单词姬的反馈
+            setMateDialogue(getStoryFeedback(
+                reward.state.level,
+                generatedStory.words.length,
+                generatedStory.content.length,
+                reward.affectionGain,
+                reward.expGain
+            ));
+            
+            setShowReward(true);
         } catch (err: any) {
             setError(err.message || '生成故事失败，请稍后重试');
+            setMateDialogue('');
         } finally {
             setIsGenerating(false);
         }
@@ -97,13 +145,37 @@ const AIStoryGenerator: React.FC<AIStoryGeneratorProps> = ({ words, onClose }) =
 
     return (
         <div className="ai-story-generator">
+            {/* 单词姬头像区域 */}
+            <div className="mate-header">
+                <MateAvatar
+                    mate={mateState}
+                    showMoodIndicator={true}
+                />
+                <div className="mate-info">
+                    <div className="mate-name">{mateState.name}</div>
+                    <div className="mate-stats">
+                        <span>Lv.{mateState.level}</span>
+                        <span>💕 {mateState.affection}/200</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* 单词姬对话气泡 */}
+            {mateDialogue && (
+                <div className="mate-dialogue-bubble">
+                    <div className="dialogue-content">
+                        {mateDialogue}
+                    </div>
+                </div>
+            )}
+
             <div className="generator-header">
                 <h2 className="generator-title">
                     <Wand2 size={24} />
-                    AI故事生成器
+                    AI故事串讲
                 </h2>
                 <p className="generator-subtitle">
-                    将今日学习的 <strong>{words.length}</strong> 个单词串联成故事
+                    {mateState.name}为你讲述包含 <strong>{words.length}</strong> 个单词的故事
                 </p>
             </div>
 
@@ -171,23 +243,28 @@ const AIStoryGenerator: React.FC<AIStoryGeneratorProps> = ({ words, onClose }) =
                     <div className="generator-actions">
                         <button
                             className="btn btn-primary btn-lg"
-                            onClick={handleGenerate}
+                            onClick={() => {
+                                // 显示单词姬的开场白
+                                setMateDialogue(getStoryGreeting(mateState.level, words.length));
+                                // 延迟一下再生成，让用户看到开场白
+                                setTimeout(handleGenerate, 1500);
+                            }}
                             disabled={isGenerating || words.length === 0}
                         >
                             {isGenerating ? (
                                 <>
                                     <Loader2 size={20} className="spin" />
-                                    生成中...
+                                    {mateState.name}正在构思...
                                 </>
                             ) : (
                                 <>
-                                    <Wand2 size={20} />
-                                    生成故事
+                                    <Sparkles size={20} />
+                                    开始故事串讲
                                 </>
                             )}
                         </button>
                         <button className="btn btn-secondary" onClick={onClose}>
-                            取消
+                            返回
                         </button>
                     </div>
                 </div>
@@ -242,12 +319,28 @@ const AIStoryGenerator: React.FC<AIStoryGeneratorProps> = ({ words, onClose }) =
                         </button>
                         <button className="btn btn-primary" onClick={() => setStory(null)}>
                             <Wand2 size={16} />
-                            重新生成
+                            再听一个故事
                         </button>
                         <button className="btn btn-secondary" onClick={onClose}>
-                            关闭
+                            返回单词姬
                         </button>
                     </div>
+
+                    {/* 奖励提示 */}
+                    {showReward && rewardData && (
+                        <div className="reward-banner">
+                            <Award size={20} />
+                            <div className="reward-text">
+                                <span className="reward-item">💕 好感度 +{rewardData.affectionGain}</span>
+                                <span className="reward-item">✨ 经验值 +{rewardData.expGain}</span>
+                                {rewardData.leveledUp && (
+                                    <span className="reward-item level-up">
+                                        🎉 升级到 Lv.{mateState.level}！
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 

@@ -2,8 +2,8 @@ import React from 'react';
 import { BookOpen, Library, Calendar, Home } from 'lucide-react';
 
 interface HeaderProps {
-  currentView: 'dashboard' | 'wordbooks' | 'study' | 'plan' | 'wordmate';
-  onViewChange: (view: 'dashboard' | 'wordbooks' | 'study' | 'plan' | 'wordmate') => void;
+  currentView: 'dashboard' | 'wordbooks' | 'study' | 'plan' | 'wordmate' | 'story' | 'odyssey';
+  onViewChange: (view: 'dashboard' | 'wordbooks' | 'study' | 'plan' | 'wordmate' | 'story' | 'odyssey') => void;
   onPlanNavigation?: () => void;
   hasActivePlan: boolean;
 }

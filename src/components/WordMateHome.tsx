@@ -22,14 +22,21 @@ import MateAvatar from './MateAvatar';
 import './WordMateHome.css';
 
 interface WordMateHomeProps {
-    onStartActivity: (activityType: 'story' | 'adventure' | 'basic') => void;
+    onStartBasicStudy: () => void;
+    onStartStory: () => void;
+    onStartOdyssey: () => void;
     onBack: () => void;
 }
 
 /**
  * WordMate 主页 - 养成系统核心界面
  */
-const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) => {
+const WordMateHome: React.FC<WordMateHomeProps> = ({ 
+    onStartBasicStudy, 
+    onStartStory, 
+    onStartOdyssey, 
+    onBack 
+}) => {
     const [mate, setMate] = useState<WordMateState>(getMateState());
     const [currentDialogue, setCurrentDialogue] = useState<string>('');
     const [showNameEdit, setShowNameEdit] = useState(false);
@@ -128,32 +135,6 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
         setAchievements(getAchievements());
     }, []);
 
-    // 处理互动
-    const handleInteraction = (type: InteractionType) => {
-        const { state, leveledUp, milestone } = recordInteraction(type);
-        setMate(state);
-
-        if (leveledUp) {
-            setShowLevelUpModal(true);
-        }
-
-        // 显示里程碑奖励
-        if (milestone) {
-            setCurrentMilestone(milestone);
-            setShowMilestoneModal(true);
-        }
-
-        const dialogue = getDialogue(type, state.level, state.affection, state.mood);
-        setCurrentDialogue(dialogue.text);
-
-        // 检查新成就
-        const newAchievements = checkAchievements();
-        if (newAchievements.length > 0) {
-            setNewAchievements(newAchievements);
-            setShowAchievementModal(true);
-        }
-    };
-
     // 更新名称
     const handleNameUpdate = () => {
         if (newName.trim()) {
@@ -200,14 +181,6 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
         setTimeout(() => {
             setShowCheckinReward(false);
         }, 3000);
-    };
-
-    // 开始活动
-    const handleStartActivity = (activityType: 'story' | 'adventure' | 'basic') => {
-        handleInteraction(InteractionType.STUDY_START);
-        setTimeout(() => {
-            onStartActivity(activityType);
-        }, 1000);
     };
 
     // 点击头像触发随机对话
@@ -374,17 +347,17 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
 
                             <button
                                 className="activity-btn story-btn"
-                                onClick={() => handleStartActivity('story')}
+                                onClick={onStartStory}
                             >
                                 <BookOpen size={24} />
-                                <span className="btn-title">AI 故事</span>
+                                <span className="btn-title">AI 故事串讲</span>
                                 <span className="btn-desc">在故事中学单词</span>
                                 <span className="btn-reward">+10 好感度 ❤️</span>
                             </button>
 
                             <button
                                 className="activity-btn adventure-btn"
-                                onClick={() => handleStartActivity('adventure')}
+                                onClick={onStartOdyssey}
                             >
                                 <Map size={24} />
                                 <span className="btn-title">Word Odyssey</span>
@@ -394,7 +367,7 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({ onStartActivity, onBack }) 
 
                             <button
                                 className="activity-btn basic-btn"
-                                onClick={() => handleStartActivity('basic')}
+                                onClick={onStartBasicStudy}
                             >
                                 <Sparkles size={24} />
                                 <span className="btn-title">基础练习</span>
