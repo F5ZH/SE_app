@@ -1,3 +1,5 @@
+// src/App.tsx (已合并登录功能)
+
 import { useState, useEffect } from 'react';
 import { WordBook, StudyPlan } from './types';
 import { wordBookStorage, studyPlanStorage } from './utils/storage';
@@ -10,25 +12,32 @@ import StudySession from './components/StudySession';
 import Dashboard from './components/Dashboard';
 import DevTools from './components/DevTools';
 import WordMateHome from './components/WordMateHome';
+import AuthPage from './pages/AuthPage'; // 1. 引入 AuthPage
 import './App.css';
 import './components/Modal.css';
+// 2. AuthPage.css 已经在 main.tsx 中引入
 
-/**
- * 主应用组件
- * 管理应用的整体状态和路由
- */
 function App() {
-  // 应用状态
+  // 3. 核心状态：用 token 判断是否登录
+  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
+
+  // 你原有的状态
   const [currentView, setCurrentView] = useState<'dashboard' | 'wordbooks' | 'study' | 'plan' | 'wordmate'>('dashboard');
   const [wordBooks, setWordBooks] = useState<WordBook[]>([]);
   const [currentPlan, setCurrentPlan] = useState<StudyPlan | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [wordMateActivity, setWordMateActivity] = useState<'story' | 'adventure' | 'basic' | null>(null);
 
-  // 初始化应用数据
+  // 4. 应用加载时，检查 token 并加载数据
   useEffect(() => {
-    initializeApp();
-  }, []);
+    if (token) {
+      // 只有在登录后才加载应用数据
+      initializeApp();
+    } else {
+      // 如果没有 token，停止加载，准备显示登录页
+      setIsLoading(false);
+    }
+  }, [token]); // 当 token 变化时（登录或登出），重新执行
 
   /**
    * 初始化应用数据
@@ -37,19 +46,14 @@ function App() {
   const initializeApp = async () => {
     try {
       setIsLoading(true);
-
-      // 加载词书数据
+      // TODO: 将来，这些数据应该从后端获取
       let books = wordBookStorage.getAll();
-
-      // 如果是首次使用，添加预设词书
       if (books.length === 0) {
         books = presetWordBooks;
         wordBookStorage.saveAll(books);
       }
-
       setWordBooks(books);
 
-      // 加载当前学习计划
       const plan = studyPlanStorage.getCurrent();
       setCurrentPlan(plan);
 
@@ -60,53 +64,51 @@ function App() {
     }
   };
 
-  /**
-   * 添加新词书
-   */
+  // 5. 登录处理：由 AuthPage 调用
+  const handleLogin = (receivedToken: string) => {
+    localStorage.setItem('token', receivedToken); // 把 "通行证" 存到本地
+    setToken(receivedToken); // 更新状态，触发 App 重新渲染
+  };
+
+  // 6. 登出处理：由 Header 调用
+  const handleLogout = () => {
+    localStorage.removeItem('token'); // 丢掉 "通行证"
+    setToken(null); // 更新状态，触发 App 重新渲染
+    // 重置所有状态
+    setWordBooks([]);
+    setCurrentPlan(null);
+    setCurrentView('dashboard');
+  };
+
+  // --- 你原有的所有 handle 函数 (保持不变) ---
   const handleAddWordBook = (newBook: WordBook) => {
     const updatedBooks = [...wordBooks, newBook];
     setWordBooks(updatedBooks);
     wordBookStorage.save(newBook);
   };
 
-  /**
-   * 删除词书
-   */
   const handleDeleteWordBook = (bookId: string) => {
     const updatedBooks = wordBooks.filter(book => book.id !== bookId);
     setWordBooks(updatedBooks);
     wordBookStorage.delete(bookId);
   };
 
-  /**
-   * 创建学习计划
-   */
   const handleCreateStudyPlan = (plan: StudyPlan) => {
     studyPlanStorage.save(plan);
     studyPlanStorage.setCurrent(plan.id);
     setCurrentPlan(plan);
-
-    // 清空今日单词列表缓存，以便重新生成
     clearCachedTodayWords();
-
     setCurrentView('dashboard');
   };
 
-  /**
-   * 开始学习
-   */
   const handleStartStudy = () => {
     if (currentPlan) {
       setCurrentView('study');
     }
   };
 
-  /**
-   * 处理学习计划导航
-   */
   const handlePlanNavigation = () => {
     if (currentPlan) {
-      // 有现有计划，显示确认对话框
       const confirmed = window.confirm(
         '您已有一个学习计划，修改计划将重置当前的学习进度。\n\n确定要继续吗？'
       );
@@ -114,12 +116,14 @@ function App() {
         setCurrentView('plan');
       }
     } else {
-      // 没有现有计划，直接进入创建界面
       setCurrentView('plan');
     }
   };
+  // --- End 原有函数 ---
 
-  // 加载状态
+  // 7. 渲染逻辑：根据是否登录显示不同内容
+
+  // 状态 1: 正在加载
   if (isLoading) {
     return (
       <div className="app">
@@ -131,6 +135,13 @@ function App() {
     );
   }
 
+  // 状态 2: 未登录 (没有 token)
+  if (!token) {
+    return <AuthPage onLogin={handleLogin} />;
+  }
+
+  // 状态 3: 已登录 (有 token)
+  // (这部分是你原有的 return 内容，但 Header 多了一个 prop)
   return (
     <div className="app">
       <Header
@@ -138,6 +149,7 @@ function App() {
         onViewChange={setCurrentView}
         onPlanNavigation={handlePlanNavigation}
         hasActivePlan={!!currentPlan}
+        onLogout={handleLogout} // 8. 把登出函数传给 Header
       />
 
       <main className="main-content">
@@ -154,7 +166,7 @@ function App() {
         {currentView === 'wordmate' && (
           <WordMateHome
             onStartActivity={(activityType) => {
-              setWordMateActivity(activityType);
+              setWordMateActivity(activityType); // 9. 这里的 setWordMateActivity 仍然保留
               if (activityType === 'basic') {
                 handleStartStudy();
               } else {
