@@ -278,7 +278,7 @@ export const getStoryGreeting = (level: number, wordCount: number): string => {
             `词汇因故事而鲜活，记忆因情感而永恒。准备好与我一同开启这段旅程了吗？🌟`
         ]
     ];
-    
+
     const levelTier = Math.min(Math.floor((level - 1) / 10), 4);
     const options = greetings[levelTier];
     return options[Math.floor(Math.random() * options.length)];
@@ -318,7 +318,7 @@ export const getStoryGenerating = (level: number): string => {
             '故事即将诞生，请静候佳音~ 🌟'
         ]
     ];
-    
+
     const levelTier = Math.min(Math.floor((level - 1) / 10), 4);
     const options = messages[levelTier];
     return options[Math.floor(Math.random() * options.length)];
@@ -364,7 +364,7 @@ export const getStoryFeedback = (
             `每一次讲解都是一次心灵的交流。感谢你认真聆听，让这些词汇在我们之间流淌。💫\n\n💕 好感度 +${affectionGain}  ✨ 经验 +${expGain}`
         ]
     ];
-    
+
     const levelTier = Math.min(Math.floor((level - 1) / 10), 4);
     const options = feedbacks[levelTier];
     return options[Math.floor(Math.random() * options.length)];
@@ -408,7 +408,7 @@ export const getOdysseyGreeting = (level: number, wordCount: number, theme: stri
             `每一次冒险都是一次自我超越的旅程。我会在这段旅程中与你同行，见证你的蜕变。💫`
         ]
     ];
-    
+
     const levelTier = Math.min(Math.floor((level - 1) / 10), 4);
     const options = greetings[levelTier];
     return options[Math.floor(Math.random() * options.length)];
@@ -423,7 +423,7 @@ export const getOdysseyGoodChoice = (level: number, word: string): string => {
         [`"${word}"的应用体现了你的理解深度。💼`, `精准的选择，专业的判断。✨`, `出色的语言运用能力。📊`],
         [`"${word}"在此刻绽放了它的光彩。🌟`, `你的选择印证了语言的智慧。✨`, `完美诠释了词汇的力量。💫`]
     ];
-    
+
     const levelTier = Math.min(Math.floor((level - 1) / 10), 4);
     const options = praises[levelTier];
     return options[Math.floor(Math.random() * options.length)];
@@ -438,7 +438,7 @@ export const getOdysseyEnergyUp = (level: number, energyGain: number): string =>
         [`+${energyGain} 能量值。专业的词汇运用。💼`, `语言掌握度提升，优秀表现。⚡`, `词汇能量累积，持续精进。✨`],
         [`+${energyGain}。词汇的能量在你心中汇聚。🌟`, `语言的力量在此刻觉醒。⚡`, `能量的提升是理解的见证。✨`]
     ];
-    
+
     const levelTier = Math.min(Math.floor((level - 1) / 10), 4);
     const options = messages[levelTier];
     return options[Math.floor(Math.random() * options.length)];
@@ -453,7 +453,7 @@ export const getOdysseyCompletion = (
     expGain: number
 ): string => {
     const usageRate = Math.round((wordsUsed / totalWords) * 100);
-    
+
     const completions = [
         // Lv 1-10
         [
@@ -481,7 +481,7 @@ export const getOdysseyCompletion = (
             `冒险是语言的修行。${usageRate >= 70 ? '你的表现证明了理解的深度' : '持续探索，智慧将不断积累'}。感谢这次同行。✨\n\n💕 好感度 +${affectionGain}  ✨ 经验 +${expGain}`
         ]
     ];
-    
+
     const levelTier = Math.min(Math.floor((level - 1) / 10), 4);
     const options = completions[levelTier];
     return options[Math.floor(Math.random() * options.length)];

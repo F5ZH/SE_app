@@ -107,11 +107,11 @@ function App() {
    */
   const getTodayWords = () => {
     if (!currentPlan) return [];
-    
+
     // 获取对应的词书
     const wordBook = wordBooks.find(wb => wb.id === currentPlan.wordBookId);
     if (!wordBook) return [];
-    
+
     // 生成今日任务并返回单词列表
     const todayTask = generateTodayTask(wordBook, currentPlan);
     return todayTask ? [...todayTask.newWords, ...todayTask.reviewWords] : [];

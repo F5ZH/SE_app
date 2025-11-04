@@ -9,6 +9,7 @@ import {
     PlayerResponse,
     THEME_INFO,
     generateAdventureStory,
+    pregenerateNextNodes,
     evaluateWordUsage,
     generateAdventureSummary,
     initializeWordEnergies,
@@ -52,7 +53,13 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
     // 单词姬状态
     const [mateState, setMateState] = useState(getMateState());
     const [mateDialogue, setMateDialogue] = useState<string>('');
-    
+
+    // 用户自定义冒险场景（主要模式）
+    const [userAdventure, setUserAdventure] = useState<string>('');
+
+    // 用户自定义单词数量（null表示自动）
+    const [customWordCount, setCustomWordCount] = useState<number | null>(null);
+
     // 配置状态
     const [config, setConfig] = useState<AdventureConfig>({
         theme: AdventureTheme.FANTASY,
@@ -85,6 +92,17 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
     const chatContainerRef = useRef<HTMLDivElement>(null);
     const inputDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
+    // 初始化时显示单词姬的开场白
+    useState(() => {
+        const greetings = [
+            "主人，想去哪里冒险呢？✨",
+            "让我带主人展开一段精彩的冒险吧～你想去什么地方？🗺️",
+            "主人想探索什么样的世界呢？告诉我吧！💭",
+            "我可以带主人去任何地方冒险哦～说说你的想法！🌟"
+        ];
+        setMateDialogue(greetings[Math.floor(Math.random() * greetings.length)]);
+    });
+
     // 滚动到底部
     useEffect(() => {
         if (chatContainerRef.current) {
@@ -104,22 +122,29 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
             return;
         }
 
-        // 显示单词姬的鼓励
-        const themeInfo = THEME_INFO[config.theme];
-        setMateDialogue(getOdysseyGreeting(mateState.level, words.length, themeInfo.name));
+        // 单词姬对话已在按钮点击时设置，这里不再重复
 
         setIsGenerating(true);
         setError('');
 
         try {
-            // 根据单词数量自适应选择单词（最多50个）
-            const maxWords = Math.min(words.length, 50);
-            const selectedWords = words.slice(0, maxWords);
+            // 根据用户设置或自适应选择单词数量
+            const targetWordCount = customWordCount !== null
+                ? Math.min(customWordCount, words.length)
+                : Math.min(words.length, 50); // 自动模式最多50个
+
+            const selectedWords = words.slice(0, targetWordCount);
+
+            // 创建配置副本，添加用户自定义冒险
+            const configWithAdventure = {
+                ...config,
+                customAdventure: userAdventure.trim() // 传递用户的自定义冒险
+            };
 
             // 初始化会话
             const newSession: AdventureSession = {
                 id: `session_${Date.now()}`,
-                config,
+                config: configWithAdventure,
                 words: selectedWords,
                 wordEnergies: initializeWordEnergies(selectedWords),
                 storyNodes: [],
@@ -131,7 +156,7 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
             // 生成第一个故事节点
             const firstNode = await generateAdventureStory(
                 newSession.words,
-                config,
+                configWithAdventure,
                 [],
                 null,
                 apiKey
@@ -143,6 +168,29 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
             setGameState('playing');
             // 开始游戏时，指导默认隐藏，鼓励用户自主思考
             setShowGuidance(false);
+
+            // 🚀 异步预生成第一个节点的所有后续选项（不阻塞UI）
+            if (configWithAdventure.mode === GameMode.GUIDED && firstNode.choices && firstNode.choices.length > 0) {
+                pregenerateNextNodes(
+                    firstNode,
+                    newSession.words,
+                    configWithAdventure,
+                    [],
+                    apiKey
+                ).then(nextNodesMap => {
+                    // 更新节点的预生成内容
+                    firstNode.nextNodes = nextNodesMap;
+                    // 标记选项已预生成
+                    firstNode.choices?.forEach(choice => {
+                        if (nextNodesMap.has(choice.id)) {
+                            choice.pregenerated = true;
+                        }
+                    });
+                    console.log('✅ 首节点预生成完成');
+                }).catch(err => {
+                    console.error('预生成失败（不影响游戏）:', err);
+                });
+            }
         } catch (err: any) {
             setError(err.message || '开始冒险失败，请稍后重试');
         } finally {
@@ -222,11 +270,46 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
             updatedSession.playerResponses.push(response);
             setSession(updatedSession);
 
-            // 生成下一个节点
-            await generateNextNode(updatedSession, response);
+            // 🚀 优先使用预生成的节点，没有才实时生成
+            if (currentNode.nextNodes && currentNode.nextNodes.has(choiceId)) {
+                console.log('✨ 使用预生成的节点，零延迟！');
+                const pregeneratedNode = currentNode.nextNodes.get(choiceId)!;
+
+                // 更新会话
+                updatedSession.storyNodes.push(pregeneratedNode);
+                setSession(updatedSession);
+                setCurrentNode(pregeneratedNode);
+                setShowGuidance(false);
+
+                // 🚀 立即异步预生成这个节点的后续选项
+                if (session.config.mode === GameMode.GUIDED && pregeneratedNode.choices && pregeneratedNode.choices.length > 0) {
+                    pregenerateNextNodes(
+                        pregeneratedNode,
+                        updatedSession.words,
+                        updatedSession.config,
+                        updatedSession.storyNodes,
+                        apiKey
+                    ).then(nextNodesMap => {
+                        pregeneratedNode.nextNodes = nextNodesMap;
+                        pregeneratedNode.choices?.forEach(choice => {
+                            if (nextNodesMap.has(choice.id)) {
+                                choice.pregenerated = true;
+                            }
+                        });
+                        console.log('✅ 预生成完成');
+                    }).catch(err => {
+                        console.error('预生成失败（不影响游戏）:', err);
+                    });
+                }
+
+                setIsGenerating(false);
+            } else {
+                // 没有预生成，实时生成
+                console.log('⏳ 实时生成节点...');
+                await generateNextNode(updatedSession, response);
+            }
         } catch (err: any) {
             setError(err.message || '处理选择失败');
-        } finally {
             setIsGenerating(false);
         }
     };
@@ -353,6 +436,27 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
             setCurrentNode(nextNode);
             // 新节点生成时，重置指导为隐藏状态，鼓励用户自主思考
             setShowGuidance(false);
+
+            // 🚀 生成完成后立即异步预生成后续选项
+            if (currentSession.config.mode === GameMode.GUIDED && nextNode.choices && nextNode.choices.length > 0) {
+                pregenerateNextNodes(
+                    nextNode,
+                    updatedSession.words,
+                    updatedSession.config,
+                    updatedSession.storyNodes,
+                    apiKey
+                ).then(nextNodesMap => {
+                    nextNode.nextNodes = nextNodesMap;
+                    nextNode.choices?.forEach(choice => {
+                        if (nextNodesMap.has(choice.id)) {
+                            choice.pregenerated = true;
+                        }
+                    });
+                    console.log('✅ 预生成完成');
+                }).catch(err => {
+                    console.error('预生成失败（不影响游戏）:', err);
+                });
+            }
         } catch (err: any) {
             setError(err.message || '生成剧情失败');
         } finally {
@@ -379,34 +483,40 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
         if (wordCount <= 5) {
             // 1-5个单词：快速模式
             minRounds = 3;
-            maxRounds = 6;
-            targetProgress = 80;
+            maxRounds = 8;
+            targetProgress = 60; // 降低要求，但需要至少60%
         } else if (wordCount <= 10) {
             // 6-10个单词：标准模式
             minRounds = 5;
-            maxRounds = 10;
-            targetProgress = 75;
+            maxRounds = 12;
+            targetProgress = 55;
         } else if (wordCount <= 20) {
             // 11-20个单词：适中模式
-            minRounds = 6;
-            maxRounds = 14;
-            targetProgress = 70;
-        } else if (wordCount <= 30) {
-            // 21-30个单词：长期模式
             minRounds = 8;
             maxRounds = 18;
-            targetProgress = 65;
+            targetProgress = 50;
+        } else if (wordCount <= 30) {
+            // 21-30个单词：长期模式
+            minRounds = 10;
+            maxRounds = 22;
+            targetProgress = 45;
         } else {
             // 30+个单词：超长模式
-            minRounds = 10;
-            maxRounds = 25;
-            targetProgress = 60;
+            minRounds = 12;
+            maxRounds = 30;
+            targetProgress = 40;
         }
 
         // 判断是否应该完成
+        // 必须同时满足：1) 达到最小轮数 AND 2) 达到目标进度
+        // 或者：达到最大轮数限制（防止无限循环）
         const progressMet = progress >= targetProgress && currentRound >= minRounds;
         const maxRoundsMet = currentRound >= maxRounds;
-        const shouldComplete = progressMet || maxRoundsMet;
+
+        // 重要：只有在有实质性进度的情况下才能完成
+        // 如果进度太低（<20%），即使达到最大轮数也要求至少达到20%
+        const hasMinimalProgress = progress >= 20;
+        const shouldComplete = progressMet || (maxRoundsMet && hasMinimalProgress);
 
         return {
             minRounds,
@@ -426,23 +536,23 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
 
             const adventureSummary = await generateAdventureSummary(currentSession, apiKey);
             setSummary(adventureSummary);
-            
+
             // 计算奖励
             const sessionDuration = Math.round((currentSession.endTime! - currentSession.startTime) / 60000); // 分钟
             const wordsUsed = adventureSummary.unlockedWords; // 解锁的单词数即为使用过的单词数
             const totalWords = currentSession.words.length;
             const turnsCount = currentSession.storyNodes.length;
-            
+
             const reward = completeOdysseySession(
                 wordsUsed,
                 totalWords,
                 turnsCount,
                 sessionDuration
             );
-            
+
             // 更新单词姬状态
             setMateState(reward.state);
-            
+
             // 显示单词姬的总结评价
             setMateDialogue(getOdysseyCompletion(
                 reward.state.level,
@@ -451,7 +561,7 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
                 reward.affectionGain,
                 reward.expGain
             ));
-            
+
             setGameState('summary');
         } catch (err: any) {
             setError('生成总结失败');
@@ -503,14 +613,55 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
                 <p className="config-subtitle">交互式语言冒险 RPG</p>
             </div>
 
+            {/* 用户自定义冒险场景（主要模式） */}
+            <div className="config-section adventure-input-section">
+                <h3>
+                    ✨ 描述你想要的冒险
+                </h3>
+                <textarea
+                    className="adventure-input"
+                    placeholder="例如：
+• 在温馨的咖啡馆遇见有趣的人
+• 探索神秘的古代图书馆
+• 在未来城市体验高科技生活
+• 和朋友一起野营、观察星空
+• 在魔法学院学习各种魔法
+描述你想要的氛围和场景，可以是轻松的、冒险的、温馨的..."
+                    value={userAdventure}
+                    onChange={(e) => setUserAdventure(e.target.value)}
+                    rows={5}
+                />
+                <p className="adventure-hint">
+                    💡 告诉{mateState.name}你想要什么样的冒险～可以是探索、日常、交友、学习等任何场景
+                </p>
+            </div>
+
+            {/* 快捷主题选择（可选辅助） */}
             <div className="config-section">
-                <h3>选择冒险主题</h3>
+                <h3>
+                    💫 或者选择快捷主题
+                    <span className="optional-tag">（可选）</span>
+                </h3>
                 <div className="theme-grid">
                     {Object.entries(THEME_INFO).map(([key, info]) => (
                         <button
                             key={key}
                             className={`theme-card ${config.theme === key ? 'selected' : ''}`}
-                            onClick={() => setConfig({ ...config, theme: key as AdventureTheme })}
+                            onClick={() => {
+                                setConfig({ ...config, theme: key as AdventureTheme });
+                                // 点击快捷主题时自动填入提示文本
+                                if (!userAdventure) {
+                                    const adventureHints: Record<string, string> = {
+                                        [AdventureTheme.FANTASY]: '我想在魔法世界展开奇幻冒险',
+                                        [AdventureTheme.MYSTERY]: '我想在神秘城市破解悬案',
+                                        [AdventureTheme.SCIFI]: '我想探索未知的星际空间',
+                                        [AdventureTheme.ROMANCE]: '我想经历一段浪漫的恋爱故事',
+                                        [AdventureTheme.WORKPLACE]: '我想在职场中挑战自己',
+                                        [AdventureTheme.CAMPUS]: '我想体验精彩的校园生活'
+                                    };
+                                    setUserAdventure(adventureHints[key] || '');
+                                }
+                            }}
                         >
                             <span className="theme-icon">{info.icon}</span>
                             <span className="theme-name">{info.name}</span>
@@ -563,28 +714,86 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
                 </div>
             </div>
 
+            {/* 单词数量选择器 */}
+            <div className="config-section">
+                <h3>📚 单词数量</h3>
+                <div className="word-count-selector">
+                    <div className="word-count-presets">
+                        <button
+                            className={`word-count-btn ${customWordCount === null ? 'selected' : ''}`}
+                            onClick={() => setCustomWordCount(null)}
+                        >
+                            <div className="preset-label">自动</div>
+                            <div className="preset-desc">根据词库自适应</div>
+                        </button>
+                        {[5, 10, 15, 20, 30].map(count => (
+                            <button
+                                key={count}
+                                className={`word-count-btn ${customWordCount === count ? 'selected' : ''}`}
+                                onClick={() => setCustomWordCount(count)}
+                                disabled={words.length < count}
+                            >
+                                <div className="preset-label">{count}个</div>
+                                <div className="preset-desc">快速完成</div>
+                            </button>
+                        ))}
+                    </div>
+                    {customWordCount !== null && words.length < customWordCount && (
+                        <div className="word-count-warning">
+                            ⚠️ 词库只有{words.length}个单词，少于设置的{customWordCount}个
+                        </div>
+                    )}
+                    <div className="custom-word-count">
+                        <label>
+                            或输入自定义数量：
+                            <input
+                                type="number"
+                                min="1"
+                                max={words.length}
+                                value={customWordCount || ''}
+                                onChange={(e) => {
+                                    const val = parseInt(e.target.value);
+                                    if (!isNaN(val) && val > 0) {
+                                        setCustomWordCount(Math.min(val, words.length));
+                                    } else if (e.target.value === '') {
+                                        setCustomWordCount(null);
+                                    }
+                                }}
+                                placeholder="自动"
+                                className="word-count-input"
+                            />
+                        </label>
+                    </div>
+                </div>
+            </div>
+
             <div className="config-info">
                 {(() => {
-                    const wordCount = Math.min(words.length, 50); // 最多50个单词
+                    // 使用用户设置的数量或自动计算
+                    const wordCount = customWordCount !== null
+                        ? Math.min(customWordCount, words.length)
+                        : Math.min(words.length, 50); // 自动模式最多50个
+
                     let requirements;
 
                     if (wordCount <= 5) {
-                        requirements = { min: 3, max: 6, progress: 80 };
+                        requirements = { min: 3, max: 8, progress: 60 };
                     } else if (wordCount <= 10) {
-                        requirements = { min: 5, max: 10, progress: 75 };
+                        requirements = { min: 5, max: 12, progress: 55 };
                     } else if (wordCount <= 20) {
-                        requirements = { min: 6, max: 14, progress: 70 };
+                        requirements = { min: 8, max: 18, progress: 50 };
                     } else if (wordCount <= 30) {
-                        requirements = { min: 8, max: 18, progress: 65 };
+                        requirements = { min: 10, max: 22, progress: 45 };
                     } else {
-                        requirements = { min: 10, max: 25, progress: 60 };
+                        requirements = { min: 12, max: 30, progress: 40 };
                     }
 
                     return (
                         <>
-                            <p>📚 本次冒险将使用 <strong>{wordCount}</strong> 个单词</p>
+                            <p>📚 本次冒险将使用 <strong>{wordCount}</strong> 个单词 {customWordCount !== null && '(自定义)'}</p>
                             <p>🎯 通关要求: 进度达到 <strong>{requirements.progress}%</strong> + 至少 <strong>{requirements.min}</strong> 轮互动</p>
                             <p>⏱️ 预计时长: <strong>{requirements.min}-{requirements.max}</strong> 轮互动 (约 {Math.ceil(requirements.max * 1.5)} 分钟)</p>
+                            <p style={{ color: '#999', fontSize: '13px', marginTop: '8px' }}>💡 每轮互动中正确使用单词可提升进度</p>
                         </>
                     );
                 })()}
@@ -601,18 +810,35 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
                 </button>
                 <button
                     className="btn btn-primary btn-lg"
-                    onClick={handleStartAdventure}
+                    onClick={() => {
+                        // 如果用户有自定义冒险描述，使用个性化引导
+                        if (userAdventure.trim()) {
+                            const customGreetings = [
+                                `好的！让我带主人去"${userAdventure.substring(0, 20)}..."冒险～✨`,
+                                `嗯嗯！"${userAdventure.substring(0, 20)}..."听起来很精彩，出发吧！🗺️`,
+                                `有意思！${userAdventure.substring(0, 20)}...让我设计几个挑战～💭`
+                            ];
+                            setMateDialogue(customGreetings[Math.floor(Math.random() * customGreetings.length)]);
+                        } else {
+                            // 没有自定义场景，使用主题引导
+                            const themeInfo = THEME_INFO[config.theme];
+                            setMateDialogue(getOdysseyGreeting(mateState.level, words.length, themeInfo.name));
+                        }
+
+                        // 延迟一下再开始，让用户看到单词姬的引导
+                        setTimeout(handleStartAdventure, 1500);
+                    }}
                     disabled={isGenerating}
                 >
                     {isGenerating ? (
                         <>
                             <Loader2 size={20} className="spin" />
-                            生成中...
+                            {mateState.name}正在设计冒险...
                         </>
                     ) : (
                         <>
                             <Play size={20} />
-                            开始冒险
+                            和{mateState.name}一起冒险
                         </>
                     )}
                 </button>
@@ -661,6 +887,30 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
                         </div>
                         <span className="progress-text">{progress.toFixed(0)}%</span>
                     </div>
+
+                    {/* 通关要求提示 */}
+                    {(() => {
+                        const wordCount = session.words.length;
+                        const currentRound = session.storyNodes.length;
+                        const requirements = calculateCompletionRequirements(wordCount, currentRound, progress);
+                        const progressNeeded = Math.max(0, requirements.targetProgress - progress);
+                        const roundsNeeded = Math.max(0, requirements.minRounds - currentRound);
+
+                        return (
+                            <div className="completion-hint">
+                                {progress >= requirements.targetProgress && currentRound >= requirements.minRounds ? (
+                                    <span className="hint-success">✅ 已达成通关条件！</span>
+                                ) : (
+                                    <span className="hint-info">
+                                        🎯 目标: {requirements.targetProgress}% |
+                                        轮数: {currentRound}/{requirements.minRounds}
+                                        {progressNeeded > 0 && ` | 还需 ${progressNeeded.toFixed(0)}% 进度`}
+                                        {roundsNeeded > 0 && ` | 还需 ${roundsNeeded} 轮`}
+                                    </span>
+                                )}
+                            </div>
+                        );
+                    })()}
 
                     <div className="word-energies">
                         {energies.map(energy => (
@@ -712,9 +962,14 @@ const WordOdyssey: React.FC<WordOdysseyProps> = ({ words, onClose }) => {
                                 {currentNode.choices.map(choice => (
                                     <button
                                         key={choice.id}
-                                        className="choice-btn"
+                                        className={`choice-btn ${choice.pregenerated ? 'pregenerated' : ''}`}
                                         onClick={() => handleChoice(choice.id, choice.text)}
                                     >
+                                        {choice.pregenerated && (
+                                            <span className="preloaded-indicator" title="已预加载，即时响应">
+                                                ⚡
+                                            </span>
+                                        )}
                                         <span className="choice-text">{choice.text}</span>
                                         {choice.targetWord && (
                                             <span className="choice-word">

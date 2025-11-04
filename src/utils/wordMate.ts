@@ -354,16 +354,16 @@ export const completeStorySession = (wordsCount: number, storyLength: number): {
     milestone: AffectionMilestone | null;
 } => {
     const state = getMateState();
-    
+
     // 基础奖励
     let affectionGain = 3; // 基础好感度
     let expGain = 50; // 基础经验
-    
+
     // 根据单词数量调整奖励 (每10个单词+1好感度, +10经验)
     const wordBonus = Math.floor(wordsCount / 10);
     affectionGain += Math.min(wordBonus, 5); // 最多+5好感度
     expGain += wordBonus * 10; // 经验无上限
-    
+
     // 根据故事长度调整奖励 (长故事更费心)
     if (storyLength > 500) {
         affectionGain += 2;
@@ -372,17 +372,17 @@ export const completeStorySession = (wordsCount: number, storyLength: number): {
         affectionGain += 1;
         expGain += 15;
     }
-    
+
     // 应用好感度
     const oldAffection = state.affection;
     state.affection = Math.min(200, state.affection + affectionGain);
-    
+
     // 更新统计
     state.stats.storiesCompleted++;
-    
+
     // 检查里程碑
     const milestone = checkAffectionMilestones(oldAffection, state.affection);
-    
+
     // 保存互动记录
     const interaction: InteractionRecord = {
         id: Date.now().toString(36) + Math.random().toString(36).substr(2),
@@ -393,18 +393,18 @@ export const completeStorySession = (wordsCount: number, storyLength: number): {
         context: `完成了包含${wordsCount}个单词的故事`
     };
     saveInteraction(interaction);
-    
+
     // 更新最后互动时间
     state.lastInteraction = Date.now();
     saveMateState(state);
-    
+
     // 应用经验值并检查升级
     let totalExpGain = expGain;
     if (milestone) {
         totalExpGain += milestone.reward.exp;
     }
     const { leveledUp } = addExp(totalExpGain);
-    
+
     return { affectionGain, expGain: totalExpGain, state, leveledUp, milestone };
 };
 
@@ -422,11 +422,11 @@ export const completeOdysseySession = (
     milestone: AffectionMilestone | null;
 } => {
     const state = getMateState();
-    
+
     // 基础奖励 (Odyssey奖励更丰厚)
     let affectionGain = 5; // 基础好感度
     let expGain = 100; // 基础经验
-    
+
     // 根据单词使用率调整奖励
     const usageRate = wordsUsed / totalWords;
     if (usageRate >= 0.8) {
@@ -439,12 +439,12 @@ export const completeOdysseySession = (
         affectionGain += 1; // 使用30%以上单词，额外+1好感度
         expGain += 20;
     }
-    
+
     // 根据回合数调整奖励 (探索更深入)
     const turnBonus = Math.floor(turnsCount / 3);
     affectionGain += Math.min(turnBonus, 5); // 最多+5好感度
     expGain += turnBonus * 15;
-    
+
     // 根据时长调整奖励 (投入更多时间)
     if (sessionDuration >= 20) {
         affectionGain += 3;
@@ -453,17 +453,17 @@ export const completeOdysseySession = (
         affectionGain += 1;
         expGain += 20;
     }
-    
+
     // 应用好感度
     const oldAffection = state.affection;
     state.affection = Math.min(200, state.affection + affectionGain);
-    
+
     // 更新统计
     state.stats.adventuresCompleted++;
-    
+
     // 检查里程碑
     const milestone = checkAffectionMilestones(oldAffection, state.affection);
-    
+
     // 保存互动记录
     const interaction: InteractionRecord = {
         id: Date.now().toString(36) + Math.random().toString(36).substr(2),
@@ -474,18 +474,18 @@ export const completeOdysseySession = (
         context: `完成冒险，使用了${wordsUsed}/${totalWords}个单词，探索${turnsCount}回合`
     };
     saveInteraction(interaction);
-    
+
     // 更新最后互动时间
     state.lastInteraction = Date.now();
     saveMateState(state);
-    
+
     // 应用经验值并检查升级
     let totalExpGain = expGain;
     if (milestone) {
         totalExpGain += milestone.reward.exp;
     }
     const { leveledUp } = addExp(totalExpGain);
-    
+
     return { affectionGain, expGain: totalExpGain, state, leveledUp, milestone };
 };
 

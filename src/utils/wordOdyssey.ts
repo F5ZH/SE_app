@@ -37,12 +37,14 @@ export interface StoryNode {
     suggestedResponse?: string; // 参考回答示例（自由模式）
     targetWords: string[];     // 本节点期望使用的单词
     timestamp: number;
+    nextNodes?: Map<string, StoryNode>; // 预生成的后续节点（选项ID -> 节点）
 }
 
 export interface StoryChoice {
     id: string;
     text: string;
     targetWord?: string;       // 该选项关联的目标词汇
+    pregenerated?: boolean;    // 是否已预生成后续内容
 }
 
 export interface PlayerResponse {
@@ -63,6 +65,7 @@ export interface AdventureConfig {
     mode: GameMode;
     difficulty: 'easy' | 'medium' | 'hard';
     sessionDuration: number;   // 预期时长（分钟）
+    customAdventure?: string;  // 用户自定义冒险描述
 }
 
 export interface AdventureSession {
@@ -145,8 +148,33 @@ export async function generateAdventureStory(
     }
 
     const wordList = words.map(w => `${w.word} (${w.translation})`).join(', ');
-    const themeInfo = THEME_INFO[config.theme];
     const isFirstNode = previousNodes.length === 0;
+
+    // 判断使用自定义冒险还是预设主题
+    let themeSection: string;
+    let storyTone: string;
+
+    if (config.customAdventure && config.customAdventure.trim()) {
+        // 使用用户自定义冒险
+        themeSection = `【用户设定的冒险场景】
+${config.customAdventure}
+
+【重要指示】
+- 严格遵循用户描述的场景和氛围
+- 不要擅自添加"危机"、"威胁"、"挑战"等元素，除非用户明确要求
+- 保持用户描述的基调（温馨、探索、日常、神秘等）
+- 如果用户描述的是轻松场景，就保持轻松；如果是冒险场景，才添加冒险元素`;
+
+        storyTone = '根据用户描述的基调和氛围';
+    } else {
+        // 使用预设主题
+        const themeInfo = THEME_INFO[config.theme];
+        themeSection = `【预设主题】
+- 类型：${themeInfo.description}
+- 风格：${themeInfo.example}`;
+
+        storyTone = '符合主题的适度悬念或趣味';
+    }
 
     // 构建上下文
     let contextPrompt = '';
@@ -158,11 +186,9 @@ export async function generateAdventureStory(
         }
     }
 
-    const prompt = `你是一位专业的互动小说作家和英语教学专家。请创作一个${themeInfo.name}风格的互动冒险故事节点。
+    const prompt = `你是一位专业的互动小说作家和英语教学专家。请创作一个互动冒险故事节点。
 
-【故事主题】
-- 类型：${themeInfo.description}
-- 风格：${themeInfo.example}
+${themeSection}
 
 【目标单词】（必须自然融入故事）
 ${wordList}
@@ -172,11 +198,12 @@ ${config.mode === GameMode.GUIDED ? '引导模式 - 提供2-3个选择项' : '�
 ${contextPrompt}
 
 【创作要求】
-1. ${isFirstNode ? '创作一个引人入胜的开场，设定场景和氛围' : '根据前情继续推进剧情'}
-2. 自然使用目标单词（不要生硬堆砌）
-3. 制造适度悬念或冲突
+1. ${isFirstNode ? '创作一个引人入胜的开场，设定场景和氛围' : '根据前情继续推进剧情，保持连贯性'}
+2. 自然流畅地使用目标单词（融入对话、描写、动作中，不要生硬堆砌）
+3. ${storyTone}
 4. 语言地道优美，适合英语学习
 5. ${config.mode === GameMode.GUIDED ? '提供2-3个行动选项，每个选项鼓励使用特定单词' : '提供明确的回答指导和参考示例，帮助玩家构建正确的回答'}
+6. 保持故事的正向氛围，让学习过程愉快而非紧张
 
 【输出格式】严格使用以下JSON格式，不要添加任何其他内容：
 
@@ -217,7 +244,17 @@ ${config.mode === GameMode.GUIDED ? `{
                 messages: [
                     {
                         role: 'system',
-                        content: `你是一位专业的互动小说作家和英语教学专家。你擅长创作引人入胜的英文故事，并巧妙地将学习词汇融入剧情。你的叙事风格生动、地道，能激发读者的想象力和学习兴趣。`
+                        content: `你是一位专业的互动小说作家和英语教学专家。你擅长：
+1. 创作引人入胜的英文故事
+2. 巧妙地将学习词汇融入剧情
+3. 严格遵循用户的场景设定和期待
+4. 根据不同场景调整叙事风格（轻松、冒险、温馨、神秘等）
+
+重要原则：
+- 用户意图优先：如果用户描述的是轻松探索，就不要添加危机；如果是温馨场景，就不要制造冲突
+- 场景适配：根据用户设定的场景选择合适的叙事基调
+- 自然流畅：词汇使用要自然，故事要符合设定的氛围
+- 学习友好：让学习过程愉快而不是紧张`
                     },
                     {
                         role: 'user',
@@ -253,11 +290,76 @@ ${config.mode === GameMode.GUIDED ? `{
             guidanceHint: parsed.guidanceHint,
             suggestedResponse: parsed.suggestedResponse,
             targetWords: parsed.targetWords || [],
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            nextNodes: new Map() // 初始化为空Map
         };
     } catch (error) {
         console.error('生成冒险故事失败:', error);
         throw error;
+    }
+}
+
+/**
+ * 预生成所有选项的后续节点（并行生成以降低延迟）
+ */
+export async function pregenerateNextNodes(
+    currentNode: StoryNode,
+    words: Word[],
+    config: AdventureConfig,
+    previousNodes: StoryNode[],
+    apiKey: string
+): Promise<Map<string, StoryNode>> {
+    // 只在引导模式且有选项时预生成
+    if (config.mode !== GameMode.GUIDED || !currentNode.choices || currentNode.choices.length === 0) {
+        return new Map();
+    }
+
+    console.log(`开始预生成 ${currentNode.choices.length} 个选项的后续内容...`);
+    const startTime = Date.now();
+
+    try {
+        // 并行生成所有选项的后续节点
+        const generationPromises = currentNode.choices.map(async (choice) => {
+            // 模拟玩家选择这个选项的响应
+            const mockResponse: PlayerResponse = {
+                text: choice.text,
+                usedWords: choice.targetWord ? [choice.targetWord] : [],
+                timestamp: Date.now()
+            };
+
+            try {
+                const nextNode = await generateAdventureStory(
+                    words,
+                    config,
+                    [...previousNodes, currentNode],
+                    mockResponse,
+                    apiKey
+                );
+                return { choiceId: choice.id, node: nextNode };
+            } catch (error) {
+                console.error(`预生成选项 ${choice.id} 失败:`, error);
+                return null;
+            }
+        });
+
+        // 等待所有生成完成
+        const results = await Promise.all(generationPromises);
+
+        // 构建Map
+        const nextNodesMap = new Map<string, StoryNode>();
+        results.forEach(result => {
+            if (result) {
+                nextNodesMap.set(result.choiceId, result.node);
+            }
+        });
+
+        const endTime = Date.now();
+        console.log(`预生成完成！耗时 ${endTime - startTime}ms，成功生成 ${nextNodesMap.size}/${currentNode.choices.length} 个节点`);
+
+        return nextNodesMap;
+    } catch (error) {
+        console.error('预生成失败:', error);
+        return new Map();
     }
 }
 

@@ -25,6 +25,7 @@ export interface StoryConfig {
     difficulty: StoryDifficulty;
     includeTranslation: boolean;  // 是否包含中文翻译
     wordCount?: number;            // 目标字数
+    customScene?: string;          // 用户自定义场景描述
 }
 
 export interface GeneratedStory {
@@ -109,16 +110,33 @@ export async function generateStoryWithAI(
 
     // 构建提示词
     const wordList = words.map(w => `${w.word} (${w.translation})`).join(', ');
-    const styleInfo = STYLE_PROMPTS[config.style];
     const difficultyInfo = DIFFICULTY_PROMPTS[config.difficulty];
 
-    // 构建更详细的Prompt
-    const prompt = `作为一名专业的英语教学故事创作者，请创作一个${styleInfo.description}的英文短文。
+    // 判断使用自定义场景还是预设风格
+    let storyStyleSection: string;
+    if (config.customScene && config.customScene.trim()) {
+        // 使用用户自定义场景
+        storyStyleSection = `【用户设定的故事场景】
+${config.customScene}
 
-【故事风格】
+【重要指示】
+- 严格遵循用户描述的场景、氛围和基调
+- 如果用户想要温馨的故事，就创作温馨故事；如果想要冒险的故事，就创作冒险故事
+- 不要擅自改变用户设定的情绪基调
+- 场景、人物、情节都应该与用户描述相符`;
+    } else {
+        // 使用预设风格
+        const styleInfo = STYLE_PROMPTS[config.style];
+        storyStyleSection = `【预设故事风格】
 - 类型：${styleInfo.description}
 - 语气：${styleInfo.tone}
-- 参考方向：${styleInfo.example}
+- 参考方向：${styleInfo.example}`;
+    }
+
+    // 构建更详细的Prompt
+    const prompt = `作为一名专业的英语教学故事创作者，请创作一个英文短文。
+
+${storyStyleSection}
 
 【必须使用的单词】
 ${wordList}
@@ -176,8 +194,10 @@ ${config.includeTranslation ? '【翻译要求】\n提供准确流畅的中文�
 2. 精准把握不同英语水平学习者的需求
 3. 将词汇自然融入情境，而不是生硬堆砌
 4. 用故事激发学习兴趣，提高记忆效果
+5. 严格遵循用户的场景设定和期待
 
 你的创作原则：
+- 用户意图优先：如果用户有明确的场景描述，必须严格遵循，不要擅自改变基调和方向
 - 情节优先：故事本身要有趣、完整
 - 自然融入：单词使用要符合语境，像native speaker一样自然
 - 教学导向：确保学习者能从故事中理解单词的真实用法

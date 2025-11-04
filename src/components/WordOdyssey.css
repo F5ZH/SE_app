@@ -68,6 +68,7 @@
         opacity: 0;
         transform: translateX(-50px);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
@@ -170,9 +171,11 @@
         opacity: 0;
         transform: scale(0.8) translateY(20px);
     }
+
     50% {
         transform: scale(1.05);
     }
+
     100% {
         opacity: 1;
         transform: scale(1) translateY(0);
@@ -184,6 +187,7 @@
         opacity: 0;
         transform: translateX(-50px);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
@@ -195,6 +199,7 @@
         opacity: 0;
         transform: translateX(50px);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
@@ -206,7 +211,8 @@
     max-width: 1000px;
     margin: 0 auto;
     padding-top: 20px;
-    padding-left: 300px; /* 减少左侧留白 */
+    padding-left: 300px;
+    /* 减少左侧留白 */
     padding-right: 20px;
 }
 
@@ -214,7 +220,7 @@
     .odyssey-config {
         padding-left: 20px;
     }
-    
+
     .mate-companion-card {
         position: relative;
         top: auto;
@@ -225,12 +231,12 @@
         flex-direction: row;
         padding: 16px;
     }
-    
+
     .companion-info {
         text-align: left;
         flex: 1;
     }
-    
+
     .companion-title {
         flex-direction: row;
     }
@@ -267,6 +273,56 @@
     font-size: 18px;
     margin-bottom: 16px;
     color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.optional-tag {
+    font-size: 12px;
+    font-weight: normal;
+    color: #999;
+    background: #f5f5f5;
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+/* 冒险输入区域 - 突出主要交互 */
+.adventure-input-section {
+    background: linear-gradient(135deg, #fff8f0 0%, #fff0e6 100%);
+    padding: 20px;
+    border-radius: 12px;
+    border: 2px solid #ff9800;
+    box-shadow: 0 2px 12px rgba(255, 152, 0, 0.1);
+}
+
+.adventure-input {
+    width: 100%;
+    padding: 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    resize: vertical;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.adventure-input:focus {
+    outline: none;
+    border-color: #ff9800;
+    box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+}
+
+.adventure-input::placeholder {
+    color: #999;
+}
+
+.adventure-hint {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #ff9800;
+    font-weight: 500;
 }
 
 /* 主题网格 */
@@ -384,6 +440,98 @@
     font-weight: 600;
 }
 
+/* 单词数量选择器 */
+.word-count-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.word-count-presets {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 12px;
+}
+
+.word-count-btn {
+    padding: 12px 8px;
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.word-count-btn:hover:not(:disabled) {
+    border-color: #ff9800;
+    transform: translateY(-2px);
+}
+
+.word-count-btn.selected {
+    border-color: #ff9800;
+    background: linear-gradient(135deg, #fff8f0 0%, #ffe0b2 100%);
+    font-weight: 600;
+}
+
+.word-count-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.preset-label {
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+}
+
+.preset-desc {
+    font-size: 11px;
+    color: #666;
+}
+
+.word-count-warning {
+    padding: 8px 12px;
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 6px;
+    color: #856404;
+    font-size: 13px;
+}
+
+.custom-word-count {
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.custom-word-count label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #666;
+}
+
+.word-count-input {
+    width: 80px;
+    padding: 6px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 14px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.word-count-input:focus {
+    outline: none;
+    border-color: #ff9800;
+    box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+}
+
 .config-info {
     background: #f5f5f5;
     padding: 16px;
@@ -419,15 +567,14 @@
 
 .game-header {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 12px;
     padding: 16px 20px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
 }
 
 .progress-section {
-    flex: 1;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -463,10 +610,33 @@
     text-align: right;
 }
 
+/* 通关要求提示 */
+.completion-hint {
+    display: flex;
+    justify-content: center;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.hint-success {
+    color: #4caf50;
+    background: rgba(76, 175, 80, 0.2);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.hint-info {
+    color: rgba(255, 255, 255, 0.95);
+}
+
 .word-energies {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
+    justify-content: center;
 }
 
 .energy-badge {
@@ -583,6 +753,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 8px;
     padding: 14px 18px;
     background: white;
     border: 2px solid #e0e0e0;
@@ -590,12 +761,42 @@
     cursor: pointer;
     transition: all 0.3s ease;
     text-align: left;
+    position: relative;
 }
 
 .choice-btn:hover {
     border-color: #667eea;
     background: #f5f5ff;
     transform: translateX(4px);
+}
+
+/* 预加载状态 */
+.choice-btn.pregenerated {
+    border-color: #4caf50;
+}
+
+.choice-btn.pregenerated:hover {
+    background: linear-gradient(135deg, #e8f5e9 0%, #f1f8f4 100%);
+    border-color: #4caf50;
+}
+
+.preloaded-indicator {
+    font-size: 16px;
+    animation: sparkle 1.5s ease-in-out infinite;
+}
+
+@keyframes sparkle {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.7;
+        transform: scale(1.2);
+    }
 }
 
 .choice-text {
@@ -872,7 +1073,7 @@
         width: 100%;
         justify-content: center;
     }
-    
+
     /* 移动端单词姬对话调整 */
     .mate-dialogue-floating {
         position: relative;
@@ -881,22 +1082,22 @@
         max-width: 100%;
         margin-bottom: 16px;
     }
-    
+
     .mate-companion-card {
         border-radius: 16px;
         padding: 16px;
         flex-direction: row;
     }
-    
+
     .companion-info {
         text-align: left;
         flex: 1;
     }
-    
+
     .companion-title {
         flex-direction: row;
     }
-    
+
     .mate-completion-card {
         flex-direction: column;
         text-align: center;

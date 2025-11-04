@@ -31,11 +31,11 @@ interface WordMateHomeProps {
 /**
  * WordMate 主页 - 养成系统核心界面
  */
-const WordMateHome: React.FC<WordMateHomeProps> = ({ 
-    onStartBasicStudy, 
-    onStartStory, 
-    onStartOdyssey, 
-    onBack 
+const WordMateHome: React.FC<WordMateHomeProps> = ({
+    onStartBasicStudy,
+    onStartStory,
+    onStartOdyssey,
+    onBack
 }) => {
     const [mate, setMate] = useState<WordMateState>(getMateState());
     const [currentDialogue, setCurrentDialogue] = useState<string>('');

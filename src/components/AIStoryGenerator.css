@@ -1,7 +1,8 @@
 .ai-story-generator {
     max-width: 1000px;
     margin: 0 auto;
-    padding-left: 300px; /* 减少左侧留白，给主内容更多空间 */
+    padding-left: 300px;
+    /* 减少左侧留白，给主内容更多空间 */
     padding-right: 20px;
 }
 
@@ -108,6 +109,7 @@
         opacity: 0;
         transform: translateX(-50px);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
@@ -119,6 +121,7 @@
         opacity: 0;
         transform: translateX(-50px);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
@@ -130,6 +133,7 @@
         opacity: 0;
         transform: translateX(50px);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
@@ -141,6 +145,7 @@
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -195,6 +200,56 @@
     font-weight: 600;
     color: #333;
     margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.optional-tag {
+    font-size: 12px;
+    font-weight: normal;
+    color: #999;
+    background: #f5f5f5;
+    padding: 2px 8px;
+    border-radius: 12px;
+}
+
+/* 场景输入区域 - 突出主要交互 */
+.scene-input-section {
+    background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+    padding: 20px;
+    border-radius: 12px;
+    border: 2px solid #667eea;
+    box-shadow: 0 2px 12px rgba(102, 126, 234, 0.1);
+}
+
+.scene-input {
+    width: 100%;
+    padding: 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    resize: vertical;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.scene-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.scene-input::placeholder {
+    color: #999;
+}
+
+.scene-hint {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #667eea;
+    font-weight: 500;
 }
 
 /* 风格选择 */
@@ -272,6 +327,98 @@
 .difficulty-desc {
     font-size: 12px;
     color: #666;
+}
+
+/* 单词数量选择器 */
+.word-count-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.word-count-presets {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 12px;
+}
+
+.word-count-btn {
+    padding: 12px 8px;
+    background: white;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.word-count-btn:hover:not(:disabled) {
+    border-color: #667eea;
+    transform: translateY(-2px);
+}
+
+.word-count-btn.selected {
+    border-color: #667eea;
+    background: linear-gradient(135deg, #f8f9ff 0%, #e8ebf9 100%);
+    font-weight: 600;
+}
+
+.word-count-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.preset-label {
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+}
+
+.preset-desc {
+    font-size: 11px;
+    color: #666;
+}
+
+.word-count-warning {
+    padding: 8px 12px;
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 6px;
+    color: #856404;
+    font-size: 13px;
+}
+
+.custom-word-count {
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.custom-word-count label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #666;
+}
+
+.word-count-input {
+    width: 80px;
+    padding: 6px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 14px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.word-count-input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
 /* 复选框 */
@@ -468,6 +615,7 @@
         opacity: 0;
         transform: translateX(20px);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
@@ -475,9 +623,12 @@
 }
 
 @keyframes pulse {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale(1);
     }
+
     50% {
         transform: scale(1.05);
     }
@@ -500,6 +651,7 @@
 
 /* 响应式设计 */
 @media (max-width: 1024px) {
+
     .mate-header,
     .mate-dialogue-bubble {
         position: relative;
@@ -509,23 +661,23 @@
         max-width: 100%;
         margin-bottom: 16px;
     }
-    
+
     .mate-header {
         border-radius: 16px;
         flex-direction: row;
         padding: 16px;
     }
-    
+
     .mate-info {
         text-align: left;
         flex: 1;
     }
-    
+
     .mate-stats {
         flex-direction: row;
         gap: 12px;
     }
-    
+
     .mate-dialogue-bubble::before {
         left: 40px;
         right: auto;
@@ -555,15 +707,15 @@
     .story-actions button {
         width: 100%;
     }
-    
+
     .mate-header {
         padding: 16px;
     }
-    
+
     .mate-name {
         font-size: 16px;
     }
-    
+
     .mate-stats {
         font-size: 13px;
     }
