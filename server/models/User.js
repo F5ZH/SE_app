@@ -2,25 +2,72 @@
 
 const mongoose = require('mongoose');
 
-// 这就是“用户”的数据结构定义
+// --- 1. 定义我们需要的子数据结构 ---
+// (我们直接从 src/types/index.ts 翻译过来)
+
+const WordSchema = new mongoose.Schema({
+    id: { type: String, required: true },
+    word: { type: String, required: true },
+    pronunciation: String,
+    translation: { type: String, required: true },
+    example: String,
+    difficulty: Number,
+    createdAt: Number
+});
+
+const WordBookSchema = new mongoose.Schema({
+    id: { type: String, required: true },
+    name: { type: String, required: true },
+    description: String,
+    words: [WordSchema], // 嵌套 Word 结构
+    totalWords: Number,
+    isPreset: Boolean,
+    createdAt: Number
+});
+
+const StudyPlanSchema = new mongoose.Schema({
+    id: { type: String, required: true },
+    wordBookId: { type: String, required: true },
+    wordBookName: String,
+    dailyNewWords: Number,
+    startDate: Number,
+    expectedEndDate: Number,
+    isActive: Boolean,
+    createdAt: Number
+});
+
+const StudyRecordSchema = new mongoose.Schema({
+    wordId: { type: String, required: true },
+    word: String,
+    correctCount: Number,
+    wrongCount: Number,
+    lastReviewed: Number,
+    nextReview: Number,
+    interval: Number,
+    easeFactor: Number,
+    reviewCount: Number,
+    difficultCount: Number,
+    studyMode: String
+});
+
+// --- 2. 定义主用户结构 ---
+
 const UserSchema = new mongoose.Schema({
     email: {
         type: String,
-        required: true, // 必须有
-        unique: true,   // 必须是唯一的（不能重复注册）
-        lowercase: true // 自动转为小写
+        required: true,
+        unique: true,
+        lowercase: true
     },
     password: {
         type: String,
-        required: true // 必须有
+        required: true
     },
-    // 我们可以把之前 localStorage 的数据也移到这里
-    // wordBooks: [Object],
-    // studyPlans: [Object],
-    // studyRecords: [Object],
-    // wordMateState: Object
-    // ...但我们先保持简单，只做注册
+    // --- 3. 把数据结构作为字段添加进来 ---
+    wordBooks: [WordBookSchema],
+    studyPlans: [StudyPlanSchema],
+    studyRecords: [StudyRecordSchema],
+    // (我们稍后也可以添加 wordMateState)
 });
 
-// "User" 是我们给这个 Model 起的名字，MongoDB 会自动把它变成复数 "users" 作为 collection 的名字
 module.exports = mongoose.model('User', UserSchema);
