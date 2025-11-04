@@ -26,7 +26,7 @@ function App() {
   const [wordBooks, setWordBooks] = useState<WordBook[]>([]);
   const [currentPlan, setCurrentPlan] = useState<StudyPlan | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [wordMateActivity, setWordMateActivity] = useState<'story' | 'adventure' | 'basic' | null>(null);
+  const [, setWordMateActivity] = useState<'story' | 'adventure' | 'basic' | null>(null);
 
   // 4. 应用加载时，检查 token 并加载数据
   useEffect(() => {
