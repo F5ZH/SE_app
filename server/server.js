@@ -1,22 +1,33 @@
 // server/server.js
 
+// 在文件最顶部加载 .env 文件中的变量
+require('dotenv').config();
+
 const express = require('express');
 const cors = require('cors');
+const mongoose = require('mongoose'); // 引入 mongoose
 
 const app = express();
-// 你的前端在 3000 端口，我们为后端选择一个新端口
 const PORT = 8080;
 
 // --- 中间件 ---
-// 允许所有来源的跨域请求 (稍后我们会收紧它)
 app.use(cors());
-// 允许服务器解析JSON格式的请求体
 app.use(express.json());
 
+// --- 数据库连接 ---
+// 从 .env 文件中安全地读取你的“钥匙”
+const mongoURI = process.env.MONGODB_URI;
+
+mongoose.connect(mongoURI)
+    .then(() => {
+        console.log('✅ 成功连接到 MongoDB Atlas!');
+    })
+    .catch((err) => {
+        console.error('❌ 连接 MongoDB 失败:', err);
+    });
+
 // --- 路由 (API的"链接") ---
-// 这是一个测试路由，用来检查服务器是否在工作
 app.get('/api/test', (req, res) => {
-    // res.json() 会自动发送一个JSON响应
     res.json({ message: '你好，来自后端服务器!' });
 });
 
