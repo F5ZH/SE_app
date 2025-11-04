@@ -30,6 +30,8 @@ mongoose.connect(mongoURI)
 app.get('/api/test', (req, res) => {
     res.json({ message: '你好，来自后端服务器!' });
 });
+// 导入 auth 路由
+app.use('/api/auth', require('./routes/auth'));
 
 // --- 启动服务器 ---
 app.listen(PORT, () => {
