@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Heart, Star, Sparkles, Map, Gift, Calendar, MessageCircle, Award, BookOpen } from 'lucide-react';
+import { Heart, Star, Sparkles, Map, Gift, Calendar, MessageCircle, Award, BookOpen, Shirt } from 'lucide-react';
 import { WordMateState, InteractionType, Achievement } from '../types';
 import {
     getMateState,
@@ -11,7 +11,8 @@ import {
     checkAchievements,
     checkDailyCheckin,
     getDailyCheckinReward,
-    getNextMilestone
+    getNextMilestone,
+    changeOutfit
 } from '../utils/wordMate';
 import { getDialogue, getGreetingByTime } from '../data/dialogues';
 import { UserContext } from '../utils/chat';
@@ -19,6 +20,7 @@ import { studyPlanStorage, wordBookStorage } from '../utils/storage';
 import { generateTodayTask, getStudyStats } from '../utils/studyPlan';
 import ChatBox from './ChatBox';
 import MateAvatar from './MateAvatar';
+import Wardrobe from './Wardrobe';
 import './WordMateHome.css';
 
 interface WordMateHomeProps {
@@ -52,6 +54,7 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({
     const [showMilestoneModal, setShowMilestoneModal] = useState(false);
     const [currentMilestone, setCurrentMilestone] = useState<any>(null);
     const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
+    const [showWardrobe, setShowWardrobe] = useState(false);
 
     const levelProgress = getLevelProgress();
     const affectionTitle = getAffectionTitle(mate.affection);
@@ -142,6 +145,13 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({
             setMate(updated);
             setShowNameEdit(false);
         }
+    };
+
+    // 处理换装
+    const handleOutfitChange = (outfitId: string) => {
+        changeOutfit(outfitId);
+        const updatedMate = getMateState();
+        setMate(updatedMate);
     };
 
     // 处理每日签到
@@ -373,6 +383,16 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({
                                 <span className="btn-title">基础练习</span>
                                 <span className="btn-desc">快速背单词</span>
                                 <span className="btn-reward">+5 好感度 ❤️</span>
+                            </button>
+
+                            <button
+                                className="activity-btn wardrobe-btn"
+                                onClick={() => setShowWardrobe(true)}
+                            >
+                                <Shirt size={24} />
+                                <span className="btn-title">换装系统</span>
+                                <span className="btn-desc">装扮你的单词姬</span>
+                                <span className="btn-reward">👗</span>
                             </button>
                         </div>
                     </div>
@@ -609,6 +629,15 @@ const WordMateHome: React.FC<WordMateHomeProps> = ({
                 <ChatBox
                     onClose={() => setShowChatBox(false)}
                     userContext={getUserContext()}
+                />
+            )}
+
+            {/* 橱窗系统 */}
+            {showWardrobe && (
+                <Wardrobe
+                    mate={mate}
+                    onClose={() => setShowWardrobe(false)}
+                    onOutfitChange={handleOutfitChange}
                 />
             )}
         </div>

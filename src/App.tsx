@@ -191,6 +191,7 @@ function App() {
         onViewChange={setCurrentView}
         onPlanNavigation={handlePlanNavigation}
         hasActivePlan={!!currentPlan}
+        onLogout={handleLogout}
       />
 
       <main className="main-content">

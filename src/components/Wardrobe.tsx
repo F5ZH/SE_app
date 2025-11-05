@@ -23,6 +23,7 @@ interface WardrobeProps {
 const Wardrobe: React.FC<WardrobeProps> = ({ mate, onClose, onOutfitChange }) => {
     const [selectedStage, setSelectedStage] = useState<number>(getStageByLevel(mate.level));
     const [previewOutfit, setPreviewOutfit] = useState<string | null>(null);
+    const [currentOutfit, setCurrentOutfit] = useState<string>(mate.appearance.outfit);
     const [wardrobeState, setWardrobeState] = useState<WardrobeState>({
         currentOutfit: mate.appearance.outfit,
         unlockedOutfits: [],
@@ -109,8 +110,16 @@ const Wardrobe: React.FC<WardrobeProps> = ({ mate, onClose, onOutfitChange }) =>
     // 切换皮肤
     const handleOutfitChange = (outfitId: string) => {
         const outfit = ALL_OUTFITS.find(o => o.id === outfitId);
-        if (!outfit || !outfit.unlocked) return;
+        
+        // 检查是否解锁
+        if (outfit && !isOutfitUnlocked(outfit) && !wardrobeState.unlockedOutfits.includes(outfitId)) {
+            alert('该装扮尚未解锁！');
+            return;
+        }
 
+        // 更新当前装扮
+        setCurrentOutfit(outfitId);
+        
         // 更新橱窗状态
         const newState: WardrobeState = {
             ...wardrobeState,
@@ -123,6 +132,9 @@ const Wardrobe: React.FC<WardrobeProps> = ({ mate, onClose, onOutfitChange }) =>
         // 通知父组件
         onOutfitChange(outfitId);
         setPreviewOutfit(null);
+        
+        // 给用户反馈
+        console.log('✅ 已切换装扮:', outfitId);
     };
 
     // 预览皮肤
@@ -225,10 +237,10 @@ const Wardrobe: React.FC<WardrobeProps> = ({ mate, onClose, onOutfitChange }) =>
                             </span>
                         </div>
                         <button
-                            className={`wear-btn ${wardrobeState.currentOutfit === 'default' ? 'current' : ''}`}
+                            className={`wear-btn ${currentOutfit === 'default' ? 'current' : ''}`}
                             onClick={() => handleOutfitChange('default')}
                         >
-                            {wardrobeState.currentOutfit === 'default' ? '✓ 当前穿戴' : '穿上'}
+                            {currentOutfit === 'default' ? '✓ 当前穿戴' : '穿上'}
                         </button>
                     </div>
 
@@ -279,10 +291,10 @@ const Wardrobe: React.FC<WardrobeProps> = ({ mate, onClose, onOutfitChange }) =>
 
                             {outfit.unlocked ? (
                                 <button
-                                    className={`wear-btn ${wardrobeState.currentOutfit === outfit.id ? 'current' : ''}`}
+                                    className={`wear-btn ${currentOutfit === outfit.id ? 'current' : ''}`}
                                     onClick={() => handleOutfitChange(outfit.id)}
                                 >
-                                    {wardrobeState.currentOutfit === outfit.id ? '✓ 当前穿戴' : '穿上'}
+                                    {currentOutfit === outfit.id ? '✓ 当前穿戴' : '穿上'}
                                 </button>
                             ) : (
                                 <div className="unlock-requirement">
@@ -310,7 +322,7 @@ const Wardrobe: React.FC<WardrobeProps> = ({ mate, onClose, onOutfitChange }) =>
                                     className="preview-wear-btn"
                                     onClick={() => handleOutfitChange(previewedOutfit.id)}
                                 >
-                                    {wardrobeState.currentOutfit === previewedOutfit.id ? '✓ 当前穿戴' : '穿上这套'}
+                                    {currentOutfit === previewedOutfit.id ? '✓ 当前穿戴' : '穿上这套'}
                                 </button>
                             </div>
                         </div>

@@ -2,11 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { StudyPlan, WordBook, TodayTask } from '../types';
 import { generateTodayTask, getStudyStats, clearCachedTodayWords } from '../utils/studyPlan';
 import { studyRecordStorage, checkInStorage } from '../utils/storage';
-import { getMateState, getWardrobeStats, changeOutfit } from '../utils/wordMate';
+import { getMateState } from '../utils/wordMate';
 import { Play, Calendar, BookOpen, TrendingUp, Clock, Target, Eye, Check, Heart, Star } from 'lucide-react';
 import Modal from './Modal';
 import MateAvatar from './MateAvatar';
-import Wardrobe from './Wardrobe';
 
 interface DashboardProps {
   currentPlan: StudyPlan | null;
@@ -32,7 +31,6 @@ const Dashboard: React.FC<DashboardProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [hasCheckedIn, setHasCheckedIn] = useState(false);
   const [mateState, setMateState] = useState(getMateState());
-  const [wardrobeStats, setWardrobeStats] = useState(getWardrobeStats());
 
   // 模态窗状态
   const [showNewWordsModal, setShowNewWordsModal] = useState(false);
@@ -40,7 +38,6 @@ const Dashboard: React.FC<DashboardProps> = ({
   const [showMasteryDetailModal, setShowMasteryDetailModal] = useState(false);
   const [showProgressDetailModal, setShowProgressDetailModal] = useState(false);
   const [showAccuracyDetailModal, setShowAccuracyDetailModal] = useState(false);
-  const [showWardrobeModal, setShowWardrobeModal] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
@@ -123,25 +120,6 @@ const Dashboard: React.FC<DashboardProps> = ({
     alert('已重置该词书的学习进度，学习计划保持不变。');
   };
 
-  /**
-   * 处理皮肤切换
-   */
-  const handleOutfitChange = (outfitId: string) => {
-    const success = changeOutfit(outfitId);
-    if (success) {
-      // 更新状态
-      setMateState(getMateState());
-      setWardrobeStats(getWardrobeStats());
-    }
-  };
-
-  /**
-   * 打开橱窗
-   */
-  const handleOpenWardrobe = () => {
-    setShowWardrobeModal(true);
-  };
-
   // 加载状态
   if (isLoading) {
     return (
@@ -211,17 +189,6 @@ const Dashboard: React.FC<DashboardProps> = ({
             <p className="wordmate-hint">点击与我互动 →</p>
           </div>
         </div>
-        <button
-          className="wardrobe-btn"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleOpenWardrobe();
-          }}
-          title="打开橱窗"
-        >
-          👗 橱窗
-          {wardrobeStats.hasNewUnlocks && <span className="new-unlock-badge">{wardrobeStats.newUnlocksCount}</span>}
-        </button>
       </div>
 
       {/* 今日任务卡片 */}
@@ -996,15 +963,6 @@ const Dashboard: React.FC<DashboardProps> = ({
             </div>
           </div>
         </Modal>
-      )}
-
-      {/* 橱窗模态窗 */}
-      {showWardrobeModal && (
-        <Wardrobe
-          mate={mateState}
-          onClose={() => setShowWardrobeModal(false)}
-          onOutfitChange={handleOutfitChange}
-        />
       )}
     </div>
   );
