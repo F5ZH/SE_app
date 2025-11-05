@@ -1,0 +1,551 @@
+/* 橱窗系统样式 */
+
+/* 遮罩层 */
+.wardrobe-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+/* 主容器 */
+.wardrobe-container {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 24px;
+    width: 90%;
+    max-width: 1200px;
+    max-height: 85vh;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.4s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 头部 */
+.wardrobe-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
+    background: rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.wardrobe-header h2 {
+    margin: 0;
+    color: white;
+    font-size: 28px;
+    font-weight: 600;
+}
+
+.close-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 24px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+/* 统计信息 */
+.wardrobe-stats {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 30px;
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.stat-label {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 12px;
+}
+
+.stat-value {
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.stat-progress {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4caf50, #8bc34a);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.progress-text {
+    color: white;
+    font-weight: 600;
+    min-width: 45px;
+    text-align: right;
+}
+
+/* 阶段选择器 */
+.stage-selector {
+    display: flex;
+    gap: 10px;
+    padding: 20px 30px;
+    background: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    overflow-x: auto;
+}
+
+.stage-btn {
+    flex: 1;
+    min-width: 120px;
+    padding: 12px 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid transparent;
+    border-radius: 12px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.stage-btn:hover:not(.locked) {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+}
+
+.stage-btn.active {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: white;
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+}
+
+.stage-btn.locked {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.stage-number {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.stage-desc {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+/* 皮肤网格 */
+.outfits-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+    padding: 30px;
+    overflow-y: auto;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+/* 皮肤卡片 */
+.outfit-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.outfit-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.outfit-card.locked {
+    opacity: 0.7;
+}
+
+.outfit-card.new-unlock::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 3px solid #ff9800;
+    border-radius: 16px;
+    pointer-events: none;
+    animation: glowPulse 2s infinite;
+}
+
+/* 预览区域 */
+.outfit-preview {
+    position: relative;
+    width: 100%;
+    padding-top: 133.33%; /* 4:3 比例 */
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.outfit-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.outfit-card:hover .outfit-image {
+    transform: scale(1.05);
+}
+
+.locked-preview {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #bbb 0%, #888 100%);
+}
+
+.lock-icon {
+    font-size: 48px;
+    z-index: 2;
+}
+
+.silhouette {
+    position: absolute;
+    width: 70%;
+    height: 70%;
+    background: rgba(0, 0, 0, 0.2);
+    filter: blur(10px);
+}
+
+.preview-hint {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.outfit-preview:hover .preview-hint {
+    opacity: 1;
+}
+
+.preview-hint span {
+    color: white;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+/* 皮肤信息 */
+.outfit-info {
+    padding: 16px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.outfit-name {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.new-badge {
+    background: linear-gradient(135deg, #ff9800, #ff5722);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    animation: pulse 1.5s infinite;
+}
+
+.outfit-desc {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+    line-height: 1.5;
+}
+
+.rarity-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    align-self: flex-start;
+}
+
+/* 穿戴按钮 */
+.wear-btn {
+    margin: 0 16px 16px;
+    padding: 10px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.wear-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.wear-btn.current {
+    background: #4caf50;
+    cursor: default;
+}
+
+.wear-btn.current:hover {
+    transform: none;
+}
+
+/* 解锁条件 */
+.unlock-requirement {
+    margin: 0 16px 16px;
+    padding: 10px;
+    background: rgba(158, 158, 158, 0.1);
+    border-radius: 8px;
+    text-align: center;
+    font-size: 13px;
+    color: #666;
+    font-weight: 500;
+}
+
+/* 基础立绘特殊样式 */
+.basic-outfit {
+    border: 2px solid #9e9e9e;
+}
+
+/* 预览弹窗 */
+.preview-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1100;
+    animation: fadeIn 0.3s ease;
+}
+
+.preview-content {
+    position: relative;
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 600px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    animation: scaleUp 0.3s ease;
+}
+
+.preview-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(0, 0, 0, 0.1);
+    border: none;
+    color: #333;
+    font-size: 24px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.preview-close:hover {
+    background: rgba(0, 0, 0, 0.2);
+    transform: rotate(90deg);
+}
+
+.preview-image {
+    max-width: 100%;
+    max-height: 60vh;
+    object-fit: contain;
+    border-radius: 12px;
+}
+
+.preview-info {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.preview-info h3 {
+    margin: 0;
+    font-size: 24px;
+    color: #333;
+}
+
+.preview-info p {
+    margin: 0;
+    font-size: 16px;
+    color: #666;
+    line-height: 1.6;
+}
+
+.preview-wear-btn {
+    padding: 12px 32px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 24px;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.preview-wear-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+}
+
+/* 动画 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleUp {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+@keyframes glowPulse {
+    0%, 100% {
+        box-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(255, 152, 0, 0.8);
+    }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .wardrobe-container {
+        width: 95%;
+        max-height: 90vh;
+    }
+
+    .outfits-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 15px;
+        padding: 20px;
+    }
+
+    .stage-selector {
+        padding: 15px 20px;
+    }
+
+    .stage-btn {
+        min-width: 100px;
+        padding: 10px 12px;
+    }
+
+    .preview-content {
+        margin: 20px;
+        padding: 20px;
+    }
+}

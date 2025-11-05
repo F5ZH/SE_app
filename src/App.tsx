@@ -12,6 +12,7 @@ import DevTools from './components/DevTools';
 import WordMateHome from './components/WordMateHome';
 import AIStoryGenerator from './components/AIStoryGenerator';
 import WordOdyssey from './components/WordOdyssey';
+import AuthPage from './pages/AuthPage';
 import './App.css';
 import './components/Modal.css';
 
@@ -20,16 +21,47 @@ import './components/Modal.css';
  * 管理应用的整体状态和路由
  */
 function App() {
+  // 登录状态
+  const [token, setToken] = useState<string | null>(null);
+  
   // 应用状态
   const [currentView, setCurrentView] = useState<'dashboard' | 'wordbooks' | 'study' | 'plan' | 'wordmate' | 'story' | 'odyssey'>('dashboard');
   const [wordBooks, setWordBooks] = useState<WordBook[]>([]);
   const [currentPlan, setCurrentPlan] = useState<StudyPlan | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // 初始化应用数据
+  // 检查是否已登录（从 localStorage 恢复 token）
   useEffect(() => {
-    initializeApp();
+    const savedToken = localStorage.getItem('auth_token');
+    if (savedToken) {
+      setToken(savedToken);
+    }
   }, []);
+
+  // 初始化应用数据（仅在登录后执行）
+  useEffect(() => {
+    if (token) {
+      initializeApp();
+    } else {
+      setIsLoading(false);
+    }
+  }, [token]);
+
+  /**
+   * 处理登录成功
+   */
+  const handleLogin = (newToken: string) => {
+    setToken(newToken);
+    localStorage.setItem('auth_token', newToken);
+  };
+
+  /**
+   * 处理登出
+   */
+  const handleLogout = () => {
+    setToken(null);
+    localStorage.removeItem('auth_token');
+  };
 
   /**
    * 初始化应用数据
@@ -134,6 +166,11 @@ function App() {
       setCurrentView('plan');
     }
   };
+
+  // 如果未登录，显示登录界面
+  if (!token) {
+    return <AuthPage onLogin={handleLogin} />;
+  }
 
   // 加载状态
   if (isLoading) {

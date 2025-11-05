@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { StudyPlan, WordBook, TodayTask } from '../types';
 import { generateTodayTask, getStudyStats, clearCachedTodayWords } from '../utils/studyPlan';
 import { studyRecordStorage, checkInStorage } from '../utils/storage';
-import { getMateState } from '../utils/wordMate';
+import { getMateState, getWardrobeStats, changeOutfit } from '../utils/wordMate';
 import { Play, Calendar, BookOpen, TrendingUp, Clock, Target, Eye, Check, Heart, Star } from 'lucide-react';
 import Modal from './Modal';
-import SelfStudy from './SelfStudy';
 import MateAvatar from './MateAvatar';
+import Wardrobe from './Wardrobe';
 
 interface DashboardProps {
   currentPlan: StudyPlan | null;
@@ -31,15 +31,16 @@ const Dashboard: React.FC<DashboardProps> = ({
   const [studyStats, setStudyStats] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasCheckedIn, setHasCheckedIn] = useState(false);
-  const [mateState] = useState(getMateState());
+  const [mateState, setMateState] = useState(getMateState());
+  const [wardrobeStats, setWardrobeStats] = useState(getWardrobeStats());
 
   // 模态窗状态
   const [showNewWordsModal, setShowNewWordsModal] = useState(false);
   const [showReviewWordsModal, setShowReviewWordsModal] = useState(false);
-  const [showSelfStudyModal, setShowSelfStudyModal] = useState(false);
   const [showMasteryDetailModal, setShowMasteryDetailModal] = useState(false);
   const [showProgressDetailModal, setShowProgressDetailModal] = useState(false);
   const [showAccuracyDetailModal, setShowAccuracyDetailModal] = useState(false);
+  const [showWardrobeModal, setShowWardrobeModal] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
@@ -122,6 +123,25 @@ const Dashboard: React.FC<DashboardProps> = ({
     alert('已重置该词书的学习进度，学习计划保持不变。');
   };
 
+  /**
+   * 处理皮肤切换
+   */
+  const handleOutfitChange = (outfitId: string) => {
+    const success = changeOutfit(outfitId);
+    if (success) {
+      // 更新状态
+      setMateState(getMateState());
+      setWardrobeStats(getWardrobeStats());
+    }
+  };
+
+  /**
+   * 打开橱窗
+   */
+  const handleOpenWardrobe = () => {
+    setShowWardrobeModal(true);
+  };
+
   // 加载状态
   if (isLoading) {
     return (
@@ -168,8 +188,8 @@ const Dashboard: React.FC<DashboardProps> = ({
       </div>
 
       {/* WordMate 卡片 */}
-      <div className="card wordmate-card" onClick={onOpenWordMate}>
-        <div className="wordmate-content">
+      <div className="card wordmate-card">
+        <div className="wordmate-content" onClick={onOpenWordMate}>
           <div className="wordmate-avatar">
             <MateAvatar
               mate={mateState}
@@ -191,6 +211,17 @@ const Dashboard: React.FC<DashboardProps> = ({
             <p className="wordmate-hint">点击与我互动 →</p>
           </div>
         </div>
+        <button 
+          className="wardrobe-btn" 
+          onClick={(e) => {
+            e.stopPropagation();
+            handleOpenWardrobe();
+          }}
+          title="打开橱窗"
+        >
+          👗 橱窗 
+          {wardrobeStats.hasNewUnlocks && <span className="new-unlock-badge">{wardrobeStats.newUnlocksCount}</span>}
+        </button>
       </div>
 
       {/* 今日任务卡片 */}
@@ -257,14 +288,6 @@ const Dashboard: React.FC<DashboardProps> = ({
             >
               <Play size={20} />
               开始学习
-            </button>
-
-            <button
-              className="btn btn-secondary btn-lg"
-              onClick={() => setShowSelfStudyModal(true)}
-            >
-              <BookOpen size={20} />
-              自主学习
             </button>
 
             <button
@@ -975,19 +998,14 @@ const Dashboard: React.FC<DashboardProps> = ({
         </Modal>
       )}
 
-      {/* 自主学习模态窗 */}
-      <Modal
-        isOpen={showSelfStudyModal}
-        onClose={() => setShowSelfStudyModal(false)}
-        title="自主学习"
-        className="self-study-modal"
-      >
-        <SelfStudy
-          plan={currentPlan!}
-          wordBooks={wordBooks}
-          onBack={() => setShowSelfStudyModal(false)}
+      {/* 橱窗模态窗 */}
+      {showWardrobeModal && (
+        <Wardrobe
+          mate={mateState}
+          onClose={() => setShowWardrobeModal(false)}
+          onOutfitChange={handleOutfitChange}
         />
-      </Modal>
+      )}
     </div>
   );
 };

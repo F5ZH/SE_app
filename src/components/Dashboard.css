@@ -31,6 +31,9 @@
   border: none;
   box-shadow: 0 8px 32px rgba(252, 182, 159, 0.3);
   transition: all 0.3s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .wordmate-card:hover {
@@ -43,6 +46,8 @@
   align-items: center;
   gap: 1.5rem;
   position: relative;
+  cursor: pointer;
+  flex: 1;
 }
 
 .wordmate-avatar {
@@ -110,6 +115,59 @@
   color: #666;
   margin: 0;
   font-weight: 500;
+}
+
+/* 橱窗按钮 */
+.wardrobe-btn {
+  margin-top: 12px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.wardrobe-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.wardrobe-btn:active {
+  transform: translateY(0);
+}
+
+.new-unlock-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ff5722;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 20px;
+  text-align: center;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 /* 今日任务卡片 */

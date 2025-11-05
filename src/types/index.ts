@@ -124,9 +124,48 @@ export enum WordMateMood {
 // 外观配置
 export interface MateAppearance {
   avatar: string;            // 头像/立绘标识（由等级决定：lv1-10, lv11-20, lv21-30, lv31-40, lv41-50）
-  outfit: string;            // 服装ID
+  outfit: string;            // 服装ID (如 "11", "24" 或 "default" 使用基础立绘)
   accessory?: string;        // 配饰ID
   background: string;        // 背景场景
+}
+
+// ========== 橱窗系统 ==========
+
+// 橱窗状态
+export interface WardrobeState {
+  currentOutfit: string;     // 当前穿戴的皮肤ID
+  unlockedOutfits: string[]; // 已解锁的皮肤ID列表
+  lastUnlockedAt?: number;   // 最后解锁时间
+  newUnlocks: string[];      // 新解锁（未查看）的皮肤ID列表
+}
+
+// 皮肤解锁条件类型
+export type UnlockConditionType = 'level' | 'affection' | 'achievement' | 'mixed';
+
+// 皮肤解锁条件
+export interface OutfitUnlockCondition {
+  type: UnlockConditionType;
+  level?: number;            // 需要的等级
+  affection?: number;        // 需要的好感度
+  achievementId?: string;    // 需要的成就ID
+  achievementTitle?: string; // 成就名称（显示用）
+}
+
+// 皮肤稀有度
+export type OutfitRarity = 'common' | 'rare' | 'epic' | 'legendary';
+
+// 皮肤物品
+export interface OutfitItem {
+  id: string;                    // 皮肤ID (如 "11", "24")
+  name: string;                  // 皮肤名称
+  description: string;           // 描述
+  imagePath: string;             // 图片路径
+  stage: number;                 // 阶段 (1-5)
+  outfitNumber: number;          // 同阶段内编号
+  rarity: OutfitRarity;          // 稀有度
+  unlockCondition: OutfitUnlockCondition; // 解锁条件
+  unlocked?: boolean;            // 是否已解锁
+  unlockedAt?: number;           // 解锁时间戳
 }
 
 // 服装配置

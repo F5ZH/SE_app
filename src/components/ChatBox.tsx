@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Send, Trash2, X } from 'lucide-react';
 import { ChatMessage, UserContext, sendChatMessage, generateMessageId, loadChatHistory, saveChatHistory, clearChatHistory } from '../utils/chat';
 import { getMateState } from '../utils/wordMate';
-import { getLevelTier } from '../data/outfitSystem';
+import { getStageByLevel } from '../data/wardrobeSystem';
 import './ChatBox.css';
 
 interface ChatBoxProps {
@@ -23,8 +23,22 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onClose, userContext }) => {
 
     // 获取当前单词姬状态
     const mateState = getMateState();
-    const levelTier = getLevelTier(mateState.level);
-    const mateAvatarUrl = `/assets/mate/base/${levelTier}.png`;
+    
+    // 获取当前显示的立绘路径
+    const getAvatarUrl = (): string => {
+        const currentOutfit = mateState.appearance.outfit;
+        
+        // 如果选择了特殊皮肤
+        if (currentOutfit && currentOutfit !== 'default') {
+            return `/img/${currentOutfit}.png`;
+        }
+        
+        // 默认使用基础立绘（根据等级阶段）
+        const stage = getStageByLevel(mateState.level);
+        return `/img/${stage}.png`;
+    };
+    
+    const mateAvatarUrl = getAvatarUrl();
 
     useEffect(() => {
         // 加载 API Key

@@ -101,7 +101,7 @@ export const createDefaultMate = (): WordMateState => {
         mood: WordMateMood.NORMAL,
         appearance: {
             avatar: 'default',
-            outfit: 'casual',
+            outfit: 'default',
             background: 'study_room'
         },
         stats: {
@@ -122,6 +122,13 @@ export const getMateState = (): WordMateState => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
         const state: WordMateState = JSON.parse(stored);
+
+        // 修复旧的 outfit 值
+        if (state.appearance.outfit === 'casual') {
+            console.log('🔧 修复旧的outfit值: casual -> default');
+            state.appearance.outfit = 'default';
+            saveMateState(state);
+        }
 
         // 检查好感度衰减（适配200上限，衰减速度保持不变）
         const now = Date.now();
@@ -181,7 +188,8 @@ export const getAffectionTitle = (affection: number): string => {
 export const addExp = (amount: number): {
     leveledUp: boolean;
     newLevel: number;
-    state: WordMateState
+    state: WordMateState;
+    unlockedOutfits: string[];
 } => {
     const state = getMateState();
     state.exp += amount;
@@ -203,7 +211,11 @@ export const addExp = (amount: number): {
     }
 
     saveMateState(state);
-    return { leveledUp, newLevel, state };
+
+    // 检查并解锁皮肤
+    const unlockedOutfits = checkAndUnlockOutfits();
+
+    return { leveledUp, newLevel, state, unlockedOutfits };
 };
 
 // 增加好感度
@@ -211,6 +223,7 @@ export const addAffection = (amount: number): {
     state: WordMateState;
     milestone: AffectionMilestone | null;
     oldAffection: number;
+    unlockedOutfits: string[];
 } => {
     const state = getMateState();
     const oldAffection = state.affection;
@@ -222,10 +235,15 @@ export const addAffection = (amount: number): {
     // 如果达到里程碑，给予额外经验
     if (milestone) {
         addExp(milestone.reward.exp);
+        // 注意：这里会递归调用addExp，unlockedOutfits会在其中检查
     }
 
     saveMateState(state);
-    return { state, milestone, oldAffection };
+
+    // 检查并解锁皮肤
+    const unlockedOutfits = checkAndUnlockOutfits();
+
+    return { state, milestone, oldAffection, unlockedOutfits };
 };
 
 // 更新心情
@@ -865,3 +883,167 @@ export const resetMateData = (): void => {
     localStorage.removeItem(ACHIEVEMENTS_KEY);
     localStorage.removeItem(MILESTONES_KEY);
 };
+
+// ========== 橱窗系统功能 ==========
+
+import { ALL_OUTFITS, getStageByLevel } from '../data/wardrobeSystem';
+import { WardrobeState, OutfitItem } from '../types';
+
+const WARDROBE_KEY = 'wardrobe_state';
+
+// 获取橱窗状态
+export const getWardrobeState = (): WardrobeState => {
+    const stored = localStorage.getItem(WARDROBE_KEY);
+    if (stored) {
+        return JSON.parse(stored) as WardrobeState;
+    }
+
+    // 初始化默认状态
+    const defaultState: WardrobeState = {
+        currentOutfit: 'default',
+        unlockedOutfits: ['default'],
+        newUnlocks: []
+    };
+    localStorage.setItem(WARDROBE_KEY, JSON.stringify(defaultState));
+    return defaultState;
+};
+
+// 保存橱窗状态
+export const saveWardrobeState = (state: WardrobeState): void => {
+    localStorage.setItem(WARDROBE_KEY, JSON.stringify(state));
+};
+
+// 检查并解锁皮肤
+export const checkAndUnlockOutfits = (): string[] => {
+    const mate = getMateState();
+    const wardrobe = getWardrobeState();
+    const newlyUnlocked: string[] = [];
+
+    // 检查所有皮肤
+    for (const outfit of ALL_OUTFITS) {
+        // 如果已解锁，跳过
+        if (wardrobe.unlockedOutfits.includes(outfit.id)) {
+            continue;
+        }
+
+        // 检查解锁条件
+        let shouldUnlock = false;
+        const condition = outfit.unlockCondition;
+
+        switch (condition.type) {
+            case 'level':
+                shouldUnlock = mate.level >= (condition.level || 999);
+                break;
+
+            case 'affection':
+                shouldUnlock = mate.affection >= (condition.affection || 999);
+                break;
+
+            case 'achievement':
+                // TODO: 集成成就系统
+                // 暂时使用简化逻辑
+                const achievements = getAchievements();
+                const achievement = achievements.find(a => a.id === condition.achievementId);
+                shouldUnlock = achievement ? achievement.currentTier !== null : false;
+                break;
+
+            case 'mixed':
+                const levelOk = mate.level >= (condition.level || 0);
+                const affectionOk = mate.affection >= (condition.affection || 0);
+                shouldUnlock = levelOk && affectionOk;
+                break;
+        }
+
+        // 如果满足条件，解锁
+        if (shouldUnlock) {
+            wardrobe.unlockedOutfits.push(outfit.id);
+            wardrobe.newUnlocks.push(outfit.id);
+            newlyUnlocked.push(outfit.id);
+        }
+    }
+
+    // 保存更新后的状态
+    if (newlyUnlocked.length > 0) {
+        saveWardrobeState(wardrobe);
+    }
+
+    return newlyUnlocked;
+};
+
+// 切换皮肤
+export const changeOutfit = (outfitId: string): boolean => {
+    const wardrobe = getWardrobeState();
+    const mate = getMateState();
+
+    // 检查是否已解锁
+    if (!wardrobe.unlockedOutfits.includes(outfitId) && outfitId !== 'default') {
+        return false;
+    }
+
+    // 更新当前皮肤
+    wardrobe.currentOutfit = outfitId;
+    mate.appearance.outfit = outfitId;
+
+    // 清除新解锁标记
+    wardrobe.newUnlocks = wardrobe.newUnlocks.filter(id => id !== outfitId);
+
+    saveWardrobeState(wardrobe);
+    saveMateState(mate);
+
+    return true;
+};
+
+// 获取已解锁的皮肤列表
+export const getUnlockedOutfits = (): OutfitItem[] => {
+    const wardrobe = getWardrobeState();
+    return ALL_OUTFITS.filter(outfit => 
+        wardrobe.unlockedOutfits.includes(outfit.id)
+    );
+};
+
+// 获取当前阶段可用的皮肤
+export const getCurrentStageOutfits = (): OutfitItem[] => {
+    const mate = getMateState();
+    const wardrobe = getWardrobeState();
+    const currentStage = getStageByLevel(mate.level);
+
+    return ALL_OUTFITS
+        .filter(outfit => outfit.stage === currentStage)
+        .map(outfit => ({
+            ...outfit,
+            unlocked: wardrobe.unlockedOutfits.includes(outfit.id)
+        }));
+};
+
+// 清除新解锁标记
+export const clearNewUnlockBadge = (outfitId: string): void => {
+    const wardrobe = getWardrobeState();
+    wardrobe.newUnlocks = wardrobe.newUnlocks.filter(id => id !== outfitId);
+    saveWardrobeState(wardrobe);
+};
+
+// 获取解锁统计
+export const getWardrobeStats = () => {
+    const wardrobe = getWardrobeState();
+    const mate = getMateState();
+    const currentStage = getStageByLevel(mate.level);
+
+    const totalOutfits = ALL_OUTFITS.length + 5; // +5 基础立绘
+    const unlockedCount = wardrobe.unlockedOutfits.length + 5; // +5 基础立绘始终解锁
+
+    const currentStageOutfits = ALL_OUTFITS.filter(o => o.stage === currentStage);
+    const currentStageUnlocked = currentStageOutfits.filter(o => 
+        wardrobe.unlockedOutfits.includes(o.id)
+    ).length;
+
+    return {
+        totalOutfits,
+        unlockedCount,
+        progress: Math.floor((unlockedCount / totalOutfits) * 100),
+        currentStageOutfits: currentStageOutfits.length,
+        currentStageUnlocked,
+        newUnlocksCount: wardrobe.newUnlocks.length,
+        hasNewUnlocks: wardrobe.newUnlocks.length > 0
+    };
+};
+
