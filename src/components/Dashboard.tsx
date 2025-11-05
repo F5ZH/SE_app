@@ -54,24 +54,35 @@ const Dashboard: React.FC<DashboardProps> = ({
   const loadDashboardData = async () => {
     try {
       setIsLoading(true);
+      console.log('📊 Dashboard - 开始加载数据');
+      console.log('📊 currentPlan:', currentPlan);
+      console.log('📊 wordBooks count:', wordBooks.length);
 
       if (currentPlan) {
         // 获取当前计划的词书
         const wordBook = wordBooks.find(book => book.id === currentPlan.wordBookId);
+        console.log('📊 找到的词书:', wordBook?.name);
 
         if (wordBook) {
           // 生成今日任务
           const task = generateTodayTask(wordBook, currentPlan);
+          console.log('📊 今日任务:', task);
           setTodayTask(task);
 
           // 获取学习统计
           const stats = getStudyStats(wordBook);
+          console.log('📊 学习统计:', stats);
           setStudyStats(stats);
+        } else {
+          console.warn('⚠️ 未找到对应的词书！');
         }
+      } else {
+        console.log('ℹ️ 没有当前计划');
       }
     } catch (error) {
-      console.error('Failed to load dashboard data:', error);
+      console.error('❌ 加载 Dashboard 数据失败:', error);
     } finally {
+      console.log('✅ Dashboard 数据加载完成，设置 isLoading = false');
       setIsLoading(false);
     }
   };
@@ -122,6 +133,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   // 加载状态
   if (isLoading) {
+    console.log('🔄 Dashboard - 显示加载状态');
     return (
       <div className="dashboard">
         <div className="loading-container">
@@ -134,6 +146,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   // 没有学习计划时的状态
   if (!currentPlan) {
+    console.log('📝 Dashboard - 显示空状态（无学习计划）');
     return (
       <div className="dashboard">
         <div className="empty-state">
@@ -154,6 +167,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   }
 
   const wordBook = wordBooks.find(book => book.id === currentPlan.wordBookId);
+  console.log('✅ Dashboard - 正常渲染，词书:', wordBook?.name, '今日任务:', todayTask);
 
   return (
     <div className="dashboard">
