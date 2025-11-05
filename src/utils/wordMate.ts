@@ -121,34 +121,102 @@ export const createDefaultMate = (): WordMateState => {
 export const getMateState = (): WordMateState => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-        const state: WordMateState = JSON.parse(stored);
+        try {
+            const state: WordMateState = JSON.parse(stored);
+            let needsSave = false;
 
-        // 修复旧的 outfit 值
-        if (state.appearance.outfit === 'casual') {
-            console.log('🔧 修复旧的outfit值: casual -> default');
-            state.appearance.outfit = 'default';
-            saveMateState(state);
-        }
+            // 确保数据结构完整（兼容旧版本）
+            if (!state.appearance) {
+                console.log('🔧 修复缺失的 appearance 字段');
+                state.appearance = {
+                    avatar: 'default',
+                    outfit: 'default',
+                    background: 'study_room'
+                };
+                needsSave = true;
+            }
 
-        // 检查好感度衰减（适配200上限，衰减速度保持不变）
-        const now = Date.now();
-        const daysSinceLastInteraction = Math.floor((now - state.lastInteraction) / (1000 * 60 * 60 * 24));
+            // 确保 stats 字段存在
+            if (!state.stats) {
+                console.log('🔧 修复缺失的 stats 字段');
+                state.stats = {
+                    totalStudyDays: 0,
+                    consecutiveDays: 0,
+                    totalWordsLearned: 0,
+                    storiesCompleted: 0,
+                    adventuresCompleted: 0,
+                    achievementsUnlocked: 0
+                };
+                needsSave = true;
+            }
 
-        // 如果超过3天没有互动，开始衰减好感度
-        if (daysSinceLastInteraction >= 3) {
-            // 每天衰减2点好感度（从第3天开始），适用于200上限
-            const decayDays = daysSinceLastInteraction - 2;
-            const decayAmount = Math.min(decayDays * 2, state.affection); // 最多衰减到0
+            // 确保其他必需字段存在
+            if (!state.name) {
+                state.name = '单词姬';
+                needsSave = true;
+            }
+            if (typeof state.level !== 'number') {
+                state.level = 1;
+                needsSave = true;
+            }
+            if (typeof state.exp !== 'number') {
+                state.exp = 0;
+                needsSave = true;
+            }
+            if (typeof state.affection !== 'number') {
+                state.affection = 0;
+                needsSave = true;
+            }
+            if (!state.mood) {
+                state.mood = WordMateMood.NORMAL;
+                needsSave = true;
+            }
+            if (!state.lastInteraction) {
+                state.lastInteraction = Date.now();
+                needsSave = true;
+            }
+            if (!state.createdAt) {
+                state.createdAt = Date.now();
+                needsSave = true;
+            }
 
-            if (decayAmount > 0 && state.affection > 0) {
-                state.affection = Math.max(0, state.affection - decayAmount);
-                // 保存衰减后的状态
+            // 修复旧的 outfit 值
+            if (state.appearance.outfit === 'casual') {
+                console.log('🔧 修复旧的outfit值: casual -> default');
+                state.appearance.outfit = 'default';
+                needsSave = true;
+            }
+
+            // 只有在有修复时才保存状态
+            if (needsSave) {
+                console.log('💾 保存修复后的状态');
                 saveMateState(state);
             }
-        }
 
-        return state;
+            // 检查好感度衰减（适配200上限，衰减速度保持不变）
+            const now = Date.now();
+            const daysSinceLastInteraction = Math.floor((now - state.lastInteraction) / (1000 * 60 * 60 * 24));
+
+            // 如果超过3天没有互动，开始衰减好感度
+            if (daysSinceLastInteraction >= 3) {
+                // 每天衰减2点好感度（从第3天开始），适用于200上限
+                const decayDays = daysSinceLastInteraction - 2;
+                const decayAmount = Math.min(decayDays * 2, state.affection); // 最多衰减到0
+
+                if (decayAmount > 0 && state.affection > 0) {
+                    state.affection = Math.max(0, state.affection - decayAmount);
+                    // 保存衰减后的状态
+                    saveMateState(state);
+                }
+            }
+
+            return state;
+        } catch (error) {
+            console.error('❌ 解析 WordMate 状态失败:', error);
+            // 数据损坏，创建新的状态
+        }
     }
+    // 没有存储数据或数据损坏，创建新的默认状态
     const newMate = createDefaultMate();
     saveMateState(newMate);
     return newMate;

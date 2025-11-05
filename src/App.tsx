@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { WordBook, StudyPlan } from './types';
 import { wordBookStorage, studyPlanStorage } from './utils/storage';
 import { clearCachedTodayWords, generateTodayTask } from './utils/studyPlan';
 import { presetWordBooks } from './data/presetWordBooks';
+import { loadDataFromCloud, saveDataToCloud, startAutoSync, stopAutoSync } from './utils/dataSync';
 import Header from './components/Header';
 import WordBookList from './components/WordBookList';
 import StudyPlanCreator from './components/StudyPlanCreator';
@@ -29,6 +30,7 @@ function App() {
   const [wordBooks, setWordBooks] = useState<WordBook[]>([]);
   const [currentPlan, setCurrentPlan] = useState<StudyPlan | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [syncIntervalId, setSyncIntervalId] = useState<NodeJS.Timeout | null>(null);
 
   // 检查是否已登录（从 localStorage 恢复 token）
   useEffect(() => {
@@ -41,10 +43,13 @@ function App() {
   // 初始化应用数据（仅在登录后执行）
   useEffect(() => {
     if (token) {
+      console.log('🔑 检测到 token，开始初始化应用...');
       initializeApp();
     } else {
+      console.log('❌ 无 token，设置 isLoading = false');
       setIsLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   /**
@@ -59,8 +64,16 @@ function App() {
    * 处理登出
    */
   const handleLogout = () => {
-    setToken(null);
-    localStorage.removeItem('auth_token');
+    // 停止自动同步
+    if (syncIntervalId) {
+      stopAutoSync(syncIntervalId);
+    }
+
+    // 最后一次同步数据
+    saveDataToCloud().finally(() => {
+      setToken(null);
+      localStorage.removeItem('auth_token');
+    });
   };
 
   /**
@@ -68,30 +81,70 @@ function App() {
    * 加载词书和学习计划
    */
   const initializeApp = async () => {
+    console.log('🚀 开始初始化应用...');
     try {
       setIsLoading(true);
 
-      // 加载词书数据
+      // 先尝试从云端加载数据（不阻塞应用启动）
+      loadDataFromCloud()
+        .then(cloudLoaded => {
+          if (cloudLoaded) {
+            console.log('✅ 已从云端加载数据');
+            // 重新加载词书数据以反映云端更新
+            const books = wordBookStorage.getAll();
+            if (books.length > 0) {
+              setWordBooks(books);
+            }
+          } else {
+            console.log('⚠️ 云端加载失败，使用本地数据');
+          }
+        })
+        .catch(err => {
+          console.error('⚠️ 云端同步异常:', err);
+        });
+
+      // 加载本地词书数据（不等待云端）
+      console.log('📚 加载本地词书数据...');
       let books = wordBookStorage.getAll();
 
       // 如果是首次使用，添加预设词书
       if (books.length === 0) {
+        console.log('📦 首次使用，加载预设词书...');
         books = presetWordBooks;
         wordBookStorage.saveAll(books);
       }
 
+      console.log(`✅ 加载了 ${books.length} 本词书`);
       setWordBooks(books);
 
       // 加载当前学习计划
+      console.log('📋 加载学习计划...');
       const plan = studyPlanStorage.getCurrent();
       setCurrentPlan(plan);
+      console.log('✅ 学习计划加载完成', plan ? `计划名: ${plan.name}` : '无计划');
+
+      // 启动自动同步（每5分钟）
+      console.log('⏰ 启动自动同步...');
+      const intervalId = startAutoSync(5);
+      setSyncIntervalId(intervalId);
+      console.log('✅ 自动同步已启动');
 
     } catch (error) {
-      console.error('Failed to initialize app:', error);
+      console.error('❌ 初始化应用失败:', error);
     } finally {
+      console.log('🎉 应用初始化完成，设置 isLoading = false');
       setIsLoading(false);
     }
   };
+
+  // 组件卸载时停止自动同步
+  useEffect(() => {
+    return () => {
+      if (syncIntervalId) {
+        stopAutoSync(syncIntervalId);
+      }
+    };
+  }, [syncIntervalId]);
 
   /**
    * 添加新词书
@@ -100,6 +153,8 @@ function App() {
     const updatedBooks = [...wordBooks, newBook];
     setWordBooks(updatedBooks);
     wordBookStorage.save(newBook);
+    // 触发云端同步
+    saveDataToCloud();
   };
 
   /**
@@ -109,6 +164,8 @@ function App() {
     const updatedBooks = wordBooks.filter(book => book.id !== bookId);
     setWordBooks(updatedBooks);
     wordBookStorage.delete(bookId);
+    // 触发云端同步
+    saveDataToCloud();
   };
 
   /**
@@ -121,6 +178,9 @@ function App() {
 
     // 清空今日单词列表缓存，以便重新生成
     clearCachedTodayWords();
+
+    // 触发云端同步
+    saveDataToCloud();
 
     setCurrentView('dashboard');
   };

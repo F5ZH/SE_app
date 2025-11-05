@@ -211,6 +211,13 @@ export const studyPlanStorage = {
     const plans = this.getAll();
     const filteredPlans = plans.filter(plan => plan.id !== id);
     setStorageData(STORAGE_KEYS.STUDY_PLANS, filteredPlans);
+  },
+
+  /**
+   * 批量保存学习计划
+   */
+  saveAll(plans: StudyPlan[]): void {
+    setStorageData(STORAGE_KEYS.STUDY_PLANS, plans);
   }
 };
 

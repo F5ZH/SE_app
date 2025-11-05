@@ -67,7 +67,32 @@ const UserSchema = new mongoose.Schema({
     wordBooks: [WordBookSchema],
     studyPlans: [StudyPlanSchema],
     studyRecords: [StudyRecordSchema],
-    // (我们稍后也可以添加 wordMateState)
+
+    // WordMate 状态
+    wordMateState: {
+        type: mongoose.Schema.Types.Mixed,
+        default: null
+    },
+
+    // 签到记录
+    checkInData: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {}
+    },
+
+    // 用户设置
+    userSettings: {
+        type: mongoose.Schema.Types.Mixed,
+        default: {}
+    },
+
+    // 最后同步时间
+    lastSyncedAt: {
+        type: Date,
+        default: Date.now
+    }
+}, {
+    timestamps: true // 自动添加 createdAt 和 updatedAt
 });
 
 module.exports = mongoose.model('User', UserSchema);

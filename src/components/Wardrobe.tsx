@@ -110,7 +110,7 @@ const Wardrobe: React.FC<WardrobeProps> = ({ mate, onClose, onOutfitChange }) =>
     // 切换皮肤
     const handleOutfitChange = (outfitId: string) => {
         const outfit = ALL_OUTFITS.find(o => o.id === outfitId);
-        
+
         // 检查是否解锁
         if (outfit && !isOutfitUnlocked(outfit) && !wardrobeState.unlockedOutfits.includes(outfitId)) {
             alert('该装扮尚未解锁！');
@@ -119,7 +119,7 @@ const Wardrobe: React.FC<WardrobeProps> = ({ mate, onClose, onOutfitChange }) =>
 
         // 更新当前装扮
         setCurrentOutfit(outfitId);
-        
+
         // 更新橱窗状态
         const newState: WardrobeState = {
             ...wardrobeState,
@@ -132,7 +132,7 @@ const Wardrobe: React.FC<WardrobeProps> = ({ mate, onClose, onOutfitChange }) =>
         // 通知父组件
         onOutfitChange(outfitId);
         setPreviewOutfit(null);
-        
+
         // 给用户反馈
         console.log('✅ 已切换装扮:', outfitId);
     };

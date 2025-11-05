@@ -15,7 +15,7 @@ const api = axios.create({
  */
 api.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('auth_token');
         if (token) {
             config.headers['x-auth-token'] = token;
         }
@@ -34,9 +34,18 @@ api.interceptors.request.use(
 export const fetchAllData = () => api.get('/data/all');
 
 /**
- * 保存(覆盖)当前登录用户的所有数据
+ * 同步所有数据到服务器
  */
-export const saveAllData = (data: any) => api.post('/data/all', data);
+export const syncAllData = (data: any) => api.post('/data/sync', data);
 
+/**
+ * 添加词书
+ */
+export const addWordBook = (wordBook: any) => api.post('/data/wordbook', wordBook);
+
+/**
+ * 删除词书
+ */
+export const deleteWordBook = (id: string) => api.delete(`/data/wordbook/${id}`);
 
 export default api;

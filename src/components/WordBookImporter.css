@@ -310,6 +310,46 @@
   color: #991b1b;
 }
 
+/* 预览区域的信息编辑 */
+.result-info-edit {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.result-info-edit .form-group {
+  margin-bottom: 0.75rem;
+}
+
+.result-info-edit .form-group:last-child {
+  margin-bottom: 0;
+}
+
+.result-info-edit label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #475569;
+  margin-bottom: 0.25rem;
+}
+
+.result-info-edit .form-input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.result-info-edit .form-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
 .result-preview {
   margin-top: 0.75rem;
 }

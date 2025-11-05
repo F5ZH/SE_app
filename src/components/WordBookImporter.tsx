@@ -94,6 +94,12 @@ const WordBookImporter: React.FC<WordBookImporterProps> = ({ onImport, onClose }
 
       // 使用自定义名称，如果没有则使用文件名
       const defaultName = file.name.replace(/\.[^/.]+$/, '');
+
+      // 如果用户没有填写自定义名称，自动填充文件名
+      if (!customName.trim()) {
+        setCustomName(defaultName);
+      }
+
       const wordBook: WordBook = {
         id: generateId(),
         name: customName.trim() || defaultName,
@@ -173,7 +179,13 @@ const WordBookImporter: React.FC<WordBookImporterProps> = ({ onImport, onClose }
    */
   const handleConfirmImport = () => {
     if (importResult?.wordBook) {
-      onImport(importResult.wordBook);
+      // 使用最新的自定义名称和描述
+      const finalWordBook = {
+        ...importResult.wordBook,
+        name: customName.trim() || importResult.wordBook.name,
+        description: customDescription.trim() || importResult.wordBook.description
+      };
+      onImport(finalWordBook);
       onClose();
     }
   };
@@ -337,21 +349,49 @@ const WordBookImporter: React.FC<WordBookImporterProps> = ({ onImport, onClose }
               <div className="result-content">
                 <p className="result-message">{importResult.message}</p>
                 {importResult.success && importResult.wordBook && (
-                  <div className="result-preview">
-                    <p>词书预览：</p>
-                    <div className="preview-words">
-                      {importResult.wordBook.words.slice(0, 3).map(word => (
-                        <span key={word.id} className="preview-word">
-                          {word.word} - {word.translation}
-                        </span>
-                      ))}
-                      {importResult.wordBook.words.length > 3 && (
-                        <span className="preview-more">
-                          还有 {importResult.wordBook.words.length - 3} 个单词...
-                        </span>
-                      )}
+                  <>
+                    {/* 显示并允许修改词书信息 */}
+                    <div className="result-info-edit">
+                      <div className="form-group">
+                        <label htmlFor="preview-name">词书名称：</label>
+                        <input
+                          id="preview-name"
+                          type="text"
+                          className="form-input"
+                          value={customName}
+                          onChange={(e) => setCustomName(e.target.value)}
+                          placeholder="请输入词书名称"
+                        />
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="preview-desc">词书描述：</label>
+                        <input
+                          id="preview-desc"
+                          type="text"
+                          className="form-input"
+                          value={customDescription}
+                          onChange={(e) => setCustomDescription(e.target.value)}
+                          placeholder="请输入词书描述"
+                        />
+                      </div>
                     </div>
-                  </div>
+
+                    <div className="result-preview">
+                      <p>词书预览（共 {importResult.wordBook.words.length} 个单词）：</p>
+                      <div className="preview-words">
+                        {importResult.wordBook.words.slice(0, 3).map(word => (
+                          <span key={word.id} className="preview-word">
+                            {word.word} - {word.translation}
+                          </span>
+                        ))}
+                        {importResult.wordBook.words.length > 3 && (
+                          <span className="preview-more">
+                            还有 {importResult.wordBook.words.length - 3} 个单词...
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </>
                 )}
               </div>
             </div>
