@@ -23,21 +23,21 @@ const ChatBox: React.FC<ChatBoxProps> = ({ onClose, userContext }) => {
 
     // 获取当前单词姬状态
     const mateState = getMateState();
-    
+
     // 获取当前显示的立绘路径
     const getAvatarUrl = (): string => {
         const currentOutfit = mateState.appearance.outfit;
-        
+
         // 如果选择了特殊皮肤
         if (currentOutfit && currentOutfit !== 'default') {
             return `/img/${currentOutfit}.png`;
         }
-        
+
         // 默认使用基础立绘（根据等级阶段）
         const stage = getStageByLevel(mateState.level);
         return `/img/${stage}.png`;
     };
-    
+
     const mateAvatarUrl = getAvatarUrl();
 
     useEffect(() => {

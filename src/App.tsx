@@ -23,7 +23,7 @@ import './components/Modal.css';
 function App() {
   // 登录状态
   const [token, setToken] = useState<string | null>(null);
-  
+
   // 应用状态
   const [currentView, setCurrentView] = useState<'dashboard' | 'wordbooks' | 'study' | 'plan' | 'wordmate' | 'story' | 'odyssey'>('dashboard');
   const [wordBooks, setWordBooks] = useState<WordBook[]>([]);

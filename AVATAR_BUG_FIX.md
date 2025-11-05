@@ -96,13 +96,13 @@ const mateAvatarUrl = getAvatarUrl();  // ✅ 正确路径，支持皮肤切换
 
 ## 路径对照表
 
-| 等级范围 | 阶段 | 旧路径（已废弃） | 新路径（当前使用） |
-|---------|------|------------------|-------------------|
-| Lv1-10  | 1    | `/assets/mate/base/lv1-10.png` | `/img/1.png` |
-| Lv11-20 | 2    | `/assets/mate/base/lv11-20.png` | `/img/2.png` |
-| Lv21-30 | 3    | `/assets/mate/base/lv21-30.png` | `/img/3.png` |
-| Lv31-40 | 4    | `/assets/mate/base/lv31-40.png` | `/img/4.png` |
-| Lv41-50 | 5    | `/assets/mate/base/lv41-50.png` | `/img/5.png` |
+| 等级范围 | 阶段 | 旧路径（已废弃）                | 新路径（当前使用） |
+| -------- | ---- | ------------------------------- | ------------------ |
+| Lv1-10   | 1    | `/assets/mate/base/lv1-10.png`  | `/img/1.png`       |
+| Lv11-20  | 2    | `/assets/mate/base/lv11-20.png` | `/img/2.png`       |
+| Lv21-30  | 3    | `/assets/mate/base/lv21-30.png` | `/img/3.png`       |
+| Lv31-40  | 4    | `/assets/mate/base/lv31-40.png` | `/img/4.png`       |
+| Lv41-50  | 5    | `/assets/mate/base/lv41-50.png` | `/img/5.png`       |
 
 特殊皮肤：`/img/11.png`, `/img/12.png`, ... `/img/54.png` (共21套)
 

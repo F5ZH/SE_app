@@ -26,13 +26,13 @@ const MateAvatar: React.FC<MateAvatarProps> = ({
     // 获取当前显示的立绘路径
     const getAvatarPath = (): string => {
         const currentOutfit = mate.appearance.outfit;
-        
+
         // 如果选择了特殊皮肤
         if (currentOutfit && currentOutfit !== 'default') {
             console.log('🎨 使用特殊皮肤:', currentOutfit);
             return `/img/${currentOutfit}.png`;
         }
-        
+
         // 默认使用基础立绘（根据等级阶段）
         const stage = getStageByLevel(mate.level);
         console.log('👤 使用基础立绘 - 等级:', mate.level, '阶段:', stage, '路径:', `/img/${stage}.png`);

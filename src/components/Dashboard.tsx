@@ -211,15 +211,15 @@ const Dashboard: React.FC<DashboardProps> = ({
             <p className="wordmate-hint">点击与我互动 →</p>
           </div>
         </div>
-        <button 
-          className="wardrobe-btn" 
+        <button
+          className="wardrobe-btn"
           onClick={(e) => {
             e.stopPropagation();
             handleOpenWardrobe();
           }}
           title="打开橱窗"
         >
-          👗 橱窗 
+          👗 橱窗
           {wardrobeStats.hasNewUnlocks && <span className="new-unlock-badge">{wardrobeStats.newUnlocksCount}</span>}
         </button>
       </div>

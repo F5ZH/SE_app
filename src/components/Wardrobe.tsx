@@ -54,20 +54,20 @@ const Wardrobe: React.FC<WardrobeProps> = ({ mate, onClose, onOutfitChange }) =>
         switch (condition.type) {
             case 'level':
                 return mate.level >= (condition.level || 999);
-            
+
             case 'affection':
                 return mate.affection >= (condition.affection || 999);
-            
+
             case 'achievement':
                 // TODO: 集成成就系统检查
                 // 暂时返回false，待成就系统完善后更新
                 return false;
-            
+
             case 'mixed':
                 const levelOk = mate.level >= (condition.level || 0);
                 const affectionOk = mate.affection >= (condition.affection || 0);
                 return levelOk && affectionOk;
-            
+
             default:
                 return false;
         }
@@ -88,19 +88,19 @@ const Wardrobe: React.FC<WardrobeProps> = ({ mate, onClose, onOutfitChange }) =>
         switch (condition.type) {
             case 'level':
                 return `等级达到 Lv.${condition.level}`;
-            
+
             case 'affection':
                 return `好感度达到 ${condition.affection}`;
-            
+
             case 'achievement':
                 return `完成成就「${condition.achievementTitle || '???'}」`;
-            
+
             case 'mixed':
                 const parts: string[] = [];
                 if (condition.level) parts.push(`Lv.${condition.level}`);
                 if (condition.affection) parts.push(`好感度${condition.affection}`);
                 return parts.join(' & ');
-            
+
             default:
                 return '未知条件';
         }
@@ -236,9 +236,8 @@ const Wardrobe: React.FC<WardrobeProps> = ({ mate, onClose, onOutfitChange }) =>
                     {currentOutfits.map(outfit => (
                         <div
                             key={outfit.id}
-                            className={`outfit-card ${!outfit.unlocked ? 'locked' : ''} ${
-                                wardrobeState.newUnlocks.includes(outfit.id) ? 'new-unlock' : ''
-                            }`}
+                            className={`outfit-card ${!outfit.unlocked ? 'locked' : ''} ${wardrobeState.newUnlocks.includes(outfit.id) ? 'new-unlock' : ''
+                                }`}
                         >
                             <div className="outfit-preview" onClick={() => outfit.unlocked && handlePreview(outfit.id)}>
                                 {outfit.unlocked ? (

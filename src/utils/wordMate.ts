@@ -996,7 +996,7 @@ export const changeOutfit = (outfitId: string): boolean => {
 // 获取已解锁的皮肤列表
 export const getUnlockedOutfits = (): OutfitItem[] => {
     const wardrobe = getWardrobeState();
-    return ALL_OUTFITS.filter(outfit => 
+    return ALL_OUTFITS.filter(outfit =>
         wardrobe.unlockedOutfits.includes(outfit.id)
     );
 };
@@ -1032,7 +1032,7 @@ export const getWardrobeStats = () => {
     const unlockedCount = wardrobe.unlockedOutfits.length + 5; // +5 基础立绘始终解锁
 
     const currentStageOutfits = ALL_OUTFITS.filter(o => o.stage === currentStage);
-    const currentStageUnlocked = currentStageOutfits.filter(o => 
+    const currentStageUnlocked = currentStageOutfits.filter(o =>
         wardrobe.unlockedOutfits.includes(o.id)
     ).length;
 
