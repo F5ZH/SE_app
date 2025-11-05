@@ -32,3 +32,9 @@ dist-ssr
 
 # OS generated files
 Thumbs.db
+
+# 后端服务器的依赖
+server/node_modules
+
+# 忽略后端密码文件
+server/.env
