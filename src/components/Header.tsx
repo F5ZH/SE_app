@@ -1,25 +1,18 @@
-// src/components/Header.tsx (已合并登出功能)
-
 import React from 'react';
-// 1. 引入 Heart 和 LogOut 图标
-import { BookOpen, Library, Calendar, Home, LogOut, Heart } from 'lucide-react';
+import { BookOpen, Library, Calendar, Home } from 'lucide-react';
 
 interface HeaderProps {
   currentView: 'dashboard' | 'wordbooks' | 'study' | 'plan' | 'wordmate' | 'story' | 'odyssey';
   onViewChange: (view: 'dashboard' | 'wordbooks' | 'study' | 'plan' | 'wordmate' | 'story' | 'odyssey') => void;
   onPlanNavigation?: () => void;
   hasActivePlan: boolean;
-  onLogout: () => void; // 4. 添加 onLogout prop
 }
 
-const Header: React.FC<HeaderProps> = ({
-  currentView,
-  onViewChange,
-  onPlanNavigation,
-  hasActivePlan,
-  onLogout // 5. 接收 onLogout
-}) => {
-
+/**
+ * 应用头部导航组件
+ * 提供主要功能模块的导航
+ */
+const Header: React.FC<HeaderProps> = ({ currentView, onViewChange, onPlanNavigation, hasActivePlan }) => {
   const navItems = [
     {
       id: 'dashboard' as const,
@@ -45,14 +38,6 @@ const Header: React.FC<HeaderProps> = ({
       icon: BookOpen,
       description: '开始今日学习任务',
       disabled: !hasActivePlan
-    },
-    // 6. 你原有的 '单词姬' 导航项 (保留)
-    {
-      id: 'wordmate' as const,
-      label: '单词姬',
-      icon: Heart,
-      description: '进入 WordMate 养成系统',
-      disabled: false
     }
   ];
 
@@ -80,8 +65,10 @@ const Header: React.FC<HeaderProps> = ({
               <button
                 key={item.id}
                 className={`nav-item ${isActive ? 'active' : ''} ${item.disabled ? 'disabled' : ''}`}
-                onClick={() => { // 7. 确保 onPlanNavigation 逻辑被正确处理
+                onClick={() => {
                   if (item.disabled) return;
+
+                  // 特殊处理学习计划导航
                   if (item.id === 'plan' && onPlanNavigation) {
                     onPlanNavigation();
                   } else {
@@ -93,7 +80,7 @@ const Header: React.FC<HeaderProps> = ({
               >
                 <Icon size={20} />
                 <span className="nav-label">{item.label}</span>
-                {item.disabled && item.id === 'study' && ( // 仅“开始学习”显示此提示
+                {item.disabled && (
                   <div className="nav-disabled-indicator">
                     <span className="text-xs text-gray-400">需要学习计划</span>
                   </div>
@@ -101,16 +88,6 @@ const Header: React.FC<HeaderProps> = ({
               </button>
             );
           })}
-
-          {/* --- 8. 添加登出按钮 --- */}
-          <button
-            className="nav-item"
-            onClick={onLogout}
-            title="登出"
-          >
-            <LogOut size={20} />
-            <span className="nav-label">登出</span>
-          </button>
         </nav>
       </div>
     </header>

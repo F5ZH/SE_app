@@ -1,6 +1,11 @@
 import {
-    WordMateState, WordMateMood, MateStats, InteractionRecord,
-    InteractionType, Achievement, AchievementTier
+    WordMateState,
+    WordMateMood,
+    MateStats,
+    InteractionRecord,
+    InteractionType,
+    Achievement,
+    AchievementTier
 } from '../types';
 
 /**
