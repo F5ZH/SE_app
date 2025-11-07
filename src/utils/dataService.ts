@@ -1,6 +1,6 @@
 // src/utils/dataService.ts
 
-import { fetchAllData, saveAllData } from './api';
+import { fetchAllData, syncAllData } from './api';
 import { presetWordBooks } from '../data/presetWordBooks';
 import { createDefaultMate, DEFAULT_ACHIEVEMENTS } from './wordMate'; // 引入默认数据
 import { WordBook, StudyPlan, StudyRecord, WordMateState, Achievement } from '../types';
@@ -40,11 +40,11 @@ const debouncedSave = () => {
 
     saveTimer = window.setTimeout(() => {
         // 2 秒到了，执行保存
-        saveAllData(appData)
+        syncAllData(appData)
             .then(() => {
                 console.log('✅ 数据已成功同步到后端');
             })
-            .catch(err => {
+            .catch((err: any) => {
                 console.error('❌ 数据同步失败:', err);
             });
         saveTimer = null;
@@ -82,7 +82,7 @@ export const initializeDataService = async () => {
             appData = data;
         }
         return true;
-    } catch (error) {
+    } catch (error: any) {
         console.error('❌ 加载用户数据失败:', error);
         // 如果加载失败 (例如 token 过期)，我们返回 false
         return false;

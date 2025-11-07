@@ -1,5 +1,5 @@
 import React from 'react';
-import { BookOpen, Library, Calendar, Home, LogOut } from 'lucide-react';
+import { BookOpen, Library, Calendar, Home, LogOut, Settings as SettingsIcon } from 'lucide-react';
 
 interface HeaderProps {
   currentView: 'dashboard' | 'wordbooks' | 'study' | 'plan' | 'wordmate' | 'story' | 'odyssey';
@@ -7,13 +7,14 @@ interface HeaderProps {
   onPlanNavigation?: () => void;
   hasActivePlan: boolean;
   onLogout?: () => void;
+  onSettings?: () => void;
 }
 
 /**
  * 应用头部导航组件
  * 提供主要功能模块的导航
  */
-const Header: React.FC<HeaderProps> = ({ currentView, onViewChange, onPlanNavigation, hasActivePlan, onLogout }) => {
+const Header: React.FC<HeaderProps> = ({ currentView, onViewChange, onPlanNavigation, hasActivePlan, onLogout, onSettings }) => {
   const navItems = [
     {
       id: 'dashboard' as const,
@@ -91,17 +92,33 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange, onPlanNaviga
           })}
         </nav>
 
-        {/* 登出按钮 */}
-        {onLogout && (
-          <button
-            className="logout-btn"
-            onClick={onLogout}
-            title="登出"
-          >
-            <LogOut size={20} />
-            <span>登出</span>
-          </button>
-        )}
+        {/* 右侧按钮组 */}
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          {/* 设置按钮 */}
+          {onSettings && (
+            <button
+              className="logout-btn"
+              onClick={onSettings}
+              title="设置"
+              style={{ background: '#6366f1' }}
+            >
+              <SettingsIcon size={20} />
+              <span>设置</span>
+            </button>
+          )}
+
+          {/* 登出按钮 */}
+          {onLogout && (
+            <button
+              className="logout-btn"
+              onClick={onLogout}
+              title="登出"
+            >
+              <LogOut size={20} />
+              <span>登出</span>
+            </button>
+          )}
+        </div>
       </div>
     </header>
   );

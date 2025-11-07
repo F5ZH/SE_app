@@ -1,9 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { WordBook, StudyPlan } from './types';
 import { wordBookStorage, studyPlanStorage } from './utils/storage';
 import { clearCachedTodayWords, generateTodayTask } from './utils/studyPlan';
 import { presetWordBooks } from './data/presetWordBooks';
-import { loadDataFromCloud, saveDataToCloud, startAutoSync, stopAutoSync } from './utils/dataSync';
 import Header from './components/Header';
 import WordBookList from './components/WordBookList';
 import StudyPlanCreator from './components/StudyPlanCreator';
@@ -13,7 +12,7 @@ import DevTools from './components/DevTools';
 import WordMateHome from './components/WordMateHome';
 import AIStoryGenerator from './components/AIStoryGenerator';
 import WordOdyssey from './components/WordOdyssey';
-import AuthPage from './pages/AuthPage';
+import Settings from './components/Settings';
 import './App.css';
 import './components/Modal.css';
 
@@ -22,58 +21,26 @@ import './components/Modal.css';
  * 管理应用的整体状态和路由
  */
 function App() {
-  // 登录状态
-  const [token, setToken] = useState<string | null>(null);
-
   // 应用状态
   const [currentView, setCurrentView] = useState<'dashboard' | 'wordbooks' | 'study' | 'plan' | 'wordmate' | 'story' | 'odyssey'>('dashboard');
   const [wordBooks, setWordBooks] = useState<WordBook[]>([]);
   const [currentPlan, setCurrentPlan] = useState<StudyPlan | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [syncIntervalId, setSyncIntervalId] = useState<NodeJS.Timeout | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
 
-  // 检查是否已登录（从 localStorage 恢复 token）
+  // 初始化应用数据
   useEffect(() => {
-    const savedToken = localStorage.getItem('auth_token');
-    if (savedToken) {
-      setToken(savedToken);
-    }
+    initializeApp();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 初始化应用数据（仅在登录后执行）
-  useEffect(() => {
-    if (token) {
-      console.log('🔑 检测到 token，开始初始化应用...');
-      initializeApp();
-    } else {
-      console.log('❌ 无 token，设置 isLoading = false');
-      setIsLoading(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token]);
-
   /**
-   * 处理登录成功
-   */
-  const handleLogin = (newToken: string) => {
-    setToken(newToken);
-    localStorage.setItem('auth_token', newToken);
-  };
-
-  /**
-   * 处理登出
+   * 处理登出（清除本地数据）
    */
   const handleLogout = () => {
-    // 停止自动同步
-    if (syncIntervalId) {
-      stopAutoSync(syncIntervalId);
-    }
-
-    // 最后一次同步数据
-    saveDataToCloud().finally(() => {
-      setToken(null);
-      localStorage.removeItem('auth_token');
-    });
+    console.log('🚪 正在登出...');
+    localStorage.clear();
+    window.location.reload();
   };
 
   /**
@@ -85,25 +52,7 @@ function App() {
     try {
       setIsLoading(true);
 
-      // 先尝试从云端加载数据（不阻塞应用启动）
-      loadDataFromCloud()
-        .then(cloudLoaded => {
-          if (cloudLoaded) {
-            console.log('✅ 已从云端加载数据');
-            // 重新加载词书数据以反映云端更新
-            const books = wordBookStorage.getAll();
-            if (books.length > 0) {
-              setWordBooks(books);
-            }
-          } else {
-            console.log('⚠️ 云端加载失败，使用本地数据');
-          }
-        })
-        .catch(err => {
-          console.error('⚠️ 云端同步异常:', err);
-        });
-
-      // 加载本地词书数据（不等待云端）
+      // 加载本地词书数据
       console.log('📚 加载本地词书数据...');
       let books = wordBookStorage.getAll();
 
@@ -121,13 +70,7 @@ function App() {
       console.log('📋 加载学习计划...');
       const plan = studyPlanStorage.getCurrent();
       setCurrentPlan(plan);
-      console.log('✅ 学习计划加载完成', plan ? `计划名: ${plan.name}` : '无计划');
-
-      // 启动自动同步（每5分钟）
-      console.log('⏰ 启动自动同步...');
-      const intervalId = startAutoSync(5);
-      setSyncIntervalId(intervalId);
-      console.log('✅ 自动同步已启动');
+      console.log('✅ 学习计划加载完成', plan ? `计划名: ${plan.wordBookName || plan.id}` : '无计划');
 
     } catch (error) {
       console.error('❌ 初始化应用失败:', error);
@@ -137,15 +80,6 @@ function App() {
     }
   };
 
-  // 组件卸载时停止自动同步
-  useEffect(() => {
-    return () => {
-      if (syncIntervalId) {
-        stopAutoSync(syncIntervalId);
-      }
-    };
-  }, [syncIntervalId]);
-
   /**
    * 添加新词书
    */
@@ -153,8 +87,6 @@ function App() {
     const updatedBooks = [...wordBooks, newBook];
     setWordBooks(updatedBooks);
     wordBookStorage.save(newBook);
-    // 触发云端同步
-    saveDataToCloud();
   };
 
   /**
@@ -164,8 +96,6 @@ function App() {
     const updatedBooks = wordBooks.filter(book => book.id !== bookId);
     setWordBooks(updatedBooks);
     wordBookStorage.delete(bookId);
-    // 触发云端同步
-    saveDataToCloud();
   };
 
   /**
@@ -178,9 +108,6 @@ function App() {
 
     // 清空今日单词列表缓存，以便重新生成
     clearCachedTodayWords();
-
-    // 触发云端同步
-    saveDataToCloud();
 
     setCurrentView('dashboard');
   };
@@ -227,11 +154,6 @@ function App() {
     }
   };
 
-  // 如果未登录，显示登录界面
-  if (!token) {
-    return <AuthPage onLogin={handleLogin} />;
-  }
-
   // 加载状态
   if (isLoading) {
     return (
@@ -252,6 +174,7 @@ function App() {
         onPlanNavigation={handlePlanNavigation}
         hasActivePlan={!!currentPlan}
         onLogout={handleLogout}
+        onSettings={() => setShowSettings(true)}
       />
 
       <main className="main-content">
@@ -312,6 +235,9 @@ function App() {
           />
         )}
       </main>
+
+      {/* 设置对话框 */}
+      <Settings isOpen={showSettings} onClose={() => setShowSettings(false)} />
 
       {/* 开发者工具 */}
       <DevTools onRefresh={initializeApp} />

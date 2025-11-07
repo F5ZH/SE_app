@@ -1,51 +1,67 @@
 // src/utils/api.ts
 
-import axios from 'axios';
-
-// 1. 创建一个 axios 实例，并设置基础 URL
-const api = axios.create({
-    baseURL: 'http://localhost:8080/api',
-});
-
 /**
- * 2. 关键：设置一个“请求拦截器”
- * * 这段代码会在 *每次* api 发送请求之前运行。
- * 它会从 localStorage 读取 'token'，
- * 然后把它附加到请求的 Header 中 (使用我们之前定义的 'x-auth-token')。
+ * 前端离线模式 API（mock）
+ *
+ * 说明：应用户要求移除后端依赖并禁用登录，所有与后端相关的调用
+ * 将被替换为本地 mock 实现，返回本地预设数据或空实现以避免网络请求。
  */
-api.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem('auth_token');
-        if (token) {
-            config.headers['x-auth-token'] = token;
+import { presetWordBooks } from '../data/presetWordBooks';
+
+// 模拟异步延迟
+const delay = (ms = 50) => new Promise(resolve => setTimeout(resolve, ms));
+
+export const fetchAllData = async () => {
+    await delay(30);
+    return {
+        data: {
+            wordBooks: presetWordBooks,
+            studyPlans: [],
+            studyRecords: [],
+            checkIn: [],
+            wordMateState: null,
+            interactions: [],
+            achievements: [],
+            milestones: []
         }
-        return config;
-    },
-    (error) => {
-        return Promise.reject(error);
-    }
-);
+    };
+};
 
-// --- 3. 定义我们的 API 函数 ---
+export const syncAllData = async (_data: any) => {
+    await delay(10);
+    return { ok: true };
+};
 
-/**
- * 获取当前登录用户的所有数据
- */
-export const fetchAllData = () => api.get('/data/all');
+export const addWordBook = async (wordBook: any) => {
+    await delay(10);
+    // 不做持久化，仅返回成功
+    return { data: wordBook };
+};
 
-/**
- * 同步所有数据到服务器
- */
-export const syncAllData = (data: any) => api.post('/data/sync', data);
+export const deleteWordBook = async (_id: string) => {
+    await delay(10);
+    return { ok: true };
+};
 
-/**
- * 添加词书
- */
-export const addWordBook = (wordBook: any) => api.post('/data/wordbook', wordBook);
+// 登录/注册 mock（总是成功）
+export const login = async (_username: string, _password: string) => {
+    await delay(20);
+    return { data: { token: 'local_dev_token' } };
+};
 
-/**
- * 删除词书
- */
-export const deleteWordBook = (id: string) => api.delete(`/data/wordbook/${id}`);
+export const register = async (_payload: any) => {
+    await delay(20);
+    return { data: { token: 'local_dev_token' } };
+};
+
+// 默认导出一个 minimal stub 以防其他模块 import default
+const api = {
+    fetchAllData,
+    syncAllData,
+    addWordBook,
+    deleteWordBook,
+    login,
+    register
+};
 
 export default api;

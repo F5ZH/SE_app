@@ -1,4 +1,4 @@
-import { WordBook, StudyPlan, TodayTask } from '../types';
+import { WordBook, StudyPlan, TodayTask, Word } from '../types';
 import { studyRecordStorage } from './storage';
 import { needsReview } from './ebbinghaus';
 
@@ -73,7 +73,7 @@ export function generateTodayTask(wordBook: WordBook, studyPlan: StudyPlan): Tod
 
   // 检查是否有缓存的单词列表
   const cachedWords = getCachedTodayWords();
-  
+
   let todayNewWords: Word[] = [];
   let todayReviewWords: Word[] = [];
 
