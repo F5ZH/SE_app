@@ -43,7 +43,11 @@ export const loadDataFromCloud = async (): Promise<boolean> => {
 
         // 同步 WordMate 状态
         if (cloudData.wordMateState) {
-            localStorage.setItem('wordmate_state', JSON.stringify(cloudData.wordMateState));
+            // wordMateState 是一个包含多个 localStorage key 的对象
+            // 需要分别恢复每个 key
+            Object.keys(cloudData.wordMateState).forEach(key => {
+                localStorage.setItem(key, JSON.stringify(cloudData.wordMateState[key]));
+            });
             console.log('✅ 已同步 WordMate 状态');
         }
 
